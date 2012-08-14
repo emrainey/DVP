@@ -141,6 +141,8 @@ private:
     */
     inline status_e sensorUsed( int32_t *data, int32_t sen, OMX_TI_3ASKIP_TI_3ASKIPINDEXTYPE omxIndex );
 
+    typedef status_e (VisionCam_3A_Export::*setFuncPtrType)(void*);
+
     /** Each of these functions, adds the requested parameter to settings list.
     */
     status_e Set_3A_Lsc2D( void *);
@@ -179,7 +181,7 @@ private:
     status_e Set_3A_H3aCommonParams( void *);
     status_e Set_3A_CamControlExpGain( void *);
 
-    VisionCamExecutionService <VisionCam_3A_Export> *execSRVC;
+    VisionCamExecutionService <VisionCam_3A_Export, VisionCam_3A_Export::setFuncPtrType> *execSRVC;
 
 #if 0
     /**

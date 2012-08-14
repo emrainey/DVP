@@ -487,6 +487,17 @@ private: // internal data types
       * in order for a certain job to be finished by camera.
     */
     typedef status_e(*serviceFunc)(OMXVisionCam *, void *);
+
+    /** @struct setFunctionParameters_t
+     *    stores the data passed to set/getParameter() apis
+     * @todo make better description
+     */
+    typedef struct {
+        void *data;
+        uint32_t size;
+        VisionCamPort_e port;
+    } setFunctionParameters_t;
+
 // Inherited Methods from VisionCam
 public:
     /** Constructor. */
@@ -940,7 +951,9 @@ private:
         ePending_Focus = ePending_Min,
         ePending_Max
     };
-    VisionCamExecutionService <OMXVisionCam>*mPendingConfigs;
+
+    typedef status_e (OMXVisionCam::*startAutofocusFuncPtr)(VisionCamFocusMode focusMode);
+    VisionCamExecutionService <OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>*mPendingConfigs;
 
     void FirstFrameFunc(void * data);
 

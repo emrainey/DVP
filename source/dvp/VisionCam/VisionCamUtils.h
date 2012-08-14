@@ -97,13 +97,15 @@ private: /// Private Methods
   * The registered function must be a class member function, and must accept a void* parameter with known size.
   * Please take care to avoid collisinos in ID values.
 */
-template <class CookieType> class VisionCamExecutionService {
+template <class CookieType, typename funcPtrType>
+class VisionCamExecutionService {
 public:
 
     /** @typedef execFuncPrt_t
       * defines a type pointer to a 'Set_3A_*' member to function of 'CookieType' class.
     */
-    typedef status_e (CookieType::*execFuncPrt_t)(void*);
+//    typedef status_e (CookieType::*execFuncPrt_t)(void*);
+    typedef funcPtrType execFuncPrt_t;
 
     /** @struct execListNode_t
       * Defines a structure that holds an ID against each Set_3A_* method in this class.

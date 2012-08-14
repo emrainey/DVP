@@ -270,7 +270,7 @@ status_e OMXVisionCam::init(void *cookie)
     mGammaResetPolulated = false_e;
 #endif // _USE_GAMMA_RESET_HC_
 
-    mPendingConfigs = new VisionCamExecutionService<OMXVisionCam>(this);
+    mPendingConfigs = new VisionCamExecutionService<OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>(this);
 
     return greError;
 }
@@ -3561,7 +3561,7 @@ status_e OMXVisionCam::startAutoFocus( VisionCamFocusMode focusMode )
         if( !mCurGreContext.mCameraPortParams[VCAM_PORT_PREVIEW].mIsActive )
         {
             mPendingConfigs->Register(  ePending_Focus,
-                                        (VisionCamExecutionService<OMXVisionCam>::execFuncPrt_t)&OMXVisionCam::startAutoFocus,
+                                        (VisionCamExecutionService<OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>::execFuncPrt_t)&OMXVisionCam::startAutoFocus,
                                         sizeof(VisionCamFocusMode),
                                         &focusMode
                                      );

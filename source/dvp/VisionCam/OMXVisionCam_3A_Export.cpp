@@ -71,7 +71,7 @@ VisionCam_3A_Export::VisionCam_3A_Export()
     mutex_init(&mLock);
     mSettingList = list_create();
 
-    execSRVC = new VisionCamExecutionService<VisionCam_3A_Export>(this);
+    execSRVC = new VisionCamExecutionService<VisionCam_3A_Export, VisionCam_3A_Export::setFuncPtrType>(this);
 
     execSRVC->Register( VCAM_3A_Lsc2D               , &VisionCam_3A_Export::Set_3A_Lsc2D            , sizeof(OMX_TI_3ASKIP_ISIF_2DLSC_CFGTYPE)        );
     execSRVC->Register( VCAM_3A_Clamp               , &VisionCam_3A_Export::Set_3A_Clamp            , sizeof(OMX_TI_3ASKIP_ISIF_CLAMP_CFGTYPE)        );
@@ -296,7 +296,7 @@ status_e VisionCam_3A_Export::set( SettingType_e paramType, void*  paramValue, s
 
     if( VCAM_3A_Start <= paramType &&  paramType < e3A_ManualSetting_MAX )
     {
-        VisionCamExecutionService<VisionCam_3A_Export>::execFuncPrt_t fun = execSRVC->getFunc(paramType);
+        VisionCamExecutionService<VisionCam_3A_Export, VisionCam_3A_Export::setFuncPtrType>::execFuncPrt_t fun = execSRVC->getFunc(paramType);
         if( fun )
         {
             ret = (this->*(fun))(paramValue);
