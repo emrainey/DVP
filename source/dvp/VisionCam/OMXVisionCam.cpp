@@ -468,6 +468,7 @@ int32_t OMXVisionCam::getAvailableSensors(VCamSensorAvailable &s)
                         continue;
                     }
 
+#if GET_SENSOR_CAPS
                     if( OMX_ErrorNone == omxError )
                     {
                         if (STATUS_SUCCESS != transitToState( OMX_StateIdle ))
@@ -480,6 +481,7 @@ int32_t OMXVisionCam::getAvailableSensors(VCamSensorAvailable &s)
                     {
                         continue;
                     }
+#endif // GET_SENSOR_CAPS
 
                     if( OMX_ErrorNone == omxError && (s.sensorCount < VCAM_Max_Supported_Sensor_Count ))
                     {
@@ -493,15 +495,13 @@ int32_t OMXVisionCam::getAvailableSensors(VCamSensorAvailable &s)
                             new_one = true_e;
                         }
                     }
-
 #if GET_SENSOR_CAPS
                     if( OMX_ErrorNone == omxError )
                     {
                         getSensorCaps(s.sensors[s.sensorCount]);
+                        transitToState(OMX_StateLoaded);
                     }
 #endif // GET_SENSOR_CAPS
-                    transitToState(OMX_StateLoaded);
-
                 }
                 if( new_one )
                 {
