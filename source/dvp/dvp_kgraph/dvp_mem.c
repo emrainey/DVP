@@ -178,7 +178,11 @@ DVP_Dim_t *DVP_Image_Dims(DVP_Image_t *pImage)
 DVP_BOOL DVP_Image_Free(DVP_Handle handle, DVP_Image_t *pImage)
 {
     DVP_BOOL ret = DVP_FALSE;
+#if defined(DVP_USE_CAMERA_SERVICE)
+    if (handle && pImage && pImage->memType != DVP_MTYPE_DISPLAY_2DTILED && pImage->memType != DVP_MTYPE_CAMERA_1DTILED)
+#else
     if (handle && pImage && pImage->memType != DVP_MTYPE_DISPLAY_2DTILED)
+#endif
     {
         DVP_Dim_t *dims = NULL;
         DVP_U32 ndims = 3;
@@ -216,13 +220,28 @@ DVP_BOOL DVP_Image_Free(DVP_Handle handle, DVP_Image_t *pImage)
             }
         }
     }
+#if defined(DVP_USE_CAMERA_SERVICE)
+    else if (handle && pImage && pImage->memType == DVP_MTYPE_CAMERA_1DTILED)
+    {
+        DVP_t *dvp = (DVP_t *)handle;
+        ret = dvp_rpc_dissociate(dvp->rpc, dvp->mem, pImage->pBuffer[0], pImage->reserved, pImage->numBytes, pImage->memType);
+        if (ret == DVP_FALSE)
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "Failed to dissociate Camera buffer %p with remote core!\n", pImage->pBuffer[0]);
+        }
+    }
+#endif
     return ret;
 }
 
 DVP_BOOL DVP_Image_Alloc(DVP_Handle handle, DVP_Image_t *pImage, DVP_MemType_e dvpMemType)
 {
     DVP_BOOL ret = DVP_FALSE;
+#if defined(DVP_USE_CAMERA_SERVICE)
+    if (handle && pImage && dvpMemType != DVP_MTYPE_DISPLAY_2DTILED && dvpMemType != DVP_MTYPE_CAMERA_1DTILED)
+#else
     if (handle && pImage && dvpMemType != DVP_MTYPE_DISPLAY_2DTILED)
+#endif
     {
         DVP_U32 ndims = 3;
         DVP_U32 nptrs = pImage->planes;
@@ -321,6 +340,27 @@ DVP_BOOL DVP_Image_Alloc(DVP_Handle handle, DVP_Image_t *pImage, DVP_MemType_e d
 #endif
         }
     }
+#if defined(DVP_USE_CAMERA_SERVICE)
+    else if (handle && pImage && dvpMemType == DVP_MTYPE_CAMERA_1DTILED)
+    {
+        DVP_t *dvp = (DVP_t *)handle;
+        DVP_U32 p = 0, planeSize = 0;
+
+        pImage->reserved = pImage->pBuffer[0];
+
+        for (p = 0; p < pImage->planes; p++)
+            pImage->pData[p] = pImage->pBuffer[p]; // assign each pointer
+
+        pImage->memType = dvpMemType;
+        pImage->y_stride = pImage->bufWidth * pImage->x_stride;
+
+        ret = dvp_rpc_associate(dvp->rpc, dvp->mem, pImage->pBuffer[0], (DVP_VALUE)pImage->reserved, pImage->numBytes, dvpMemType);
+        if (ret == DVP_FALSE)
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "Failed to associate Camera buffer %p with remote core!\n", pImage->pBuffer[0]);
+        }
+    }
+#endif
     DVP_PrintImage(DVP_ZONE_MEM, pImage);
     return ret;
 }

@@ -439,6 +439,9 @@ DVP_BOOL dvp_rpc_dissociate(DVP_RPC_t *rpc, DVP_Mem_t *mem, DVP_PTR ptr, DVP_VAL
         case DVP_MTYPE_DISPLAY_2DTILED:
 #endif
         case DVP_MTYPE_MPUCACHED_VIRTUAL_SHARED:
+#if defined(DVP_USE_CAMERA_SERVICE)
+        case DVP_MTYPE_CAMERA_1DTILED:
+#endif
         {
             DVP_Memory_Range_t *mrange = NULL;
             mutex_lock(&rpc->lock);
@@ -504,6 +507,9 @@ DVP_BOOL dvp_rpc_associate(DVP_RPC_t *rpc, DVP_Mem_t *mem, DVP_PTR ptr, DVP_VALU
         case DVP_MTYPE_DISPLAY_2DTILED:   // not supported on ICS
 #endif
         case DVP_MTYPE_MPUCACHED_VIRTUAL_SHARED:
+#if defined(DVP_USE_CAMERA_SERVICE)
+        case DVP_MTYPE_CAMERA_1DTILED:
+#endif
         {
             DVP_Memory_Range_t *mrange = (DVP_Memory_Range_t *)calloc(1, sizeof(DVP_Memory_Range_t));
             if (mrange)
