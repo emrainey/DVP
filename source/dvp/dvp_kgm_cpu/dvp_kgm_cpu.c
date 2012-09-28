@@ -138,7 +138,10 @@ static DVP_CoreFunction_t local_kernels[] = {
     {"Buffer Debug",   DVP_KN_BUFFER_DEBUG, 0},
     {"Gamma",          DVP_KN_GAMMA, 0},
 
-#if defined(DVP_USE_VLIB)
+#if defined(DVP_USE_YUV)
+    {"NEON YXYX to LUMA", DVP_KN_YUV_YXYX_TO_Y800, 0},
+    {"NEON YXYX to LUMA", DVP_KN_YXYX_TO_Y800, 0},
+#elif defined(DVP_USE_VLIB)
     {"\"C\" DilateCross", DVP_KN_DILATE_CROSS, 0},
     {"\"C\" DilateMask", DVP_KN_DILATE_MASK, 0},
     {"\"C\" DilateSquare", DVP_KN_DILATE_SQUARE, 0},
@@ -2496,16 +2499,27 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                 //******************************************************
 
                 case DVP_KN_YXYX_TO_Y800:
+#if defined(DVP_USE_YUV)
+                case DVP_KN_YUV_YXYX_TO_Y800:
+#endif
+#if defined(DVP_USE_VLIB)
                 case DVP_KN_VLIB_YXYX_TO_Y800:
+#endif
                 {
                     DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                     if (pT->input.color == FOURCC_YUY2)
                     {
+#if defined(DVP_USE_YUV)
+                        __yuyv_luma_extract(pT->input.width, pT->input.height,
+                                            pT->input.pData[0], pT->input.y_stride,
+                                            pT->output.pData[0], pT->output.y_stride);
+#elif defined(DVP_USE_VLIB)
                         VLIB_extractLumaFromYxYx(pT->input.pData[0],
                                                  pT->input.width,
                                                  pT->input.y_stride/pT->input.x_stride,
                                                  pT->input.height,
                                                  pT->output.pData[0]);
+#endif
                     }
                     break;
                 }

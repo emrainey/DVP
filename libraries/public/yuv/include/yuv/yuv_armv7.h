@@ -474,6 +474,23 @@ void __yuv420_to_yuv422_line(uint8_t *pY,
                              int32_t y_stride,
                              int32_t dstStride);
 
+/*! \brief This function extracts LUMA (Y) data from a YUYV image.
+ * \param [in] width The width in pixels.
+ * \param [in] height The height in pixels.
+ * \param [in] pYUV The YUYV data pointer.
+ * \param [in] srcStride The stride in bytes of the pYUV image.
+ * \param [out] pY The LUMA data pointer.
+ * \param [in] dstStride The stride in bytes of the destination image.
+ * \ingroup group_yuv
+ */
+void __yuyv_luma_extract(uint32_t width,
+                         uint32_t height,
+                         uint8_t *pYUV,
+                         int32_t srcStride,
+                         uint8_t *pY,
+                         int32_t dstStride);
+
+
 #ifdef __cplusplus
 }
 #endif
