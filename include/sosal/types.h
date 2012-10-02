@@ -112,14 +112,14 @@ printf("Value="FMT_VALUE_T"\n", value);
 #define FMT_VALUE_T   "%zu"
 #endif
 
-#if defined(ARCH_32)
+#if defined(ARCH_32) || defined(DARWIN)
 #define FMT_CONST     "%u"
 #define FMT_INT64_T   "%lld"
 #define FMT_UINT64_T  "%llu"
 #define FMT_HEX64_T   "%llx"
 /** Used to specify in a format string a unsigned 64 bit value of a certain number of digits */
 #define FMT_U64(d) "%"#d"llu"
-#elif defined(ARCH_64)
+#elif defined(ARCH_64) 
 #define FMT_CONST     "%lu"
 #define FMT_INT64_T   "%ld"
 #define FMT_UINT64_T  "%lu"

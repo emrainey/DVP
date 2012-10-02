@@ -1085,14 +1085,14 @@ cl_int clCallKernel(cl_environment_t *pEnv, cl_kernel_call_t *pCall, cl_uint num
             {
                 pCall[k].params[j].mem = clCreateBuffer(pEnv->context, pCall[k].params[j].flags, pCall[k].params[j].numBytes, NULL, &err);
         #ifdef CL_DEBUG
-                printf("Create Buffer from %p for %lu bytes with 0x%08x flags (mem=%p, err=%d)\n",
+                printf("Create Buffer from %p for "FMT_SIZE_T" bytes with 0x%08x flags (mem=%p, err=%d)\n",
                         pCall[k].params[j].data,
                         pCall[k].params[j].numBytes,
                         (cl_uint)pCall[k].params[j].flags,
                         pCall[k].params[j].mem,
                         err);
         #endif
-                cl_assert((err == CL_SUCCESS), printf("Failed to create 1D cl_mem object of %u bytes!\n", pCall[k].params[j].numBytes));
+                cl_assert((err == CL_SUCCESS), printf("Failed to create 1D cl_mem object of "FMT_SIZE_T" bytes!\n", pCall[k].params[j].numBytes));
             }
             else if (pCall[k].params[j].type == CL_KPARAM_BUFFER_2D)
             {
@@ -1100,14 +1100,14 @@ cl_int clCallKernel(cl_environment_t *pEnv, cl_kernel_call_t *pCall, cl_uint num
                 cl_image_format *pIf = &pBuf->format;
                 pCall[k].params[j].mem = clCreateImage2D(pEnv->context, pCall[k].params[j].flags, pIf, pBuf->dim[X_DIM], pBuf->dim[Y_DIM], pBuf->strides[Y_DIM], NULL, &err);
         #ifdef CL_DEBUG
-                printf("Create Image2D from %p for %lu bytes with 0x%08x flags (mem=%p, err=%d)\n",
+                printf("Create Image2D from %p for "FMT_SIZE_T" bytes with 0x%08x flags (mem=%p, err=%d)\n",
                         pCall[k].params[j].data,
                         pCall[k].params[j].numBytes,
                         (cl_uint)pCall[k].params[j].flags,
                         pCall[k].params[j].mem,
                         err);
         #endif
-                cl_assert((err == CL_SUCCESS), printf("Failed to create 2D cl_mem object of %u bytes!\n",pCall[k].params[j].numBytes));
+                cl_assert((err == CL_SUCCESS), printf("Failed to create 2D cl_mem object of "FMT_SIZE_T" bytes!\n",pCall[k].params[j].numBytes));
             }
             else if (pCall[k].params[j].type == CL_KPARAM_BUFFER_3D)
             {

@@ -166,7 +166,7 @@ typedef cl_int (*QueryInfo_f)(void *, cl_uint, size_t, void *, size_t *);
         sprintf(format_str, "%%41s:[%%02lu] %s\n", format);\
         printf(format_str, types[index].name, size, param);\
     } else {\
-        printf("%41s:[""] NO RETURNED VALUE! (err = %d)\n", types[index].name, size, err);\
+        printf("%41s:["FMT_SIZE_T"] NO RETURNED VALUE! (err = %d)\n", types[index].name, size, err);\
     }\
 }
 
