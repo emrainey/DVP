@@ -14,6 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#Open the output log
+echo "**********************************************************" > regression_results.txt
+echo "******************** TEST RESULTS ************************" >> regression_results.txt
+echo "**********************************************************" >> regression_results.txt
+echo >> regression_results.txt
+
+if [[ "$@" =~ "full" ]]; then
+    export DVP_TEST_FULL=1
+fi
+if [[ "$@" =~ "common" ]]; then
+    export DVP_TEST_GRAPH_NUM=7
+    export DVP_TEST_GRAPH_STR="common"
+fi
+if [[ "$@" =~ "vrun" ]]; then
+    export DVP_TEST_GRAPH_NUM=8
+    export DVP_TEST_GRAPH_STR="vrun"
+fi
+if [[ "$@" =~ "ldc" ]]; then
+    export DVP_TEST_GRAPH_NUM=17
+    export DVP_TEST_GRAPH_STR="ldc"
+fi
+if [[ "$@" =~ "imglib" ]]; then
+    export DVP_TEST_GRAPH_NUM=16
+    export DVP_TEST_GRAPH_STR="imglib"
+fi
+if [[ "$@" =~ "vlib" ]]; then
+    export DVP_TEST_GRAPH_NUM=22
+    export DVP_TEST_GRAPH_STR="vlib"
+fi
+if [[ "$@" =~ "rvm" ]]; then
+    export DVP_TEST_GRAPH_NUM=1
+    export DVP_TEST_GRAPH_STR="rvm"
+fi
+
+
+
 if [ -n "${MYDROID}" ]; then
     . dvp_test_android.sh $*
 fi

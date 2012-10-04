@@ -55,26 +55,6 @@ function remote_clean() {
     adb -s ${TARGET_DEVICE} shell "rm /sdcard/raw/0* /sdcard/raw/1* /sdcard/raw/2* /sdcard/raw/3* /sdcard/raw/4* /sdcard/raw/5* /sdcard/raw/6*"
 }
 
-if [[ "$@" =~ "full" ]]; then
-    export DVP_TEST_FULL=1
-fi
-if [[ "$@" =~ "vrun" ]]; then
-    export DVP_TEST_GRAPH_NUM=7
-    export DVP_TEST_GRAPH_STR="vrun"
-fi
-if [[ "$@" =~ "imglib" ]]; then
-    export DVP_TEST_GRAPH_NUM=16
-    export DVP_TEST_GRAPH_STR="imglib"
-fi
-if [[ "$@" =~ "vlib" ]]; then
-    export DVP_TEST_GRAPH_NUM=22
-    export DVP_TEST_GRAPH_STR="vlib"
-fi
-if [[ "$@" =~ "rvm" ]]; then
-    export DVP_TEST_GRAPH_NUM=1
-    export DVP_TEST_GRAPH_STR="rvm"
-fi
-
 while [ $# -gt 0 ];
 do
     get_devices
@@ -99,12 +79,6 @@ do
 
         #Prepare output directory
         mkdir -p $DVP_ROOT/raw/output
-
-        #Open the output log
-        echo "**********************************************************" > regression_results.txt
-        echo "******************** TEST RESULTS ************************" >> regression_results.txt
-        echo "**********************************************************" >> regression_results.txt
-        echo >> regression_results.txt
     fi
 
     if [ "$1" == "simcop" ] || [ "$1" == "dsp" ] || [ "$1" == "cpu" ]; then
@@ -150,6 +124,7 @@ do
     fi
     if [ "$1" == "report" ]; then
         cat regression_results.txt
+        mv regression_results.txt regression_results_${DVP_TEST_GRAPH_STR}.txt
     fi
     if [ "$1" == "clean" ]; then
         remote_clean

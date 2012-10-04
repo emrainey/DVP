@@ -41,8 +41,12 @@ fi
 if [[ "$@" =~ "full" ]]; then
     export DVP_TEST_FULL=1
 fi
-if [[ "$@" =~ "vrun" ]]; then
+if [[ "$@" =~ "common" ]]; then
     export DVP_TEST_GRAPH_NUM=7
+    export DVP_TEST_GRAPH_STR="common"
+fi
+if [[ "$@" =~ "vrun" ]]; then
+    export DVP_TEST_GRAPH_NUM=8
     export DVP_TEST_GRAPH_STR="vrun"
 fi
 if [[ "$@" =~ "imglib" ]]; then
@@ -69,12 +73,6 @@ do
 
         #Prepare output directory
         mkdir $DVP_ROOT/raw/output
-
-        #Open the output log
-        echo "**********************************************************" > regression_results.txt
-        echo "******************** TEST RESULTS ************************" >> regression_results.txt
-        echo "**********************************************************" >> regression_results.txt
-        echo >> regression_results.txt
     fi
 
     if [ "$1" == "simcop" ] || [ "$1" == "dsp" ] || [ "$1" == "cpu" ]; then
@@ -120,6 +118,7 @@ do
     fi
     if [ "$1" == "report" ]; then
         cat regression_results.txt
+        mv regression_results.txt regression_results_${DVP_TEST_GRAPH_STR}.txt
     fi
     if [ "$1" == "move" ]; then
         move_videos

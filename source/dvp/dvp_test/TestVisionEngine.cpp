@@ -138,15 +138,14 @@ status_e TestVisionEngine::GraphSetup()
                 status = Test_MiscGraphSetup();
                 break;
             case TI_GRAPH_TYPE_TEST5:
-                status = Test_SimcopGraphSetup();
+                status = Test_CommonGraphSetup();
                 break;
             case TI_GRAPH_TYPE_TEST6:
-                m_testcore = DVP_CORE_DSP;
-                status = Test_SimcopGraphSetup();
+                status = Test_VrunGraphSetup();
                 break;
             case TI_GRAPH_TYPE_TEST7:
                 m_testcore = DVP_CORE_CPU;
-                status = Test_SimcopGraphSetup();
+                status = Test_CommonGraphSetup();
                 break;
             case TI_GRAPH_TYPE_TEST8:
                 status = Test_HistGraphSetup();
@@ -1713,10 +1712,677 @@ status_e TestVisionEngine::Test_CannyGraphSetup()
     return status;
 }
 
-status_e TestVisionEngine::Test_SimcopGraphSetup()
+status_e TestVisionEngine::Test_VrunGraphSetup()
 {
     status_e status = STATUS_SUCCESS;
-#if defined(DVP_USE_VLIB) && defined(DVP_USE_IMGLIB)
+#if defined(DVP_USE_VRUN)
+    DVP_Image_t tmpImages[3];
+    DVP_Bounds_t bound = {NULL, 0, 0};
+    DVP_S08 maskOnes[3][3] = {{1,1,1},{1,1,1},{1,1,1}};
+    DVP_S08 maskBlurNeg3x3[3][3] = {{-5, 20, 17} ,
+                                    {19, -28, 13} ,
+                                    {-22, 9, 33}};
+    DVP_S08 maskBlur7x7[7][7]    = {{5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5}};
+    DVP_U08 maskSAD16x16[16][16] ={{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5} ,
+                                    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}};
+
+    // 3x3 Gaussian kernel with SQ0.8 coefficients
+    const DVP_S08 gaussian_7x7[49] =
+    {
+        0, 0,  0,  0,  0, 0, 0,
+        0, 0,  0,  0,  0, 0, 0,
+        0, 0, 16, 32, 16, 0, 0,
+        0, 0, 32, 64, 32, 0, 0,
+        0, 0, 16, 32, 16, 0, 0,
+        0, 0,  0,  0,  0, 0, 0,
+        0, 0,  0,  0,  0, 0, 0
+    };
+    DVP_S08 maskAvg[7] = {1,2,3,4,3,2,1};
+    DVP_MemType_e camType = DVP_MTYPE_DEFAULT;
+    DVP_MemType_e smallType = DVP_MTYPE_MPUCACHED_VIRTUAL;
+
+#if defined(DVP_USE_TILER) || defined(DVP_USE_ION) || defined(DVP_USE_BO)
+    camType = DVP_MTYPE_MPUNONCACHED_2DTILED;
+    smallType = DVP_MTYPE_MPUNONCACHED_1DTILED;
+#endif
+    if (m_hDVP)
+    {
+        if (AllocateImageStructs(75))
+        {
+            DVP_Image_Init(&m_images[0], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_YV24);
+            DVP_Image_Init(&m_images[2], m_width, m_height, FOURCC_Y800); //resv1
+            DVP_Image_Init(&m_images[3], m_width, m_height, FOURCC_Y800); //resv1
+            DVP_Image_Init(&m_images[4], m_width, m_height, FOURCC_Y800); //resv1
+            DVP_Image_Init(&m_images[5], m_width, m_height, FOURCC_Y800); //resv1
+            DVP_Image_Init(&m_images[6], m_width, m_height, FOURCC_Y800); //resv1
+            DVP_Image_Init(&m_images[7], m_width, m_height, FOURCC_Y800); //resv1
+            /** Misc**/
+            DVP_Image_Init(&m_images[8], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[9], m_width, m_height, FOURCC_RGBP);
+            DVP_Image_Init(&m_images[10], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[11], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[12], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[13], m_width, m_height, FOURCC_IYUV);
+            /** Morph**/
+            DVP_Image_Init(&m_images[14], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[15], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[16], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[17], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[18], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[19], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[20], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[21], 3, 3, FOURCC_Y800);
+            /** NonMax**/
+            DVP_Image_Init(&m_images[22], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[23], m_width, m_height+2, FOURCC_Y800);
+            DVP_Image_Init(&m_images[24], m_width, m_height+4, FOURCC_Y800);
+            DVP_Image_Init(&m_images[25], m_width, m_height+6, FOURCC_Y800);
+            DVP_Image_Init(&m_images[26], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[27], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[28], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[29], 3, 3, FOURCC_Y800);
+            DVP_Image_Init(&m_images[30], 5, 5, FOURCC_Y800);
+            DVP_Image_Init(&m_images[31], 7, 7, FOURCC_Y800);
+            /** Canny**/
+            DVP_Image_Init(&m_images[32], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[33], 7, 7, FOURCC_Y800);
+            DVP_Image_Init(&m_images[34], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[35], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[36], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[37], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[38], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[39], m_width, m_height, FOURCC_RGBA);
+            DVP_Image_Init(&m_images[40], m_width, m_height, FOURCC_Y800); //resv1
+            /** New **/
+            DVP_Image_Init(&m_images[41], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[42], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[43], 7, 1, FOURCC_Y800);
+            DVP_Image_Init(&m_images[44], 1, 7, FOURCC_Y800);
+            DVP_Image_Init(&m_images[45], m_width, m_height, FOURCC_Y800); //resv1
+            DVP_Image_Init(&m_images[46], m_width, m_height, FOURCC_Y800); //resv1
+            DVP_Image_Init(&m_images[47], 16, 16, FOURCC_Y800);            //sad ref image
+            DVP_Image_Init(&m_images[48], m_width, m_height, FOURCC_Y800); //sad 8x8
+            DVP_Image_Init(&m_images[49], m_width, m_height, FOURCC_Y800); //sad 16x16
+            DVP_Image_Init(&m_images[50], m_width, m_height, FOURCC_Y800); //sad 3x3
+            DVP_Image_Init(&m_images[51], m_width, m_height, FOURCC_Y800); //sad 5x5
+            DVP_Image_Init(&m_images[52], m_width, m_height, FOURCC_Y800); //sad 7x7
+            DVP_Image_Init(&m_images[53], m_width, m_height, FOURCC_RGBP);
+            /** Imglib **/
+            DVP_Image_Init(&m_images[54], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[55], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[56], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[57], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[58], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[59], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[60], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[61], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[62], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[63], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[64], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[65], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[66], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[67], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[68], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[69], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[70], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[71], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[72], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[73], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[74], m_width, m_height, FOURCC_Y16);
+            /** Misc**/
+            if (!DVP_Image_Alloc(m_hDVP, &m_images[0],   camType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[1],  DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[2],  DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[3],  DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[4],  DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[5],  DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[6],  DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[7],  DVP_MTYPE_DEFAULT) || //resv1
+                /** Misc **/
+#if defined(DVP_USE_ION) || defined(DVP_USE_TILER) || defined(DVP_USE_BO)
+                !DVP_Image_Alloc(m_hDVP, &m_images[8],  DVP_MTYPE_MPUNONCACHED_2DTILED) ||
+#else
+                !DVP_Image_Alloc(m_hDVP, &m_images[8],  DVP_MTYPE_DEFAULT) ||
+#endif
+                !DVP_Image_Alloc(m_hDVP, &m_images[9],  DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[10], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[11], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[12], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[13], DVP_MTYPE_DEFAULT) ||
+                /** Morph**/
+                !DVP_Image_Alloc(m_hDVP, &m_images[14], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[15], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[16], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[17], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[18], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[19], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[20], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[21], smallType) ||      // Mask can be in virtual space since it is copied
+                /** NonMax**/
+                !DVP_Image_Alloc(m_hDVP, &m_images[22], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[23], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[24], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[25], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[26], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[27], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[28], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[29], smallType) ||       // Mask can be in virtual space since it is copied
+                !DVP_Image_Alloc(m_hDVP, &m_images[30], smallType) ||       // Mask can be in virtual space since it is copied
+                !DVP_Image_Alloc(m_hDVP, &m_images[31], smallType) ||       // Mask can be in virtual space since it is copied
+                /** Canny**/
+                !DVP_Image_Alloc(m_hDVP, &m_images[32], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[33], smallType) ||       // Mask can be in virtual space since it is copied
+                !DVP_Image_Alloc(m_hDVP, &m_images[34], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[35], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[36], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[37], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[38], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[39], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[40], DVP_MTYPE_DEFAULT) || //resv1
+                /** New Requests**/
+                !DVP_Image_Alloc(m_hDVP, &m_images[41], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[42], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[43], smallType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[44], smallType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[45], DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[46], DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[47], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[48], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[49], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[50], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[51], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[52], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[53], DVP_MTYPE_DEFAULT) ||
+                /** Imglib **/
+                !DVP_Image_Alloc(m_hDVP, &m_images[54], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[55], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[56], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[57], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[58], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[59], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[60], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[61], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[62], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[63], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[64], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[65], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[66], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[67], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[68], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[69], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[70], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[71], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[72], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[73], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[74], DVP_MTYPE_DEFAULT))
+                return STATUS_NOT_ENOUGH_MEMORY;
+        }
+        else
+            return STATUS_NOT_ENOUGH_MEMORY;
+
+        if (AllocateNodes(56) && AllocateSections(&m_graphs[0], 1))
+        {
+            // initialize the data in the nodes...
+            m_pNodes[0].header.kernel = DVP_KN_VRUN_UYVY_TO_YUV444p;
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = m_images[0];
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = m_images[1];
+
+            m_pNodes[1].header.kernel = DVP_KN_NOOP; // From common kernels
+            m_pNodes[2].header.kernel = DVP_KN_NOOP; // From common kernels
+
+            /*********
+
+            **********/
+            m_pNodes[3].header.kernel = DVP_KN_VRUN_XYXY_TO_Y800;
+            dvp_knode_to(&m_pNodes[3], DVP_Transform_t)->input = m_images[0];
+            dvp_knode_to(&m_pNodes[3], DVP_Transform_t)->output = m_images[8];
+
+            m_pNodes[4].header.kernel = DVP_KN_VRUN_UYVY_TO_RGBp;
+            dvp_knode_to(&m_pNodes[4], DVP_Transform_t)->input = m_images[0];
+            dvp_knode_to(&m_pNodes[4], DVP_Transform_t)->output = m_images[9];
+
+            m_pNodes[5].header.kernel = DVP_KN_VRUN_IIR_HORZ;
+            dvp_knode_to(&m_pNodes[5], DVP_IIR_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[5], DVP_IIR_t)->output = m_images[10];
+            dvp_knode_to(&m_pNodes[5], DVP_IIR_t)->weight = 2000;
+            dvp_knode_to(&m_pNodes[5], DVP_IIR_t)->bounds[0] = bound;
+            dvp_knode_to(&m_pNodes[5], DVP_IIR_t)->bounds[1] = bound;
+            dvp_knode_to(&m_pNodes[5], DVP_IIR_t)->scratch = m_images[11];
+
+            m_pNodes[6].header.kernel = DVP_KN_VRUN_IIR_VERT;
+            dvp_knode_to(&m_pNodes[6], DVP_IIR_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[6], DVP_IIR_t)->output = m_images[12];
+            dvp_knode_to(&m_pNodes[6], DVP_IIR_t)->weight = 2000;
+            dvp_knode_to(&m_pNodes[6], DVP_IIR_t)->bounds[0] = bound;
+            dvp_knode_to(&m_pNodes[6], DVP_IIR_t)->bounds[1] = bound;
+            dvp_knode_to(&m_pNodes[6], DVP_IIR_t)->scratch = m_images[11];
+
+            m_pNodes[7].header.kernel = DVP_KN_VRUN_UYVY_TO_YUV420p;
+            dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->input = m_images[0];
+            dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->output = m_images[13];
+
+            /*********
+              Morph
+            **********/
+            m_pNodes[8].header.kernel = DVP_KN_THRESHOLD;         // Then threshold for binary image functions
+            dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->input = m_images[8];       // Using Luma from Luma Extract function
+            dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->output = m_images[14];     // Thresholded output
+
+            m_pNodes[9].header.kernel = DVP_KN_VRUN_ERODE_CROSS;
+            dvp_knode_to(&m_pNodes[9], DVP_Morphology_t)->input = m_images[14];
+            dvp_knode_to(&m_pNodes[9], DVP_Morphology_t)->output = m_images[15];
+
+            m_pNodes[10].header.kernel = DVP_KN_VRUN_ERODE_SQUARE;
+            dvp_knode_to(&m_pNodes[10], DVP_Morphology_t)->input = m_images[14];
+            dvp_knode_to(&m_pNodes[10], DVP_Morphology_t)->output = m_images[16];
+
+            m_pNodes[11].header.kernel = DVP_KN_VRUN_ERODE_MASK;
+            dvp_knode_to(&m_pNodes[11], DVP_Morphology_t)->input = m_images[14];
+            dvp_knode_to(&m_pNodes[11], DVP_Morphology_t)->output = m_images[17];
+            dvp_knode_to(&m_pNodes[11], DVP_Morphology_t)->mask = m_images[21];
+
+            m_pNodes[12].header.kernel = DVP_KN_VRUN_DILATE_CROSS;
+            dvp_knode_to(&m_pNodes[12], DVP_Morphology_t)->input = m_images[14];
+            dvp_knode_to(&m_pNodes[12], DVP_Morphology_t)->output = m_images[18];
+
+            m_pNodes[13].header.kernel = DVP_KN_VRUN_DILATE_SQUARE;
+            dvp_knode_to(&m_pNodes[13], DVP_Morphology_t)->input = m_images[14];
+            dvp_knode_to(&m_pNodes[13], DVP_Morphology_t)->output = m_images[19];
+
+            m_pNodes[14].header.kernel = DVP_KN_VRUN_DILATE_MASK;
+            dvp_knode_to(&m_pNodes[14], DVP_Morphology_t)->input = m_images[14];
+            dvp_knode_to(&m_pNodes[14], DVP_Morphology_t)->output = m_images[20];
+            dvp_knode_to(&m_pNodes[14], DVP_Morphology_t)->mask = m_images[21];
+
+            DVP_Image_Fill(&m_images[21], (DVP_S08 *)maskOnes, 3*3*sizeof(DVP_S08)); //  Setting the mask to be a square (all 1s)
+
+            /*********
+              NonMax
+            **********/
+            m_pNodes[15].header.kernel = DVP_KN_XSTRIDE_CONVERT; // From common kernels
+            dvp_knode_to(&m_pNodes[15], DVP_Transform_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[15], DVP_Transform_t)->output = m_images[22];
+
+            m_pNodes[16].header.kernel = DVP_KN_VRUN_NONMAXSUPPRESS_3x3_S16;
+            dvp_knode_to(&m_pNodes[16], DVP_Threshold_t)->input = m_images[22];
+            dvp_knode_to(&m_pNodes[16], DVP_Threshold_t)->output = m_images[23];
+            dvp_knode_to(&m_pNodes[16], DVP_Threshold_t)->thresh = 100;
+            if(dvp_knode_to(&m_pNodes[16], DVP_Threshold_t)->input.width > 992)
+            {
+                m_pNodes[16].header.kernel = DVP_KN_NONMAXSUPPRESS_3x3_S16;
+                m_pNodes[16].header.affinity = DVP_CORE_CPU;
+            }
+
+            m_pNodes[17].header.kernel = DVP_KN_VRUN_NONMAXSUPPRESS_5x5_S16;
+            dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->input = m_images[22];
+            dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->output = m_images[24];
+            dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->thresh = 100;
+            if(dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->input.width > 992)
+            {
+                m_pNodes[17].header.kernel = DVP_KN_NONMAXSUPPRESS_5x5_S16;
+                m_pNodes[17].header.affinity = DVP_CORE_CPU;
+            }
+
+            m_pNodes[18].header.kernel = DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16;
+            dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->input = m_images[22];
+            dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->output = m_images[25];
+            dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->thresh = 100;
+            if(dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->input.width > 768)
+            {
+                m_pNodes[18].header.kernel = DVP_KN_NONMAXSUPPRESS_7x7_S16;
+                m_pNodes[18].header.affinity = DVP_CORE_CPU;
+            }
+
+            m_pNodes[19].header.kernel = DVP_KN_VRUN_CONV_3x3;
+            dvp_knode_to(&m_pNodes[19], DVP_ImageConvolution_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[19], DVP_ImageConvolution_t)->output = m_images[26];
+            dvp_knode_to(&m_pNodes[19], DVP_ImageConvolution_t)->mask = m_images[29];
+            dvp_knode_to(&m_pNodes[19], DVP_ImageConvolution_t)->shiftMask = 6;
+
+            m_pNodes[20].header.kernel = DVP_KN_VRUN_CONV_5x5;
+            dvp_knode_to(&m_pNodes[20], DVP_ImageConvolution_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[20], DVP_ImageConvolution_t)->output = m_images[27];
+            dvp_knode_to(&m_pNodes[20], DVP_ImageConvolution_t)->mask = m_images[30];
+            dvp_knode_to(&m_pNodes[20], DVP_ImageConvolution_t)->shiftMask = 7;
+
+            m_pNodes[21].header.kernel = DVP_KN_VRUN_CONV_7x7;
+            dvp_knode_to(&m_pNodes[21], DVP_ImageConvolution_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[21], DVP_ImageConvolution_t)->output = m_images[28];
+            dvp_knode_to(&m_pNodes[21], DVP_ImageConvolution_t)->mask = m_images[31];
+            dvp_knode_to(&m_pNodes[21], DVP_ImageConvolution_t)->shiftMask = 8;
+
+            DVP_Image_Fill(&m_images[29], (DVP_S08*)maskBlurNeg3x3, 3*3*sizeof(DVP_S08));
+            DVP_Image_Fill(&m_images[30], (DVP_S08*)maskBlur7x7,    5*5*sizeof(DVP_S08));
+            DVP_Image_Fill(&m_images[31], (DVP_S08*)maskBlur7x7,    7*7*sizeof(DVP_S08));
+
+            /*********
+              Canny
+            **********/
+            m_pNodes[22].header.kernel = DVP_KN_VRUN_CANNY_IMAGE_SMOOTHING;
+            dvp_knode_to(&m_pNodes[22], DVP_ImageConvolution_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[22], DVP_ImageConvolution_t)->output = m_images[32];
+            dvp_knode_to(&m_pNodes[22], DVP_ImageConvolution_t)->mask = m_images[33];
+            dvp_knode_to(&m_pNodes[22], DVP_ImageConvolution_t)->shiftMask = 8;
+
+            m_pNodes[23].header.kernel = DVP_KN_VRUN_CANNY_2D_GRADIENT;
+            dvp_knode_to(&m_pNodes[23], DVP_Canny2dGradient_t)->input = m_images[32];
+            dvp_knode_to(&m_pNodes[23], DVP_Canny2dGradient_t)->outGradX = m_images[34];
+            dvp_knode_to(&m_pNodes[23], DVP_Canny2dGradient_t)->outGradY = m_images[35];
+            dvp_knode_to(&m_pNodes[23], DVP_Canny2dGradient_t)->outMag = m_images[36];
+
+            m_pNodes[24].header.kernel = DVP_KN_VRUN_CANNY_NONMAX_SUPPRESSION;
+            dvp_knode_to(&m_pNodes[24], DVP_CannyNonMaxSuppression_t)->inGradX = m_images[34];
+            dvp_knode_to(&m_pNodes[24], DVP_CannyNonMaxSuppression_t)->inGradY = m_images[35];
+            dvp_knode_to(&m_pNodes[24], DVP_CannyNonMaxSuppression_t)->inMag = m_images[36];
+            dvp_knode_to(&m_pNodes[24], DVP_CannyNonMaxSuppression_t)->output = m_images[37];
+
+            m_pNodes[25].header.kernel = DVP_KN_VRUN_CANNY_HYST_THRESHHOLD;
+            dvp_knode_to(&m_pNodes[25], DVP_CannyHystThresholding_t)->inMag = m_images[36];
+            dvp_knode_to(&m_pNodes[25], DVP_CannyHystThresholding_t)->inEdgeMap = m_images[37];
+            dvp_knode_to(&m_pNodes[25], DVP_CannyHystThresholding_t)->output = m_images[38];
+            dvp_knode_to(&m_pNodes[25], DVP_CannyHystThresholding_t)->loThresh = 35;
+            dvp_knode_to(&m_pNodes[25], DVP_CannyHystThresholding_t)->hiThresh = 122;
+
+            m_pNodes[26].header.kernel = DVP_KN_VRUN_INTEGRAL_IMAGE_8;
+            dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->output = m_images[39];
+            if(dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->input.width> 2049 || dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->input.height> 819 )
+            {
+                m_pNodes[26].header.kernel = DVP_KN_INTEGRAL_IMAGE_8;
+                m_pNodes[26].header.affinity = DVP_CORE_CPU;
+            }
+
+            DVP_Image_Fill(&m_images[33], (DVP_S08*)gaussian_7x7, 7*7*sizeof(DVP_S08)); // Copying the mask
+
+            m_pNodes[27].header.kernel = DVP_KN_VRUN_CONV_MxN;
+            dvp_knode_to(&m_pNodes[27], DVP_ImageConvolution_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[27], DVP_ImageConvolution_t)->output = m_images[41];
+            dvp_knode_to(&m_pNodes[27], DVP_ImageConvolution_t)->mask = m_images[43];
+            dvp_knode_to(&m_pNodes[27], DVP_ImageConvolution_t)->shiftMask = 4;
+
+            m_pNodes[28].header.kernel = DVP_KN_VRUN_CONV_MxN;
+            dvp_knode_to(&m_pNodes[28], DVP_ImageConvolution_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[28], DVP_ImageConvolution_t)->output = m_images[42];
+            dvp_knode_to(&m_pNodes[28], DVP_ImageConvolution_t)->mask = m_images[44];
+            dvp_knode_to(&m_pNodes[28], DVP_ImageConvolution_t)->shiftMask = 4;
+
+            DVP_Image_Fill(&m_images[43], (DVP_S08*)maskAvg, 7*sizeof(DVP_S08)); // Copying the mask
+            DVP_Image_Fill(&m_images[44], (DVP_S08*)maskAvg, 7*sizeof(DVP_S08)); // Copying the mask
+
+            m_pNodes[29].header.kernel = DVP_KN_VRUN_SAD_8x8;
+            dvp_knode_to(&m_pNodes[29], DVP_SAD_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[29], DVP_SAD_t)->output = m_images[48];
+            dvp_knode_to(&m_pNodes[29], DVP_SAD_t)->refImg = m_images[47];
+            dvp_knode_to(&m_pNodes[29], DVP_SAD_t)->shiftMask = 4;
+            dvp_knode_to(&m_pNodes[29], DVP_SAD_t)->refPitch = 8;
+            dvp_knode_to(&m_pNodes[29], DVP_SAD_t)->refStartOffset = 0;
+
+            m_pNodes[30].header.kernel = DVP_KN_VRUN_SAD_16x16;
+            dvp_knode_to(&m_pNodes[30], DVP_SAD_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[30], DVP_SAD_t)->output = m_images[49];
+            dvp_knode_to(&m_pNodes[30], DVP_SAD_t)->refImg = m_images[47];
+            dvp_knode_to(&m_pNodes[30], DVP_SAD_t)->shiftMask = 8;
+            dvp_knode_to(&m_pNodes[30], DVP_SAD_t)->refPitch = 16;
+            dvp_knode_to(&m_pNodes[30], DVP_SAD_t)->refStartOffset = 0;
+
+            m_pNodes[31].header.kernel = DVP_KN_VRUN_SAD_3x3;
+            dvp_knode_to(&m_pNodes[31], DVP_SAD_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[31], DVP_SAD_t)->output = m_images[50];
+            dvp_knode_to(&m_pNodes[31], DVP_SAD_t)->refImg = m_images[47];
+            dvp_knode_to(&m_pNodes[31], DVP_SAD_t)->refPitch = 3;
+            dvp_knode_to(&m_pNodes[31], DVP_SAD_t)->refStartOffset = 0;
+
+            m_pNodes[32].header.kernel = DVP_KN_VRUN_SAD_5x5;
+            dvp_knode_to(&m_pNodes[32], DVP_SAD_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[32], DVP_SAD_t)->output = m_images[51];
+            dvp_knode_to(&m_pNodes[32], DVP_SAD_t)->refImg = m_images[47];
+            dvp_knode_to(&m_pNodes[32], DVP_SAD_t)->refPitch = 5;
+            dvp_knode_to(&m_pNodes[32], DVP_SAD_t)->refStartOffset = 0;
+
+            m_pNodes[33].header.kernel = DVP_KN_VRUN_SAD_7x7;
+            dvp_knode_to(&m_pNodes[33], DVP_SAD_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[33], DVP_SAD_t)->output = m_images[52];
+            dvp_knode_to(&m_pNodes[33], DVP_SAD_t)->refImg = m_images[47];
+            dvp_knode_to(&m_pNodes[33], DVP_SAD_t)->refPitch = 7;
+            dvp_knode_to(&m_pNodes[33], DVP_SAD_t)->refStartOffset = 0;
+
+            DVP_Image_Fill(&m_images[47], (DVP_S08*)maskSAD16x16,   16*16*sizeof(DVP_S08));
+
+            m_pNodes[34].header.kernel = DVP_KN_VRUN_YUV444p_TO_RGBp;
+            dvp_knode_to(&m_pNodes[34], DVP_Transform_t)->input  = m_images[1];
+            dvp_knode_to(&m_pNodes[34], DVP_Transform_t)->output = m_images[53];
+
+            /*********
+              Imglib
+            **********/
+            m_pNodes[35].header.kernel = DVP_KN_XSTRIDE_SHIFT;
+            dvp_knode_to(&m_pNodes[35], DVP_Transform_t)->input = m_images[8];        // Use 8bit luma
+            dvp_knode_to(&m_pNodes[35], DVP_Transform_t)->output = m_images[54];       // Output 16bit luma
+
+            m_pNodes[36].header.kernel = DVP_KN_VRUN_THR_GT2MAX_8;
+            dvp_knode_to(&m_pNodes[36], DVP_Threshold_t)->input = m_images[8];    // Use 8bit luma
+            dvp_knode_to(&m_pNodes[36], DVP_Threshold_t)->output = m_images[55];
+            dvp_knode_to(&m_pNodes[36], DVP_Threshold_t)->thresh = 128;
+
+            m_pNodes[37].header.kernel = DVP_KN_VRUN_THR_GT2THR_8;
+            dvp_knode_to(&m_pNodes[37], DVP_Threshold_t)->input = m_images[8];    // Use 8bit luma
+            dvp_knode_to(&m_pNodes[37], DVP_Threshold_t)->output = m_images[56];
+            dvp_knode_to(&m_pNodes[37], DVP_Threshold_t)->thresh = 128;
+
+            m_pNodes[38].header.kernel = DVP_KN_VRUN_THR_LE2MIN_8;
+            dvp_knode_to(&m_pNodes[38], DVP_Threshold_t)->input = m_images[8];    // Use 8bit luma
+            dvp_knode_to(&m_pNodes[38], DVP_Threshold_t)->output = m_images[57];
+            dvp_knode_to(&m_pNodes[38], DVP_Threshold_t)->thresh = 128;
+
+            m_pNodes[39].header.kernel = DVP_KN_VRUN_THR_LE2THR_8;
+            dvp_knode_to(&m_pNodes[39], DVP_Threshold_t)->input = m_images[8];    // Use 8bit luma
+            dvp_knode_to(&m_pNodes[39], DVP_Threshold_t)->output = m_images[58];
+            dvp_knode_to(&m_pNodes[39], DVP_Threshold_t)->thresh = 128;
+
+            m_pNodes[40].header.kernel = DVP_KN_VRUN_THR_GT2MAX_16;
+            dvp_knode_to(&m_pNodes[40], DVP_Threshold_t)->input = m_images[54];    // Use 16bit luma
+            dvp_knode_to(&m_pNodes[40], DVP_Threshold_t)->output = m_images[59];
+            dvp_knode_to(&m_pNodes[40], DVP_Threshold_t)->thresh = (DVP_S16)0x8000;
+
+            m_pNodes[41].header.kernel = DVP_KN_VRUN_THR_GT2THR_16;
+            dvp_knode_to(&m_pNodes[41], DVP_Threshold_t)->input = m_images[54];    // Use 16bit luma
+            dvp_knode_to(&m_pNodes[41], DVP_Threshold_t)->output = m_images[60];
+            dvp_knode_to(&m_pNodes[41], DVP_Threshold_t)->thresh = (DVP_S16)0x8000;
+
+            m_pNodes[42].header.kernel = DVP_KN_VRUN_THR_LE2MIN_16;
+            dvp_knode_to(&m_pNodes[42], DVP_Threshold_t)->input = m_images[54];    // Use 16bit luma
+            dvp_knode_to(&m_pNodes[42], DVP_Threshold_t)->output = m_images[61];
+            dvp_knode_to(&m_pNodes[42], DVP_Threshold_t)->thresh = (DVP_S16)0x8000;
+
+            m_pNodes[43].header.kernel = DVP_KN_VRUN_THR_LE2THR_16;
+            dvp_knode_to(&m_pNodes[43], DVP_Threshold_t)->input = m_images[54];    // Use 16bit luma
+            dvp_knode_to(&m_pNodes[43], DVP_Threshold_t)->output = m_images[62];
+            dvp_knode_to(&m_pNodes[43], DVP_Threshold_t)->thresh = (DVP_S16)0x8000;
+
+            m_pNodes[44].header.kernel = DVP_KN_VRUN_SOBEL_3x3_8s;
+            dvp_knode_to(&m_pNodes[44], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
+            dvp_knode_to(&m_pNodes[44], DVP_Transform_t)->output = m_images[63];
+
+            m_pNodes[45].header.kernel = DVP_KN_VRUN_SOBEL_3x3_8;
+            dvp_knode_to(&m_pNodes[45], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
+            dvp_knode_to(&m_pNodes[45], DVP_Transform_t)->output = m_images[64];
+
+            m_pNodes[46].header.kernel = DVP_KN_VRUN_SOBEL_5x5_8s;
+            dvp_knode_to(&m_pNodes[46], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
+            dvp_knode_to(&m_pNodes[46], DVP_Transform_t)->output = m_images[65];
+
+            m_pNodes[47].header.kernel = DVP_KN_VRUN_SOBEL_5x5_8;
+            dvp_knode_to(&m_pNodes[47], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
+            dvp_knode_to(&m_pNodes[47], DVP_Transform_t)->output = m_images[66];
+
+            m_pNodes[48].header.kernel = DVP_KN_VRUN_SOBEL_7x7_8s;
+            dvp_knode_to(&m_pNodes[48], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
+            dvp_knode_to(&m_pNodes[48], DVP_Transform_t)->output = m_images[67];
+
+            m_pNodes[49].header.kernel = DVP_KN_VRUN_SOBEL_7x7_8;
+            dvp_knode_to(&m_pNodes[49], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
+            dvp_knode_to(&m_pNodes[49], DVP_Transform_t)->output = m_images[68];
+
+            m_pNodes[50].header.kernel = DVP_KN_VRUN_SOBEL_3x3_16s;
+            dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
+            dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->output = m_images[69];
+
+            m_pNodes[51].header.kernel = DVP_KN_VRUN_SOBEL_3x3_16;
+            dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
+            dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->output = m_images[70];
+
+            m_pNodes[52].header.kernel = DVP_KN_VRUN_SOBEL_5x5_16s;
+            dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
+            dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->output = m_images[71];
+
+            m_pNodes[53].header.kernel = DVP_KN_VRUN_SOBEL_5x5_16;
+            dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
+            dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->output = m_images[72];
+
+            m_pNodes[54].header.kernel = DVP_KN_VRUN_SOBEL_7x7_16s;
+            dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
+            dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->output = m_images[73];
+
+            m_pNodes[55].header.kernel = DVP_KN_VRUN_SOBEL_7x7_16;
+            dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
+            dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->output = m_images[74];
+
+#if 0
+            TBD:
+                DVP_KN_VRUN_NV12_TO_YUV444p
+                DVP_KN_LDC_AFFINE_TRANSFORM
+                DVP_KN_VRUN_HARRIS_CORNERS
+                DVP_KN_VRUN_HARRIS_SCORE_7x7
+                DVP_KN_VRUN_BLOCK_MAXIMA
+                DVP_KN_VRUN_NMS_STEP1
+#endif
+
+            // put all the nodes in the section.
+            m_graphs[0].sections[0].pNodes = &m_pNodes[0];
+            m_graphs[0].sections[0].numNodes = m_numNodes;
+            m_graphs[0].order[0] = 0;
+        }
+
+        status = CameraInit(this, m_images[0].color);
+        if (status == STATUS_SUCCESS)
+        {
+            if (m_imgdbg_enabled && AllocateImageDebug(67))
+            {
+                /** Misc**/
+                ImageDebug_Init(&m_imgdbg[0],  &m_images[0],  m_imgdbg_path, "00_input");
+                ImageDebug_Init(&m_imgdbg[1],  &m_images[1],  m_imgdbg_path, "01_YUV444");
+                ImageDebug_Init(&m_imgdbg[2],  &m_images[2],  m_imgdbg_path, "02_resv1");
+                ImageDebug_Init(&m_imgdbg[3],  &m_images[3],  m_imgdbg_path, "03_resv1");
+                ImageDebug_Init(&m_imgdbg[4],  &m_images[4],  m_imgdbg_path, "04_resv1");
+                ImageDebug_Init(&m_imgdbg[5],  &m_images[5],  m_imgdbg_path, "05_resv1");
+                ImageDebug_Init(&m_imgdbg[6],  &m_images[6],  m_imgdbg_path, "06_resv1");
+                ImageDebug_Init(&m_imgdbg[7],  &m_images[7],  m_imgdbg_path, "07_resv1");
+                /** **/
+                ImageDebug_Init(&m_imgdbg[8],  &m_images[8],  m_imgdbg_path, "08_luma");
+                ImageDebug_Init(&m_imgdbg[9],  &m_images[9],  m_imgdbg_path, "09_RGBpl");
+                ImageDebug_Init(&m_imgdbg[10], &m_images[10], m_imgdbg_path, "10_IIRH");
+                ImageDebug_Init(&m_imgdbg[11], &m_images[12], m_imgdbg_path, "11_IIRV");
+                ImageDebug_Init(&m_imgdbg[12], &m_images[13], m_imgdbg_path, "12_YUV420");
+                /** Morph**/
+                ImageDebug_Init(&m_imgdbg[13], &m_images[14], m_imgdbg_path, "13_bitimgThresh");
+                ImageDebug_Init(&m_imgdbg[14], &m_images[15], m_imgdbg_path, "14_bitimgErodeX");
+                ImageDebug_Init(&m_imgdbg[15], &m_images[16], m_imgdbg_path, "15_bitimgErodeSq");
+                ImageDebug_Init(&m_imgdbg[16], &m_images[17], m_imgdbg_path, "16_bitimgErodeMsk");
+                ImageDebug_Init(&m_imgdbg[17], &m_images[18], m_imgdbg_path, "17_bitimgDilateX");
+                ImageDebug_Init(&m_imgdbg[18], &m_images[19], m_imgdbg_path, "18_bitimgDilateSq");
+                ImageDebug_Init(&m_imgdbg[19], &m_images[20], m_imgdbg_path, "19_bitimgDilateMsk");
+                /** NonMax**/
+                ImageDebug_Init(&m_imgdbg[20], &m_images[22], m_imgdbg_path, "20_16bitStride");
+                ImageDebug_Init(&m_imgdbg[21], &m_images[23], m_imgdbg_path, "21_nonma3");
+                ImageDebug_Init(&m_imgdbg[22], &m_images[24], m_imgdbg_path, "22_nonma5");
+                ImageDebug_Init(&m_imgdbg[23], &m_images[25], m_imgdbg_path, "23_nonma7");
+                ImageDebug_Init(&m_imgdbg[24], &m_images[26], m_imgdbg_path, "24_imgconv3");
+                ImageDebug_Init(&m_imgdbg[25], &m_images[27], m_imgdbg_path, "25_imgconv5");
+                ImageDebug_Init(&m_imgdbg[26], &m_images[28], m_imgdbg_path, "26_imgconv7");
+                /** Canny**/
+                ImageDebug_Init(&m_imgdbg[27], &m_images[32], m_imgdbg_path, "27_cannySmooth");
+                ImageDebug_Init(&m_imgdbg[28], &m_images[34], m_imgdbg_path, "28_canny2dgradX");
+                ImageDebug_Init(&m_imgdbg[29], &m_images[35], m_imgdbg_path, "29_canny2dgradY");
+                ImageDebug_Init(&m_imgdbg[30], &m_images[36], m_imgdbg_path, "30_canny2dmag");
+                ImageDebug_Init(&m_imgdbg[31], &m_images[37], m_imgdbg_path, "31_cannyNonma");
+                ImageDebug_Init(&m_imgdbg[32], &m_images[38], m_imgdbg_path, "32_dThresh");
+                ImageDebug_Init(&m_imgdbg[33], &m_images[39], m_imgdbg_path, "33_intImg");
+                ImageDebug_Init(&m_imgdbg[34], &m_images[40], m_imgdbg_path, "34_resv1");
+                /** New Requests**/
+                ImageDebug_Init(&m_imgdbg[35], &m_images[41], m_imgdbg_path, "35_fir7X1");
+                ImageDebug_Init(&m_imgdbg[36], &m_images[42], m_imgdbg_path, "36_fir1X7");
+                ImageDebug_Init(&m_imgdbg[37], &m_images[45], m_imgdbg_path, "37_resv1");
+                ImageDebug_Init(&m_imgdbg[38], &m_images[46], m_imgdbg_path, "38_resv1");
+                ImageDebug_Init(&m_imgdbg[39], &m_images[47], m_imgdbg_path, "39_refImg");
+                ImageDebug_Init(&m_imgdbg[40], &m_images[48], m_imgdbg_path, "40_SAD_8X8");
+                ImageDebug_Init(&m_imgdbg[41], &m_images[49], m_imgdbg_path, "41_SAD_16X16");
+                ImageDebug_Init(&m_imgdbg[42], &m_images[50], m_imgdbg_path, "42_SAD_3X3");
+                ImageDebug_Init(&m_imgdbg[43], &m_images[51], m_imgdbg_path, "43_SAD_5X5");
+                ImageDebug_Init(&m_imgdbg[44], &m_images[52], m_imgdbg_path, "44_SAD_7X7");
+                ImageDebug_Init(&m_imgdbg[45], &m_images[53], m_imgdbg_path, "45_RGBpl");
+                /** Imglib **/
+                ImageDebug_Init(&m_imgdbg[46], &m_images[54], m_imgdbg_path, "46_luma16");
+                ImageDebug_Init(&m_imgdbg[47], &m_images[55], m_imgdbg_path, "47_thr8_gtMAX");
+                ImageDebug_Init(&m_imgdbg[48], &m_images[56], m_imgdbg_path, "48_thr8_gtTHR");
+                ImageDebug_Init(&m_imgdbg[49], &m_images[57], m_imgdbg_path, "49_thr8_leMIN");
+                ImageDebug_Init(&m_imgdbg[50], &m_images[58], m_imgdbg_path, "50_thr8_leTHR");
+                ImageDebug_Init(&m_imgdbg[51], &m_images[59], m_imgdbg_path, "51_thr16_gtMAX");
+                ImageDebug_Init(&m_imgdbg[52], &m_images[60], m_imgdbg_path, "52_thr16_gtTHR");
+                ImageDebug_Init(&m_imgdbg[53], &m_images[61], m_imgdbg_path, "53_thr16_leMIN");
+                ImageDebug_Init(&m_imgdbg[54], &m_images[62], m_imgdbg_path, "54_thr16_leTHR");
+                ImageDebug_Init(&m_imgdbg[55], &m_images[63], m_imgdbg_path, "55_sobel8_3X3_s");
+                ImageDebug_Init(&m_imgdbg[56], &m_images[64], m_imgdbg_path, "56_sobel8_3X3");
+                ImageDebug_Init(&m_imgdbg[57], &m_images[65], m_imgdbg_path, "57_sobel8_5X5_s");
+                ImageDebug_Init(&m_imgdbg[58], &m_images[66], m_imgdbg_path, "58_sobel8_5X5");
+                ImageDebug_Init(&m_imgdbg[59], &m_images[67], m_imgdbg_path, "59_sobel8_7X7_s");
+                ImageDebug_Init(&m_imgdbg[60], &m_images[68], m_imgdbg_path, "60_sobel8_7X7");
+                ImageDebug_Init(&m_imgdbg[61], &m_images[69], m_imgdbg_path, "61_sobel16_3X3_s");
+                ImageDebug_Init(&m_imgdbg[62], &m_images[70], m_imgdbg_path, "62_sobel16_3X3");
+                ImageDebug_Init(&m_imgdbg[63], &m_images[71], m_imgdbg_path, "63_sobel16_5X5_s");
+                ImageDebug_Init(&m_imgdbg[64], &m_images[72], m_imgdbg_path, "64_sobel16_5X5");
+                ImageDebug_Init(&m_imgdbg[65], &m_images[74], m_imgdbg_path, "65_sobel16_7X7_s");
+                ImageDebug_Init(&m_imgdbg[66], &m_images[73], m_imgdbg_path, "66_sobel16_7X7");
+                ImageDebug_Open(m_imgdbg, m_numImgDbg);
+            }
+            // clear the performance
+            DVP_Perf_Clear(&m_graphs[0].totalperf);
+            DVP_PerformanceClear(m_hDVP, m_pNodes, m_numNodes);
+            DVP_PRINT(DVP_ZONE_ENGINE, "About to process %u frames!\n",m_numFrames);
+        }
+    }
+    else
+        status = STATUS_NO_RESOURCES;
+#else
+        status = STATUS_NOT_IMPLEMENTED;
+#endif
+    return status;
+}
+
+status_e TestVisionEngine::Test_CommonGraphSetup()
+{
+    status_e status = STATUS_SUCCESS;
+#if defined(DVP_USE_VRUN) || (defined(DVP_USE_VLIB) && defined(DVP_USE_IMGLIB))
     DVP_Image_t tmpImages[3];
     DVP_Bounds_t bound = {NULL, 0, 0};
     DVP_S08 maskOnes[3][3] = {{1,1,1},{1,1,1},{1,1,1}};
@@ -2278,12 +2944,12 @@ status_e TestVisionEngine::Test_SimcopGraphSetup()
                 /** Misc**/
                 ImageDebug_Init(&m_imgdbg[0],  &m_images[0],  m_imgdbg_path, "00_input");
                 ImageDebug_Init(&m_imgdbg[1],  &m_images[1],  m_imgdbg_path, "01_YUV444");
-                ImageDebug_Init(&m_imgdbg[2],  &m_images[2],  m_imgdbg_path, "02_sobelMag1");
-                ImageDebug_Init(&m_imgdbg[3],  &m_images[3],  m_imgdbg_path, "03_sobelMag2");
-                ImageDebug_Init(&m_imgdbg[4],  &m_images[4],  m_imgdbg_path, "04_sobelAngle");
-                ImageDebug_Init(&m_imgdbg[5],  &m_images[5],  m_imgdbg_path, "05_sobelAngleTrans");
-                ImageDebug_Init(&m_imgdbg[6],  &m_images[6],  m_imgdbg_path, "06_bitimgMultiNeigh");
-                ImageDebug_Init(&m_imgdbg[7],  &m_images[7],  m_imgdbg_path, "07_bitimgMultiTrans");
+                ImageDebug_Init(&m_imgdbg[2],  &m_images[2],  m_imgdbg_path, "02_resv1");
+                ImageDebug_Init(&m_imgdbg[3],  &m_images[3],  m_imgdbg_path, "03_resv1");
+                ImageDebug_Init(&m_imgdbg[4],  &m_images[4],  m_imgdbg_path, "04_resv1");
+                ImageDebug_Init(&m_imgdbg[5],  &m_images[5],  m_imgdbg_path, "05_resv1");
+                ImageDebug_Init(&m_imgdbg[6],  &m_images[6],  m_imgdbg_path, "06_resv1");
+                ImageDebug_Init(&m_imgdbg[7],  &m_images[7],  m_imgdbg_path, "07_resv1");
                 /** **/
                 ImageDebug_Init(&m_imgdbg[8],  &m_images[8],  m_imgdbg_path, "08_luma");
                 ImageDebug_Init(&m_imgdbg[9],  &m_images[9],  m_imgdbg_path, "09_RGBpl");
@@ -2314,18 +2980,18 @@ status_e TestVisionEngine::Test_SimcopGraphSetup()
                 ImageDebug_Init(&m_imgdbg[31], &m_images[37], m_imgdbg_path, "31_cannyNonma");
                 ImageDebug_Init(&m_imgdbg[32], &m_images[38], m_imgdbg_path, "32_dThresh");
                 ImageDebug_Init(&m_imgdbg[33], &m_images[39], m_imgdbg_path, "33_intImg");
-                ImageDebug_Init(&m_imgdbg[34], &m_images[40], m_imgdbg_path, "34_bitimgNeighThresh");
+                ImageDebug_Init(&m_imgdbg[34], &m_images[40], m_imgdbg_path, "34_resv1");
                 /** New Requests**/
                 ImageDebug_Init(&m_imgdbg[35], &m_images[41], m_imgdbg_path, "35_fir7X1");
                 ImageDebug_Init(&m_imgdbg[36], &m_images[42], m_imgdbg_path, "36_fir1X7");
-                ImageDebug_Init(&m_imgdbg[37], &m_images[45], m_imgdbg_path, "37_MIN");
-                ImageDebug_Init(&m_imgdbg[38], &m_images[46], m_imgdbg_path, "38_MAX");
-                ImageDebug_Init(&m_imgdbg[39], &m_images[47], m_imgdbg_path, "39_sobelMag1");
-                ImageDebug_Init(&m_imgdbg[40], &m_images[48], m_imgdbg_path, "40_sobelMag2");
-                ImageDebug_Init(&m_imgdbg[41], &m_images[49], m_imgdbg_path, "41_sobelAngle");
-                ImageDebug_Init(&m_imgdbg[42], &m_images[50], m_imgdbg_path, "42_sobelAngleTrans");
-                ImageDebug_Init(&m_imgdbg[43], &m_images[51], m_imgdbg_path, "43_hue");
-                ImageDebug_Init(&m_imgdbg[44], &m_images[52], m_imgdbg_path, "44_mask");
+                ImageDebug_Init(&m_imgdbg[37], &m_images[45], m_imgdbg_path, "37_resv1");
+                ImageDebug_Init(&m_imgdbg[38], &m_images[46], m_imgdbg_path, "38_resv1");
+                ImageDebug_Init(&m_imgdbg[39], &m_images[47], m_imgdbg_path, "39_resv1");
+                ImageDebug_Init(&m_imgdbg[40], &m_images[48], m_imgdbg_path, "40_resv1");
+                ImageDebug_Init(&m_imgdbg[41], &m_images[49], m_imgdbg_path, "41_resv1");
+                ImageDebug_Init(&m_imgdbg[42], &m_images[50], m_imgdbg_path, "42_resv1");
+                ImageDebug_Init(&m_imgdbg[43], &m_images[51], m_imgdbg_path, "43_resv1");
+                ImageDebug_Init(&m_imgdbg[44], &m_images[52], m_imgdbg_path, "44_resv1");
                 ImageDebug_Init(&m_imgdbg[45], &m_images[53], m_imgdbg_path, "45_RGBpl");
                 /** Imglib **/
                 ImageDebug_Init(&m_imgdbg[46], &m_images[54], m_imgdbg_path, "46_luma16");
@@ -2374,6 +3040,7 @@ status_e TestVisionEngine::Test_SimcopGraphSetup()
 #endif
     return status;
 }
+
 
 status_e TestVisionEngine::Test_HistGraphSetup()
 {

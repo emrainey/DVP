@@ -28,8 +28,8 @@ typedef enum _vision_engine_tests_e
     TI_GRAPH_TYPE_TEST2,    //4
     TI_GRAPH_TYPE_TEST3,    //5
     TI_GRAPH_TYPE_TEST4,    //6
-    TI_GRAPH_TYPE_TEST5,    //7  All Simcop (plus some support fns from A9 & DSP)
-    TI_GRAPH_TYPE_TEST6,    //8  Same as TEST5, with DSP affinity
+    TI_GRAPH_TYPE_TEST5,    //7  Common kernels
+    TI_GRAPH_TYPE_TEST6,    //8  VRUN
     TI_GRAPH_TYPE_TEST7,    //9  Same as TEST5, with A9 affinity
     TI_GRAPH_TYPE_TEST8,    //10 Tesla Only (histogram)
     TI_GRAPH_TYPE_TEST9,    //11 NV12 Camera Input
@@ -72,14 +72,13 @@ public:
     virtual status_e PostProcessImage(VisionCamFrame* pFrame, uint32_t numSections);
 
     // Different Graph Setups
-    status_e CalibrationGraph();
-    status_e CarGraph();
     status_e EdgeGraphSetup();
     status_e Test_MorphGraphSetup();
     status_e Test_NonmaxImgconvGraphSetup();
     status_e Test_CannyGraphSetup();
     status_e Test_MiscGraphSetup();
-    status_e Test_SimcopGraphSetup();
+    status_e Test_VrunGraphSetup();
+    status_e Test_CommonGraphSetup();
     status_e Test_HistGraphSetup();
     status_e Test_NV12GraphSetup();
     status_e Test_UYVYScalingGraph();
