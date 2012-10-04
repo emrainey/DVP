@@ -19,17 +19,6 @@ if [ "${MYDROID}" == "" ]; then
     exit
 fi
 
-if [ $# == 0 ]; then
-    echo "Usage: dvp_test.sh [setup|clean|full|library graph|simcop|dsp|cpu|report]"
-    echo "    setup:  Compile and load the test and required input files."
-    echo "    clean:  Clean the previous run output files from the target and local pc"
-    echo "    full:   By default, only QQVGA resolution is run, with 'full' enabled,"
-    echo "            then QVGA and VGA resolutions are run as well"
-    echo "    library graph: one of the following options: vrun|imglib|vlib|rvm|tismo"
-    echo "    report: Report the results of the binary comparisons at the output."
-    exit
-fi
-
 if [ -z "${TI_HW_ROOT}" ]; then
     export TI_HW_ROOT=hardware/ti
 fi

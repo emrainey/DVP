@@ -14,7 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Open the output log
+if [ $# == 0 ]; then
+    echo "Usage: dvp_test.sh [setup|clean|full|library graph|simcop|dsp|cpu|report]"
+    echo "    setup:  Compile and load the test and required input files."
+    echo "    clean:  Clean the previous run output files from the target and local pc"
+    echo "    full:   By default, only QQVGA resolution is run, with 'full' enabled,"
+    echo "            then QVGA and VGA resolutions are run as well"
+    echo "    library graph: one of the following options: vrun|imglib|vlib|rvm|tismo"
+    echo "    core:   One or more of the following options: simcop|dsp|cpu"
+    echo "    report: Report the results of the binary comparisons at the output."
+    exit
+fi
+
+# Open the output log
 echo "**********************************************************" > regression_results.txt
 echo "******************** TEST RESULTS ************************" >> regression_results.txt
 echo "**********************************************************" >> regression_results.txt
@@ -49,7 +61,7 @@ if [[ "$@" =~ "rvm" ]]; then
 fi
 
 
-
+# Redirect to the appropriate OS-based script
 if [ -n "${MYDROID}" ]; then
     . dvp_test_android.sh $*
 fi

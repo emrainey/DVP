@@ -22,44 +22,9 @@ function move_videos {
     done
 }
 
-if [ $# == 0 ]; then
-    echo "Usage: dvp_test.sh [setup|clean|full|library graph|simcop|dsp|cpu|report]"
-    echo "    setup:  Compile and load the test and required input files."
-    echo "    clean:  Clean the previous run output files from the target and local pc"
-    echo "    full:   By default, only QQVGA resolution is run, with 'full' enabled,"
-    echo "            then QVGA and VGA resolutions are run as well"
-    echo "    library graph: one of the following options: vrun|imglib|vlib|rvm|tismo"
-    echo "    report: Report the results of the binary comparisons at the output."
-    exit
-fi
-
 if [ -z "${DVP_ROOT}" ]; then
     echo "DVP_ROOT must be set"
     exit
-fi
-
-if [[ "$@" =~ "full" ]]; then
-    export DVP_TEST_FULL=1
-fi
-if [[ "$@" =~ "common" ]]; then
-    export DVP_TEST_GRAPH_NUM=7
-    export DVP_TEST_GRAPH_STR="common"
-fi
-if [[ "$@" =~ "vrun" ]]; then
-    export DVP_TEST_GRAPH_NUM=8
-    export DVP_TEST_GRAPH_STR="vrun"
-fi
-if [[ "$@" =~ "imglib" ]]; then
-    export DVP_TEST_GRAPH_NUM=16
-    export DVP_TEST_GRAPH_STR="imglib"
-fi
-if [[ "$@" =~ "vlib" ]]; then
-    export DVP_TEST_GRAPH_NUM=22
-    export DVP_TEST_GRAPH_STR="vlib"
-fi
-if [[ "$@" =~ "rvm" ]]; then
-    export DVP_TEST_GRAPH_NUM=1
-    export DVP_TEST_GRAPH_STR="rvm"
 fi
 
 pushd ${DVP_ROOT}
