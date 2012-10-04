@@ -94,12 +94,12 @@ void __dual_sqrtf_array(float *input, int32_t num, float *output);
 
 /*!
  * \brief A 3x1 image filter of fixed coefficients  {-0.25, 1.5, -0.25}
- * \param pSrc
- * \param width
- * \param height
- * \param pDst
- * \param srcStride
- * \param dstStride
+ * \param pSrc The source image pointer. The image must be in FOURCC_ARGB format.
+ * \param width The width of the image in pixels.
+ * \param height The height of the image in pixels.
+ * \param pDst The destination image pointer. The image will be in FOURCC_ARGB format.
+ * \param srcStride The stride of the source image in bytes.
+ * \param dstStride The stride of the destination image in bytes.
  * \ingroup group_imgfilter
  */
 void __3chan_tap_filter_image_3x1_fixed(uint8_t *pSrc,
@@ -110,14 +110,19 @@ void __3chan_tap_filter_image_3x1_fixed(uint8_t *pSrc,
                                          uint32_t dstStride);
 
 /*!
- * \brief A 3x1 image filter of computed fractional coefficients from 0<=k<=85.
- * \param pSrc
- * \param width
- * \param height
- * \param pDst
- * \param srcStride
- * \param dstStride
- * \param k
+ * \brief A 3x1 image filter of computed fractional coefficients.
+ * \detail Assumes input is a 3 pixel channel source like xRGB where the first byte is ignored.
+ * uses symmetric fractional coefficients = [-k/64, (64+2k)/64, -k/64] where
+ * 0 <= k <= 64. If a value of 11 is used this reduces to
+ * [-8/64, (64+16)/64, -8/64] => [-0.125, 1.25, -0.125]. The benefit of this
+ * reduced range is that the math never exceeds 16 bit representation.
+ * \param pSrc The source image pointer. The image must be in FOURCC_ARGB format.
+ * \param width The width of the image in pixels.
+ * \param height The height of the image in pixels.
+ * \param pDst The destination image pointer. The image will be in FOURCC_ARGB format.
+ * \param srcStride The stride of the source image in bytes.
+ * \param dstStride The stride of the destination image in bytes.
+ * \param k The coefficient to create the 3tap filter with. 0<=k<=64.
  * \ingroup group_imgfilter
  */
 void __3chan_tap_filter_image_3x1_fixed_k(uint8_t *pSrc,
@@ -130,13 +135,13 @@ void __3chan_tap_filter_image_3x1_fixed_k(uint8_t *pSrc,
 
 /*!
  * \brief A 3x1 image filter which can take arbitrary coefficients.
- * \param pSrc
- * \param width
- * \param height
- * \param pDst
- * \param srcStride
- * \param dstStride
- * \param coeff
+ * \param pSrc The source image pointer. The image must be in FOURCC_ARGB format.
+ * \param width The width of the image in pixels.
+ * \param height The height of the image in pixels.
+ * \param pDst The destination image pointer. The image will be in FOURCC_ARGB format.
+ * \param srcStride The stride of the source image in bytes.
+ * \param dstStride The stride of the destination image in bytes.
+ * \param coeff The 3 element coefficient matrix.
  * \ingroup group_imgfilter
  */
 void __3chan_tap_filter_image_3x1(uint8_t *pSrc,
