@@ -36,6 +36,7 @@ endif
 $(info Android Version $(TARGET_ANDROID_VERSION))
 
 DVP_TOP := $(call my-dir)
+DVP_ROOT := $(DVP_TOP)
 SOSAL_TOP := $(call my-dir)
 
 #COMMIT_ID := $(shell cd $(DVP_TOP) && git show | grep commit | awk '{print $$2}')
