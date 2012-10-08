@@ -51,7 +51,18 @@ anativewindow_t *anativewindow_create(const sp<ANativeWindow> &window)
 void anativewindow_free(anativewindow_t *anw)
 {
     status_t status;
+    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
 
+    for (uint32_t i = 0; i < anw->m_numBuffers; i++)
+    {
+        if (anw->m_native_buffers[i])
+        {
+            status = mapper.unlock((buffer_handle_t)anw->m_native_buffers[i]->handle);
+            ANW_ERROR(status,"UNLOCK");
+            status = anw->m_window->cancelBuffer(anw->m_window.get(), anw->m_native_buffers[i]);
+            ANW_ERROR(status,"CANCEL");
+        }
+    }
     // disconnect from the native window
     status = native_window_api_disconnect(anw->m_window.get(), NATIVE_WINDOW_API_CAMERA);
     ANW_ERROR(status,"DISCONNECT");
@@ -204,6 +215,7 @@ bool_e anativewindow_release(anativewindow_t *anw, void *handle)
                 ANW_ERROR(status,"UNLOCK");
                 status = anw->m_window->cancelBuffer(anw->m_window.get(), anw->m_native_buffers[i]);
                 ANW_ERROR(status,"CANCEL");
+                anw->m_native_buffers[i] = NULL;
                 return true_e;
             }
         }
