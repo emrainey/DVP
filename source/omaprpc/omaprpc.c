@@ -105,6 +105,20 @@ static void set_zone_mask()
 }
 #endif
 
+#if defined(OMAPRPC_USE_ION)
+static int list_hdl_compare(node_t *a, node_t *b)
+{
+    struct ion_fd_data *ad = (struct ion_fd_data *)a->data;
+    struct ion_fd_data *bd = (struct ion_fd_data *)b->data;
+    if (ad->handle > bd->handle)
+        return 1;
+    else if (ad->handle < bd->handle)
+        return -1;
+    else
+        return 0;
+}
+#endif
+
 /*! \brief A private function used to restart the remote endpoint when the conditions
  * dictate that this should be done.
  * \param [in] rpc The handle to the OMAPRPC context.
@@ -245,6 +259,7 @@ bool_e omaprpc_unregister(omaprpc_t *rpc, int memdevice, void *ptr, void **reser
     {
 #if defined(OMAPRPC_USE_ION)
         struct ion_fd_data data;
+        node_t node, *tmp;
         memdevice = memdevice; // removes warning
         ptr = ptr; // removes warning
         data.handle = *((struct ion_handle **)reserved);
@@ -254,6 +269,16 @@ bool_e omaprpc_unregister(omaprpc_t *rpc, int memdevice, void *ptr, void **reser
             OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Unregistered %p with OMAPRPC:%u\n", ptr, rpc->device);
         } else {
             OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to unregister %p with OMAPRPC:%u\n", ptr, rpc->device);
+        }
+
+        node.data = (value_t)&data;
+        tmp = list_remove_match(&rpc->fd_list, &node, list_hdl_compare);
+        if (tmp)
+        {
+            struct ion_fd_data *fd_hdl = (struct ion_fd_data *)tmp->data;
+            close(fd_hdl->fd);
+            free(fd_hdl);
+            free(tmp);
         }
 #endif
     }
@@ -266,29 +291,47 @@ bool_e omaprpc_register(omaprpc_t *rpc, int memdevice, void *ptr, void **reserve
     if (rpc && memdevice && ptr && reserved)
     {
 #if defined(OMAPRPC_USE_ION)
-        struct ion_fd_data data;
-        struct ion_handle *ih = *((struct ion_handle **)reserved);
-        int ret = ion_share(memdevice, ih, &data.fd);
-        if (ret < 0)
+        struct ion_fd_data *data = calloc(1, sizeof(struct ion_fd_data));
+        if (data)
         {
-            OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to share ION memory! (err=%d)\n", ret);
-        }
-        else
-        {
-            ret = ioctl(rpc->device, OMAPRPC_IOC_IONREGISTER, &data);
+            struct ion_handle *ih = *((struct ion_handle **)reserved);
+            int ret = ion_share(memdevice, ih, &data->fd);
             if (ret < 0)
             {
-                OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to register ION buffer with OMAPRPC:%u! (err=%d)\n", rpc->device, ret);
+                OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to share ION memory! (err=%d)\n", ret);
             }
             else
             {
-                OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Registered %p with OMAPRPC:%u!\n", data.handle, rpc->device);
-                if (data.handle != ih) {
-                    OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "ERROR: Handle from registration has changed! Was %p now %p\n", ih, data.handle);
+                ret = ioctl(rpc->device, OMAPRPC_IOC_IONREGISTER, data);
+                if (ret < 0)
+                {
+                    OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to register ION buffer with OMAPRPC:%u! (err=%d)\n", rpc->device, ret);
+                    close(data->fd);
                 }
-                *((struct ion_handle **)reserved) = data.handle;
-                registered = true_e;
+                else
+                {
+                    node_t *node = node_create((value_t)data);
+                    if (node)
+                    {
+                        list_append(&rpc->fd_list, node);
+                    }
+                    else
+                    {
+                        OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to remember shared fd. LEAK!\n");
+                    }
+
+                    OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Registered %p with OMAPRPC:%u!\n", data->handle, rpc->device);
+                    if (data->handle != ih) {
+                        OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "ERROR: Handle from registration has changed! Was %p now %p\n", ih, data->handle);
+                    }
+                    *((struct ion_handle **)reserved) = data->handle;
+                    registered = true_e;
+                }
             }
+        }
+        else
+        {
+            OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "ERROR: Failed to create association structure!\n");
         }
 #endif
     }

@@ -51,6 +51,9 @@ typedef struct _omaprpc_t {
     struct omaprpc_call_function_t *functions;  /*!< \brief The array of supported functions on the endpoint */
     omaprpc_endpoint_restarted_f restart;       /*!< \brief The function to call if the remote endpoint restarts unexpectedly. */
     void *cookie;                               /*!< \brief A user supplied context pointer to be passed to the restart callback */
+#if defined(OMAPRPC_USE_ION)
+    list_t fd_list;
+#endif
 } omaprpc_t;
 
 #ifdef __cplusplus
