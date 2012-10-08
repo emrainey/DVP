@@ -51,6 +51,7 @@
 typedef struct _ion_fd_hdl_t {
     struct ion_handle *handle;
     int fd;
+    size_t size;
 } ion_fd_hdl_t;
 #endif
 
@@ -375,6 +376,9 @@ bool_e allocator_free(allocator_t *alloc,
                 if (tmp)
                 {
                     ion_fd_hdl_t *fd_hdl = (ion_fd_hdl_t *)tmp->data;
+                    if (munmap(ptrs[p], fd_hdl->size) < 0) {
+                        SOSAL_PRINT(SOSAL_ZONE_ERROR, "%s: Failed to munmap ION hdl: "FMT_VALUE_T" ptr: %p\n", __FUNCTION__, hdls[p], ptrs[p]);
+                    }
                     close(fd_hdl->fd);
                     free(fd_hdl);
                     free(tmp);
@@ -646,6 +650,7 @@ bool_e allocator_calloc(allocator_t *alloc,
                             if (node)
                             {
                                 fd_hdl->handle = (struct ion_handle *)hdls[p];
+                                fd_hdl->size = rsize;
                                 list_append(&alloc->fd_list, node);
                             }
                             else
@@ -1011,6 +1016,7 @@ bool_e allocator_import(allocator_t *alloc,
                     else
                     {
                         fd_hdl->handle = (struct ion_handle *)hdls[p];
+                        fd_hdl->size = rsize;
                         node_t *node = node_create((value_t)fd_hdl);
                         if (node)
                             list_append(&alloc->fd_list, node);
