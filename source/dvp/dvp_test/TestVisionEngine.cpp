@@ -5707,13 +5707,13 @@ status_e TestVisionEngine::Test_Ldc()
             dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->pixpad = 6;
 
             // Rotation with no scaling
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[0] = 4096*(DVP_S16)cos(angleRadians);
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[1] = 4096*(DVP_S16)sin(angleRadians);
+            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[0] = (DVP_S16)(4096*cos(angleRadians));
+            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[1] = (DVP_S16)(4096*sin(angleRadians));
             dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[2] = 8*x0in-
                                                 8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[0]*x0out/4096-
                                                 8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[1]*y0out/4096;
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[3] = -4096*(DVP_S16)sin(angleRadians);
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[4] = 4096*(DVP_S16)cos(angleRadians);
+            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[3] = (DVP_S16)(-4096*sin(angleRadians));
+            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[4] = (DVP_S16)(4096*cos(angleRadians));
             dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[5] = 8*y0in-
                                                 8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[3]*x0out/4096-
                                                 8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[4]*y0out/4096;
@@ -5740,13 +5740,13 @@ status_e TestVisionEngine::Test_Ldc()
             dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->pixpad = 6;
 
             // Rotation with no scaling
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[0] = 4096*(DVP_S16)cos(angleRadians);
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[1] = 4096*(DVP_S16)sin(angleRadians);
+            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[0] = (DVP_S16)(4096*cos(angleRadians));
+            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[1] = (DVP_S16)(4096*sin(angleRadians));
             dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[2] = 8*x0in-
                                                 8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[0]*x0out/4096-
                                                 8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[1]*y0out/4096;
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[3] = -4096*(DVP_S16)sin(angleRadians);
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[4] = 4096*(DVP_S16)cos(angleRadians);
+            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[3] = (DVP_S16)(-4096*sin(angleRadians));
+            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[4] = (DVP_S16)(4096*cos(angleRadians));
             dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[5] = 8*y0in-
                                                 8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[3]*x0out/4096-
                                                 8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[4]*y0out/4096;
