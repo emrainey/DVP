@@ -511,7 +511,7 @@ status_e VisionEngine::CameraDeinit()
     {
         // let any camera callbacks finish
         DVP_PRINT(DVP_ZONE_ENGINE, "Stopping Camera\n");
-        VCAM_COMPLAIN_IF_FAILED(status,m_pCam->sendCommand(VCAM_CMD_PREVIEW_STOP));
+        VCAM_COMPLAIN_IF_FAILED(status,m_pCam->sendCommand(VCAM_CMD_PREVIEW_STOP, NULL, 0, VCAM_PORT_ALL));
         DVP_PRINT(DVP_ZONE_ENGINE, "Destroying Camera\n");
         VCAM_COMPLAIN_IF_FAILED(status,m_pCam->disablePreviewCbk(m_camcallback));
         VCAM_COMPLAIN_IF_FAILED(status,m_pCam->releaseBuffers());
