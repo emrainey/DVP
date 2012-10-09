@@ -17,7 +17,7 @@
 dvp_test.sh clean setup
 dvp_test.sh clean common simcop dsp cpu full report
 dvp_test.sh clean vrun simcop full report
-#dvp_test.sh clean ldc simcop full report
+dvp_test.sh clean ldc simcop full report
 #dvp_test.sh clean rvm dsp cpu full report
 #dvp_test.sh clean vlib dsp cpu full report
 #dvp_test.sh clean imglib dsp cpu full report

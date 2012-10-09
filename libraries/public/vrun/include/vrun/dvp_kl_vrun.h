@@ -457,7 +457,7 @@ enum {
 
     /*!
      * Programmable affine Transformation \n
-     * Configuration Structure: DVP_Affine_t
+     * Configuration Structure: DVP_Ldc_t
      * \param [input]  Image color type supported: FOURCC_UYVY or FOURCC_NV12
      * \param [output] Image color type supported: FOURCC_UYVY or FOURCC_NV12
      */
@@ -507,16 +507,32 @@ enum {
      * \param [refImg] Image color type supported: FOURCC_Y800
      */
     DVP_KN_VRUN_SAD_7x7,
+
+    /*!
+     * Programmable lens distortion correction \n
+     * Configuration Structure: DVP_Ldc_t
+     * \param [input]  Image color type supported: FOURCC_UYVY or FOURCC_NV12
+     * \param [output] Image color type supported: FOURCC_UYVY or FOURCC_NV12
+     */
+    DVP_KN_LDC_DISTORTION_CORRECTION,
+
+    /*!
+     * Programmable lens distortion correction and affine Transformation \n
+     * Configuration Structure: DVP_Ldc_t
+     * \param [input]  Image color type supported: FOURCC_UYVY or FOURCC_NV12
+     * \param [output] Image color type supported: FOURCC_UYVY or FOURCC_NV12
+     */
+    DVP_KN_LDC_DISTORTION_AND_AFFINE,
 };
 
 /*!
- * This structure is used with Affine Transformation Kernels.
+ * This structure is used with LDC Kernels.
  * \ingroup group_algo_vrun
  */
-typedef struct _dvp_affine_t {
+typedef struct _dvp_ldc_t {
     DVP_Image_t input;                     /*!<  Input image (FOURCC_UYVY or FOURCC_NV12) */
     DVP_Image_t output;                    /*!<  Output image (must be same format as input) */
-    DVP_S16     affine[6];                 /*!<  Affine parameters */
+    DVP_S16     affine[6];                 /*!<  Affine parameters (will be ignored for DVP_KN_LDC_DISTORTION_CORRECTION) */
     /* ======================================================================= */
     /* affine[6] -  Affine transform parameters
      *  --       --     --                   --     --     --       --       --
@@ -538,7 +554,19 @@ typedef struct _dvp_affine_t {
      */
     /* ======================================================================= */
     DVP_U16 pixpad;                        /*!<  Pixel padding parameter */
-} DVP_Affine_t;
+    DVP_U16 interpolationLuma;             /*!<  Interpolation mode (0->BICUBIC, 1->BILINEAR) */
+
+    /* All of the following parameters will be ignored for DVP_KN_LDC_AFFINE_TRANSFORM */
+    DVP_Buffer_t ldcLut;                   /*!<  LDC LUT (256 entries of size DVP_U16) */
+    DVP_U16      ldcLensCenterX;           /*!<  Lens Center, X coordinate  */
+    DVP_U16      ldcLensCenterY;           /*!<  Lens Center, Y coordinate */
+    DVP_U08      ldcKhl;                   /*!<  Horizontal left radial scaling factor */
+    DVP_U08      ldcKhr;                   /*!<  Horizontal right radial scaling factor */
+    DVP_U08      ldcKvu;                   /*!<  Vertical upper radial scaling factor */
+    DVP_U08      ldcKvl;                   /*!<  Vertical lower radial scaling factor */
+    DVP_U16      ldcRth;                   /*!<  Radius Threshold */
+    DVP_U08      ldcRightShiftBits;        /*!<  Downshift value */
+} DVP_Ldc_t;
 
 /*!
  * This structure is used with Harris Corner Kernel in VRUN.
@@ -591,5 +619,4 @@ typedef struct _dvp_nmsstep1_t {
 #endif // DVP_USE_VRUN
 
 #endif // _DVP_KL_VRUN_H_
-
 

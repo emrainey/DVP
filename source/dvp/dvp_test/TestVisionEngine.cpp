@@ -1716,7 +1716,6 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
 {
     status_e status = STATUS_SUCCESS;
 #if defined(DVP_USE_VRUN)
-    DVP_Image_t tmpImages[3];
     DVP_Bounds_t bound = {NULL, 0, 0};
     DVP_S08 maskOnes[3][3] = {{1,1,1},{1,1,1},{1,1,1}};
     DVP_S08 maskBlurNeg3x3[3][3] = {{-5, 20, 17} ,
@@ -5649,6 +5648,24 @@ status_e TestVisionEngine::Test_Ldc()
     DVP_Image_t tmpImages[1];
     DVP_MemType_e opType = DVP_MTYPE_DEFAULT;
 
+    DVP_U16 lut[256] = {
+        9300,9289,9278,9267,9256,9245,9234,9223,9212,9201,9190,9179,9168,9157,9146,9135,
+        9125,9114,9103,9092,9081,9070,9059,9048,9037,9026,9015,9004,8993,8982,8971,8960,
+        8950,8936,8922,8909,8895,8882,8868,8854,8841,8827,8814,8800,8786,8773,8759,8746,
+        8732,8718,8705,8691,8678,8664,8650,8637,8623,8610,8596,8582,8569,8555,8542,8528,
+        8515,8500,8486,8471,8457,8442,8428,8413,8399,8384,8370,8355,8341,8326,8312,8297,
+        8283,8269,8254,8240,8225,8211,8196,8182,8167,8153,8138,8124,8109,8095,8080,8066,
+        8052,8039,8026,8014,8001,7989,7976,7964,7951,7938,7926,7913,7901,7888,7876,7863,
+        7851,7838,7825,7813,7800,7788,7775,7763,7750,7737,7725,7712,7700,7687,7675,7662,
+        7650,7643,7636,7629,7622,7615,7608,7601,7595,7588,7581,7574,7567,7560,7553,7546,
+        7540,7533,7526,7519,7512,7505,7498,7491,7485,7478,7471,7464,7457,7450,7443,7436,
+        7430,7422,7414,7406,7398,7390,7383,7375,7367,7359,7351,7344,7336,7328,7320,7312,
+        7305,7297,7289,7281,7273,7265,7258,7250,7242,7234,7226,7219,7211,7203,7195,7187,
+        7180,7178,7176,7174,7172,7170,7168,7166,7165,7163,7161,7159,7157,7155,7153,7151,
+        7150,7148,7146,7144,7142,7140,7138,7136,7135,7133,7131,7129,7127,7125,7123,7121,
+        7120,7110,7100,7090,7080,7070,7060,7050,7040,7030,7020,7010,7000,6990,6980,6970,
+        6960,6950,6940,6930,6920,6910,6900,6890,6880,6870,6860,6850,6840,6830,6820, 0};
+
 #if defined(DVP_USE_ION) || defined(DVP_USE_TILER) || defined(DVP_USE_BO)
     opType = DVP_MTYPE_MPUCACHED_1DTILED;
 #endif
@@ -5656,41 +5673,61 @@ status_e TestVisionEngine::Test_Ldc()
 #if defined(DVP_USE_VRUN)
     if (m_hDVP)
     {
-        if (AllocateImageStructs(4))
+        if (AllocateImageStructs(8))
         {
             DVP_Image_Init(&m_images[0], m_width, m_height, FOURCC_UYVY);
-            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_UYVY); // To see full output of data, need larger output size
-            DVP_Image_Init(&m_images[2], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[2], m_width, m_height, FOURCC_UYVY); // To see full output of data, need larger output size
             DVP_Image_Init(&tmpImages[0], m_width, m_height, FOURCC_NV12);
             DVP_Image_Init(&m_images[3], m_width, m_height, FOURCC_NV12);
+            DVP_Image_Init(&m_images[4], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[5], m_width, m_height, FOURCC_NV12);
+            DVP_Image_Init(&m_images[6], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[7], m_width, m_height, FOURCC_NV12);
 
             if(inputImagePadding) {         // This is required to avoid trash data outside of input range.
                 m_images[0].bufHeight *= 2;
                 m_images[0].bufWidth *= 2;
-                m_images[2].bufHeight *= 2;
-                m_images[2].bufWidth *= 2;
+                m_images[1].bufHeight *= 2;
+                m_images[1].bufWidth *= 2;
             }
 
             if (!DVP_Image_Alloc(m_hDVP, &m_images[0], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[1], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[2], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[3], opType))
+                !DVP_Image_Alloc(m_hDVP, &m_images[3], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[4], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[5], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[6], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[7], opType))
                 return STATUS_NOT_ENOUGH_MEMORY;
 
             if(inputImagePadding) {         // Moving the image to middle of buffer
                 m_images[0].pData[0] += m_images[0].y_stride*m_images[0].height/2;
                 m_images[0].y_start = m_images[0].height/2;
-                m_images[2].pData[0] += m_images[2].y_stride*m_images[2].height/2;
-                m_images[2].y_start = m_images[2].height/2;
+                m_images[1].pData[0] += m_images[1].y_stride*m_images[1].height/2;
+                m_images[1].y_start = m_images[1].height/2;
             }
         }
         else
             return STATUS_NOT_ENOUGH_MEMORY;
 
-        if (AllocateNodes(3) && AllocateSections(&m_graphs[0], 1))
+        DVP_PRINT(DVP_ZONE_ALWAYS, "I am here\n");
+
+        if (AllocateBufferStructs(1))
+        {
+            DVP_Buffer_Init(&m_buffers[0], 2, 256);  // LDC lut
+            if (!DVP_Buffer_Alloc(m_hDVP, &m_buffers[0], DVP_MTYPE_DEFAULT))
+                return STATUS_NOT_ENOUGH_MEMORY;
+        }
+        else
+            return STATUS_NOT_ENOUGH_MEMORY;
+
+        if (AllocateNodes(7) && AllocateSections(&m_graphs[0], 1))
         {
             int angleDegrees = 15;
             double angleRadians = angleDegrees*M_PI/180;
+            unsigned short interpolateLuma = 0;
 
             // Center of rotation in input
             int x0in  = m_images[0].width/2;
@@ -5700,56 +5737,137 @@ status_e TestVisionEngine::Test_Ldc()
             int x0out = m_images[1].width/2;
             int y0out = m_images[1].height/2;
 
-            // YUV422 Image Rotation
-            m_pNodes[0].header.kernel = DVP_KN_LDC_AFFINE_TRANSFORM;
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->input  = m_images[0];
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->output = m_images[1];
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->pixpad = 6;
+            /* Luma Extraction */
+            m_pNodes[0].header.kernel = DVP_KN_XYXY_TO_Y800;
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = m_images[0];
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = m_images[1];
 
-            // Rotation with no scaling
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[0] = (DVP_S16)(4096*cos(angleRadians));
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[1] = (DVP_S16)(4096*sin(angleRadians));
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[2] = 8*x0in-
-                                                8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[0]*x0out/4096-
-                                                8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[1]*y0out/4096;
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[3] = (DVP_S16)(-4096*sin(angleRadians));
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[4] = (DVP_S16)(4096*cos(angleRadians));
-            dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[5] = 8*y0in-
-                                                8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[3]*x0out/4096-
-                                                8*dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[4]*y0out/4096;
+            /* YUV422 Image Rotation */
+            m_pNodes[1].header.kernel = DVP_KN_LDC_AFFINE_TRANSFORM;
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->input  = m_images[0];
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->output = m_images[2];
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->pixpad = 6;
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
+
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[0] = (DVP_S16)(4096*cos(angleRadians));
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[1] = (DVP_S16)(4096*sin(angleRadians));
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[2] = 8*x0in-
+                                                8*dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[0]*x0out/4096-
+                                                8*dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[1]*y0out/4096;
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[3] = (DVP_S16)(-4096*sin(angleRadians));
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[4] = (DVP_S16)(4096*cos(angleRadians));
+            dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[5] = 8*y0in-
+                                                8*dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[3]*x0out/4096-
+                                                8*dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[4]*y0out/4096;
 
             for(int i=0; i<6; i++)
-                DVP_PRINT(DVP_ZONE_ALWAYS, "Affine[%d]: %d\n", i, dvp_knode_to(&m_pNodes[0], DVP_Affine_t)->affine[i]);
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Affine[%d]: %d\n", i, dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[i]);
 
-            m_pNodes[1].header.kernel = DVP_KN_XYXY_TO_Y800;
-            dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->input = m_images[0];
-            dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->output = m_images[2];
-
-            tmpImages[0].pBuffer[0] = m_images[2].pBuffer[0];    // Using Luma from luma extract function
-            tmpImages[0].pData[0] = m_images[2].pData[0];
+            tmpImages[0].pBuffer[0] = m_images[1].pBuffer[0];    // Using Luma from luma extract function
+            tmpImages[0].pData[0] = m_images[1].pData[0];
             tmpImages[0].pBuffer[1] = m_images[3].pBuffer[1];
             tmpImages[0].pData[1] = m_images[3].pData[1];
             tmpImages[0].y_stride = m_images[2].y_stride;
             tmpImages[0].y_start  = m_images[2].y_start;
             tmpImages[0].memType  = m_images[3].memType;
 
-            // NV12 Image Rotation
+            /* NV12 Image Rotation */
             m_pNodes[2].header.kernel = DVP_KN_LDC_AFFINE_TRANSFORM;
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->input  = tmpImages[0];
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->output = m_images[3];
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->pixpad = 6;
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->input  = tmpImages[0];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->output = m_images[3];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->pixpad = 6;
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
 
-            // Rotation with no scaling
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[0] = (DVP_S16)(4096*cos(angleRadians));
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[1] = (DVP_S16)(4096*sin(angleRadians));
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[2] = 8*x0in-
-                                                8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[0]*x0out/4096-
-                                                8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[1]*y0out/4096;
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[3] = (DVP_S16)(-4096*sin(angleRadians));
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[4] = (DVP_S16)(4096*cos(angleRadians));
-            dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[5] = 8*y0in-
-                                                8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[3]*x0out/4096-
-                                                8*dvp_knode_to(&m_pNodes[2], DVP_Affine_t)->affine[4]*y0out/4096;
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->affine[0] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[0];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->affine[1] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[1];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->affine[2] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[2];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->affine[3] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[3];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->affine[4] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[4];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->affine[5] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[5];
+
+            memcpy(m_buffers[0].pData, lut, 256*2);
+
+            /* YUV422 Distortion Correction */
+            m_pNodes[3].header.kernel = DVP_KN_LDC_DISTORTION_CORRECTION;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->input  = m_images[0];
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->output = m_images[4];
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->pixpad = 3;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
+
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcLut  = m_buffers[0];
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcLensCenterX  = m_width/2;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcLensCenterY  = m_height/2;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcKhl  = 209;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcKhr  = 190;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcKvu  = 190;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcKvl  = 190;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcRth  = 0;
+            dvp_knode_to(&m_pNodes[3], DVP_Ldc_t)->ldcRightShiftBits  = 11;
+
+            /* NV12 Distortion Correction */
+            m_pNodes[4].header.kernel = DVP_KN_LDC_DISTORTION_CORRECTION;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->input  = tmpImages[0];
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->output = m_images[5];
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->pixpad = 3;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
+
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcLut  = m_buffers[0];
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcLensCenterX  = m_width/2;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcLensCenterY  = m_height/2;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcKhl  = 209;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcKhr  = 190;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcKvu  = 190;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcKvl  = 190;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcRth  = 0;
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->ldcRightShiftBits  = 11;
+
+            /* YUV422 Distortion Correction + Affine rotation */
+            m_pNodes[5].header.kernel = DVP_KN_LDC_DISTORTION_AND_AFFINE;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->input  = m_images[0];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->output = m_images[6];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->pixpad = 3;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
+
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->affine[0] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[0];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->affine[1] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[1];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->affine[2] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[2];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->affine[3] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[3];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->affine[4] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[4];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->affine[5] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[5];
+
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcLut  = m_buffers[0];
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcLensCenterX  = m_width/2;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcLensCenterY  = m_height/2;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcKhl  = 209;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcKhr  = 190;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcKvu  = 190;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcKvl  = 190;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcRth  = 0;
+            dvp_knode_to(&m_pNodes[5], DVP_Ldc_t)->ldcRightShiftBits  = 11;
+
+            /* NV12 Distortion Correction + Affine rotation */
+            m_pNodes[6].header.kernel = DVP_KN_LDC_DISTORTION_AND_AFFINE;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->input  = tmpImages[0];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->output = m_images[7];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->pixpad = 3;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
+
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->affine[0] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[0];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->affine[1] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[1];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->affine[2] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[2];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->affine[3] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[3];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->affine[4] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[4];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->affine[5] = dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[5];
+
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcLut  = m_buffers[0];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcLensCenterX  = m_width/2;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcLensCenterY  = m_height/2;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcKhl  = 209;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcKhr  = 190;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcKvu  = 190;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcKvl  = 190;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcRth  = 0;
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->ldcRightShiftBits  = 11;
 
             // put all the nodes in the section.
             m_graphs[0].sections[0].pNodes = &m_pNodes[0];
@@ -5759,12 +5877,16 @@ status_e TestVisionEngine::Test_Ldc()
         status = CameraInit(this, m_images[0].color);
         if (status == STATUS_SUCCESS)
         {
-            if (m_imgdbg_enabled && AllocateImageDebug(4))
+            if (m_imgdbg_enabled && AllocateImageDebug(8))
             {
                 ImageDebug_Init(&m_imgdbg[0], &m_images[0], m_imgdbg_path, "00_input");
-                ImageDebug_Init(&m_imgdbg[1], &m_images[1], m_imgdbg_path, "01_422_affine");
-                ImageDebug_Init(&m_imgdbg[2], &m_images[2], m_imgdbg_path, "02_luma");
+                ImageDebug_Init(&m_imgdbg[1], &m_images[1], m_imgdbg_path, "01_luma");
+                ImageDebug_Init(&m_imgdbg[2], &m_images[2], m_imgdbg_path, "02_422_affine");
                 ImageDebug_Init(&m_imgdbg[3], &m_images[3], m_imgdbg_path, "03_nv12_affine");
+                ImageDebug_Init(&m_imgdbg[4], &m_images[4], m_imgdbg_path, "04_422_dist");
+                ImageDebug_Init(&m_imgdbg[5], &m_images[5], m_imgdbg_path, "05_nv12_dist");
+                ImageDebug_Init(&m_imgdbg[6], &m_images[6], m_imgdbg_path, "06_422_dist_affine");
+                ImageDebug_Init(&m_imgdbg[7], &m_images[7], m_imgdbg_path, "07_nv12_dist_affine");
                 ImageDebug_Open(m_imgdbg, m_numImgDbg);
             }
             // clear the performance

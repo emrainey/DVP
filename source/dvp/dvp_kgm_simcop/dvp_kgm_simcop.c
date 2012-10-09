@@ -150,6 +150,8 @@ static DVP_CoreFunction_t remote_kernels[] = {
     {"SIMCOP Integral 8",      DVP_KN_VRUN_INTEGRAL_IMAGE_8,        0},
 
     {"LDC Affine Transfm",     DVP_KN_LDC_AFFINE_TRANSFORM,         0},
+    {"LDC Distortion Correct", DVP_KN_LDC_DISTORTION_CORRECTION,    0},
+    {"LDC Distortion & Aff",   DVP_KN_LDC_DISTORTION_AND_AFFINE,    0},
     {"SIMCOP SAD 8x8",         DVP_KN_VRUN_SAD_8x8,                 0},
     {"SIMCOP SAD 16x16",       DVP_KN_VRUN_SAD_16x16,               0},
     {"SIMCOP SAD 3x3",         DVP_KN_VRUN_SAD_3x3,                 0},
@@ -505,6 +507,18 @@ static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 s
                     DVP_PrintImage(DVP_ZONE_KGM, &pIO->output);
                     break;
                 }
+                case DVP_KN_LDC_DISTORTION_CORRECTION:
+                case DVP_KN_LDC_DISTORTION_AND_AFFINE:
+                {
+                    DVP_Ldc_t *pIO = dvp_knode_to(&pNodes[n], DVP_Ldc_t);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->input, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->output, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_buffer(rpc, DVP_GetSupportedRemoteCore(), &pIO->ldcLut, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+
+                    DVP_PrintImage(DVP_ZONE_KGM, &pIO->input);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pIO->output);
+                    break;
+                }
                 case DVP_KN_VRUN_HARRIS_CORNERS:
                 {
                     DVP_HarrisCorners_t *pIO = dvp_knode_to(&pNodes[n], DVP_HarrisCorners_t);
@@ -750,6 +764,15 @@ static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 s
                     DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->input, DVP_FALSE);
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->output, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_LDC_DISTORTION_CORRECTION:
+                case DVP_KN_LDC_DISTORTION_AND_AFFINE:
+                {
+                    DVP_Ldc_t *pIO = dvp_knode_to(&pNodes[n], DVP_Ldc_t);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->input, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->output, DVP_TRUE);
+                    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pIO->ldcLut, DVP_FALSE);
                     break;
                 }
                 case DVP_KN_VRUN_HARRIS_CORNERS:
