@@ -31,6 +31,8 @@ void threadpool_destroy(threadpool_t *pool)
             pool->workers[i].handle = 0;
             queue_destroy(pool->workers[i].queue);
             pool->workers[i].queue = NULL;
+            free(pool->workers[i].data);
+            pool->workers[i].data = NULL;
         }
         free(pool->workers);
         pool->workers = NULL;

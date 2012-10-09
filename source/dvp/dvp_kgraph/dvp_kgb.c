@@ -294,6 +294,7 @@ void DVP_KernelGraphBossDeinit(DVP_t *dvp)
             DVP_KernelGraphManagerUnload(&dvp->managers[i]);
         }
 
+        free(dvp->managers);
         mutex_deinit(&dvp->mgrLock);
         dvp_rpc_deinit(&dvp->rpc);
         dvp_mem_deinit(&dvp->mem);

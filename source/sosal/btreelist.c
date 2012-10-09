@@ -234,6 +234,7 @@ void btreelist_destroy(btreelist_t *btl)
         free(node);
         node = next;
     }
+    free(btl->array);
     memset(btl, 0, sizeof(btreelist_t));
     free(btl);
 }
