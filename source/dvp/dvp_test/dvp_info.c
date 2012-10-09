@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     debug_get_zone_mask("DVP_ZONE_MASK", &dvp_zone_mask);
 #endif
 
-    if (strcmp("kernel", argv[1]) == 0)
+    if (argc > 1 && strcmp("kernel", argv[1]) == 0)
     {
         if (argc == 3)
         {
