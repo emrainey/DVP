@@ -514,7 +514,7 @@ status_e VisionEngine::CameraDeinit()
         VCAM_COMPLAIN_IF_FAILED(status,m_pCam->sendCommand(VCAM_CMD_PREVIEW_STOP, NULL, 0, VCAM_PORT_ALL));
         DVP_PRINT(DVP_ZONE_ENGINE, "Destroying Camera\n");
         VCAM_COMPLAIN_IF_FAILED(status,m_pCam->disablePreviewCbk(m_camcallback));
-        VCAM_COMPLAIN_IF_FAILED(status,m_pCam->releaseBuffers());
+        VCAM_COMPLAIN_IF_FAILED(status,m_pCam->releaseBuffers(VCAM_PORT_ALL));
         VCAM_COMPLAIN_IF_FAILED(status,m_pCam->deinit());
         delete m_pCam;
         m_pCam = NULL;
@@ -707,7 +707,9 @@ bool VisionEngine::AllocateGraphs(uint32_t numGraphs)
 void VisionEngine::FreeGraphs()
 {
     free(m_graphs);
+    free(m_correlation);
     m_graphs = NULL;
+    m_correlation = NULL;
     m_numGraphs = 0;
 }
 
