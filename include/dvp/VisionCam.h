@@ -320,6 +320,8 @@ typedef enum _vcam_params_e
                                         @see VisionCamImagePyramidType.
                                    */
 
+    VCAM_PARAM_PREVIEW_TEXTURE,     /*!< When using VCAM from a User process on Android, this allows for using a surfaceTexture as a capture buffer. */
+
     VCAM_PARAM_MAX
 } VisionCamParam_e;
 
@@ -1080,6 +1082,7 @@ typedef enum _vision_cam_e {
     VISIONCAM_OMX,      /**< Live stream through OMX camera. */
     VISIONCAM_USB,      /**< Live stream through USB, for example with a web camera. */
     VISIONCAM_SOCKET,   /**< Live stream usinf TPC IP communication */
+    VISIONCAM_CS,       /**< Live stream using Android CameraService */
 
     VISIONCAM_MAX,
 } VisionCam_e;

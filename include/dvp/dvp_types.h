@@ -243,7 +243,7 @@ typedef enum _dvp_mtype_e {
 #if defined(DVP_USE_SHARED_T)
     DVP_MTYPE_MPUCACHED_VIRTUAL_SHARED,  /*!<  MPU has a cached virtual view of the memory, but the accelerators can not be utilized in this memory. The memory can be shared among processes.*/
 #endif
-    DVP_MTYPE_CAMERA_1DTILED,            /*!<  for tests. Virtual shared memory allocated by Camera Service */
+    DVP_MTYPE_CAMERA_1DTILED,            /*!<  Virtual shared memory allocated by Camera Service */
     DVP_MTYPE_MAX,
 
     /*! The default memory allocation type on the platform. */
@@ -1206,7 +1206,7 @@ typedef enum _dvp_knode_e {
      * \param [output] Image color type supported: FOURCC_RGBA
      */
     DVP_KN_INTEGRAL_IMAGE_8,
-    
+
     /*!
      * Applies a given gamma mapping to an image and produces it as a new output.
      * Configuration Structure: DVP_Transform_t

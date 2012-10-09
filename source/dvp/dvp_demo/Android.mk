@@ -21,7 +21,7 @@ LOCAL_ARM_MODE := arm
 LOCAL_CPPFLAGS := $(DVP_DEBUGGING) $(DVP_CPPFLAGS) $(DVP_FEATURES)
 LOCAL_SRC_FILES := dvp_demo.cpp
 LOCAL_C_INCLUDES := $(DVP_INCLUDES)
-LOCAL_SHARED_LIBRARIES:= libdl $(DVP_SYSLIBS) libOMX_Core libcutils libutils libdvp
+LOCAL_SHARED_LIBRARIES:= libdl $(DVP_SYSLIBS) libOMX_Core libcutils libutils libdvp libbinder libcamera_client libgui
 LOCAL_STATIC_LIBRARIES := libvcam libsosal libcthreaded
 LOCAL_MODULE := dvp_demo
 include $(BUILD_EXECUTABLE)

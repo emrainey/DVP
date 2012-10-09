@@ -23,6 +23,9 @@
 #if defined(VCAM_USE_USB) && defined(LINUX)
 #include <UVCVisionCam.h>
 #endif
+#if defined(DVP_USE_CAMERA_SERVICE)
+#include <CSVisionCam.h>
+#endif
 
 extern "C" VisionCam * VisionCamFactory(VisionCam_e type)
 {
@@ -42,6 +45,11 @@ extern "C" VisionCam * VisionCamFactory(VisionCam_e type)
 #if defined(VCAM_SUPPORTS_SOCKETCAM)
         case VISIONCAM_SOCKET:
             handle = new SocketVisionCam();
+            break;
+#endif
+#if defined(DVP_USE_CAMERA_SERVICE)
+        case VISIONCAM_CS:
+            handle = new CSVisionCam();
             break;
 #endif
 #if defined(DVP_USE_FS)

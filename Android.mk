@@ -230,6 +230,13 @@ endif # rpmsg
 # Android always has FS usage turned on
 DVP_FLAGS += -DDVP_USE_FS
 
+# in the future this may be conditionally defined.
+DVP_USES_CAMERA_SERVICE := false
+
+ifeq ($(DVP_USES_CAMERA_SERVICE),true)
+DVP_FLAGS += -DDVP_USE_CAMERA_SERVICE
+endif
+
 DVP_CFLAGS := $(DVP_FLAGS) $(LOCAL_FLAGS) -Werror-implicit-function-declaration
 DVP_CPPFLAGS := $(DVP_FLAGS) $(LOCAL_FLAGS) -fuse-cxa-atexit
 

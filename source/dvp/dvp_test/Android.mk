@@ -21,7 +21,7 @@ LOCAL_CPPFLAGS := $(DVP_DEBUGGING) $(DVP_CPPFLAGS) $(DVP_FEATURES)
 LOCAL_SRC_FILES := dvp_test.cpp TestVisionEngine.cpp
 LOCAL_C_INCLUDES += $(DVP_INCLUDES)
 LOCAL_STATIC_LIBRARIES := libVisionEngine
-LOCAL_SHARED_LIBRARIES := libdvp libcutils libOMX_Core libbinder libutils libgui libmedia libhardware libui
+LOCAL_SHARED_LIBRARIES := libdvp libcutils libOMX_Core libbinder libutils libgui libmedia libhardware libui libcamera_client
 LOCAL_MODULE := dvp_test
 include $(BUILD_EXECUTABLE)
 
