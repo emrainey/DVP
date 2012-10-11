@@ -50,6 +50,7 @@ typedef struct _omaprpc_t {
     uint32_t num_funcs;                         /*!< \brief The number of supported functions on the endpoint */
     struct omaprpc_call_function_t *functions;  /*!< \brief The array of supported functions on the endpoint */
     omaprpc_endpoint_restarted_f restart;       /*!< \brief The function to call if the remote endpoint restarts unexpectedly. */
+    bool_e in_restart;                          /*!< \brief This indicates that the driver is in a restart state */
     void *cookie;                               /*!< \brief A user supplied context pointer to be passed to the restart callback */
 #if defined(OMAPRPC_USE_ION)
     list_t fd_list;

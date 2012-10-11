@@ -27,7 +27,7 @@
 #endif
 #endif
 
-#define OMAPRPC_RESTART_CONDITION(ret) (ret == -ENXIO || ret == -ENOTCONN)
+#define OMAPRPC_RESTART_CONDITION(ret) (errno == ENXIO || errno == ENOTCONN)
 
 //******************************************************************************
 // TYPEDEFS, ENUMS and #DEFINES
@@ -142,7 +142,7 @@ static void omaprpc_restart(omaprpc_t *rpc)
 #if defined(POSIX)
             struct timespec req, rem;
             req.tv_sec = rem.tv_sec = rem.tv_nsec = 0;
-            req.tv_nsec = 100000; // 1 ms
+            req.tv_nsec = 500000; // 5 ms (remote core reboots can take on the order of 20ms)
 #endif
             // open a new handle
             rpc->device = open(rpc->dev_name, O_RDWR);
@@ -161,7 +161,6 @@ static void omaprpc_restart(omaprpc_t *rpc)
         if (rpc->device > 0)
         {
             OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Re-opened device %s\n", rpc->dev_name);
-            OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Connecting to Service %s\n", rpc->create.name);
             if (ioctl(rpc->device, OMAPRPC_IOC_CREATE, &rpc->create) < 0)
             {
                 OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to connect to remote service %s!\n", rpc->create.name);
@@ -169,12 +168,19 @@ static void omaprpc_restart(omaprpc_t *rpc)
             }
             else
             {
-                OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Opened %s for %s\n", rpc->dev_name, rpc->create.name);
-            }
+                OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Connected to Service %s\n", rpc->create.name);
 
-            // call the restart function
-            rpc->restart(rpc, rpc->cookie);
+                // call the restart function
+                rpc->in_restart = true_e;
+                OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Calling Restart Function!\n");
+                rpc->restart(rpc, rpc->cookie);
+                rpc->in_restart = false_e;
+            }
         }
+    }
+    else
+    {
+        OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Restart path not taken!\n");
     }
 }
 
@@ -187,11 +193,12 @@ void omaprpc_close(omaprpc_t **prpc)
     if (prpc)
     {
         omaprpc_t *rpc = *prpc;
-        if (rpc)
+        if (rpc && rpc->num_funcs > 0) // need to check something as non-zero.
         {
             ioctl(rpc->device, OMAPRPC_IOC_DESTROY, 0);
             close(rpc->device);
             OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Closed OMAPRPC Device!\n");
+            rpc->device = -1; // set to invalid handle
             free(rpc);
             *prpc = NULL;
         }
@@ -204,7 +211,7 @@ omaprpc_t *omaprpc_open(char *device_name, char *server_name, uint32_t numFuncs)
 
 #if defined(OMAPRPC_RUNTIME_DEBUG)
     set_zone_mask();
-    printf("zone_mask=%x, error=%x is error masked?=%x\n", zone_mask, SET_FLAG(OMAPRPC_ZONE_ERROR), (SET_FLAG(OMAPRPC_ZONE_ERROR) & zone_mask));
+    printf("OMAPRPC zone_mask=%x, error=%x is error masked?=%x\n", zone_mask, SET_FLAG(OMAPRPC_ZONE_ERROR), (SET_FLAG(OMAPRPC_ZONE_ERROR) & zone_mask));
 #endif
 
     OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Opening OMAPRPC Device %s server: %s\n", device_name, server_name);
@@ -341,50 +348,63 @@ bool_e omaprpc_register(omaprpc_t *rpc, int memdevice, void *ptr, void **reserve
 
 bool_e omaprpc_call(omaprpc_t *rpc, struct omaprpc_call_function_t *function, struct omaprpc_function_return_t *returned)
 {
-    clock_t start = clock(), end = 0, diff = 0;
+    clock_t start = 0, end = 0, diff = 0;
     bool_e passed = false_e;
     int ret = 0;
     if (rpc && function->func_index < rpc->num_funcs)
     {
         size_t func_len = sizeof(struct omaprpc_call_function_t) + (function->num_translations * sizeof(struct omaprpc_param_translation_t));
 
+        start = clock();
+        errno = 0; // reset errno before calling
         ret = write(rpc->device, function, func_len);
+        end = clock();
+        diff = end - start;
+        OMAPRPC_PRINT(OMAPRPC_ZONE_PERF, "Called function %u, (wrote to fd %d took %lu ticks CLOCKS_PER_SEC=%lu)\n", function->func_index, rpc->device, diff, (clock_t)CLOCKS_PER_SEC);
         if (ret < 0)
         {
             passed = false_e;
-            if (OMAPRPC_RESTART_CONDITION(ret))
+            OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to write to driver (ret=%d, errno=%d restart?=%s)\n", ret, errno, (rpc->in_restart==true_e?"yes":"no"));
+            if (OMAPRPC_RESTART_CONDITION(ret) && rpc->in_restart == false_e)
             {
+                OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Restart condition detected on write()!\n");
                 omaprpc_restart(rpc);
-                return passed;
-            }
-        }
-        else if (returned) // provided pointer to get return value...
-        {
-            int ret = 0;
-            end = clock();
-            diff = end-start;
-            OMAPRPC_PRINT(OMAPRPC_ZONE_PERF, "Called function %u, (write on fd %d took %lu ticks CLOCKS_PER_SEC=%lu) waiting on response...\n", function->func_index, rpc->device, diff, (clock_t)CLOCKS_PER_SEC);
-            start = clock();
-            ret = read(rpc->device, returned, sizeof(*returned));
-            if (ret >= 0)
-                passed = true_e;
-            end = clock();
-            diff = end - start;
-            OMAPRPC_PRINT(OMAPRPC_ZONE_PERF, "read on device fd %u took %lu ticks\n", rpc->device, diff);
-            if (passed) {
-                OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Function %u return value %d\n", returned->func_index, returned->status);
-            } else {
-                OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to read from driver (errno=%d)\n", errno);
-            }
-
-            if (OMAPRPC_RESTART_CONDITION(ret))
-            {
-                omaprpc_restart(rpc);
-                passed = false_e;
             }
         }
         else
-            passed = true_e;
+        {
+            passed = true_e; // this could get superceded by read();
+            if (returned) // provided pointer to get return value...
+            {
+                start = clock();
+                errno = 0; // reset errno before calling.
+                ret = read(rpc->device, returned, sizeof(*returned));
+                end = clock();
+                diff = end - start;
+                OMAPRPC_PRINT(OMAPRPC_ZONE_PERF, "Returning Function %u (read on device fd %u took %lu ticks)\n", returned->func_index, rpc->device, diff);
+                if (ret < 0)
+                {
+                    passed = false_e;
+                    OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Failed to read from driver (ret=%d errno=%d restart?=%s)\n", ret, errno, (rpc->in_restart==true_e?"yes":"no"));
+                    if (OMAPRPC_RESTART_CONDITION(ret) && rpc->in_restart == false_e)
+                    {
+                        OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Restart condition detected on read()!\n");
+                        omaprpc_restart(rpc);
+                    }
+                }
+                else
+                {
+                    passed = true_e;
+                    OMAPRPC_PRINT(OMAPRPC_ZONE_INFO, "Function %u return value %d\n", returned->func_index, returned->status);
+                }
+            }
+        }
     }
+    else
+    {
+        OMAPRPC_PRINT(OMAPRPC_ZONE_ERROR, "Invalid parameters to call! rpc=%p, fi=%u, #funcs=%u\n", rpc, function->func_index, rpc->num_funcs);
+    }
+    OMAPRPC_PRINT(OMAPRPC_ZONE_API, "omaprpc_call(%p, %p, %p) => %s (errno=%d)\n",
+            rpc, function, returned, (passed==true_e?"true":"false"), errno);
     return passed;
 }
