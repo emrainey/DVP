@@ -286,6 +286,7 @@ DVP_BOOL dvp_mem_free_import(DVP_Handle handle,
         return DVP_FALSE;
 
     if (dvp->rpc != NULL) {
+        DVP_VALUE dummyHdls[DVP_MAX_PLANES] = {0, 0, 0, 0};
         for (p = 0; p < nptrs; p++) {
             // calculate the size
             size = 1;
@@ -294,7 +295,7 @@ DVP_BOOL dvp_mem_free_import(DVP_Handle handle,
             }
 
             // dissociate the memory with the remote cores
-            dvp_rpc_dissociate(dvp->rpc, dvp->mem, ptrs[p], &hdls[p], size, mtype);
+            dvp_rpc_dissociate(dvp->rpc, dvp->mem, ptrs[p], &dummyHdls[p], size, mtype);
         }
     }
     if (true_e == allocator_free(dvp->mem, dvp_mem_type_xlate(mtype), nptrs, ptrs, hdls))

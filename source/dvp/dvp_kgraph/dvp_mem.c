@@ -207,13 +207,14 @@ DVP_BOOL DVP_Image_Free(DVP_Handle handle, DVP_Image_t *pImage)
         DVP_t *dvp = (DVP_t *)handle;
         DVP_U32 nptrs = pImage->planes;
         DVP_U32 p = 0;
+        DVP_VALUE hdls[DVP_MAX_PLANES] = {0, 0, 0, 0};
 #if defined(DVP_USE_TILER) || defined(GRALLOC_USE_MULTIPLE_POINTERS)
         if (pImage->color == FOURCC_NV12)
             nptrs = 1;
 #endif
         for (p = 0; p < nptrs; p++)
         {
-            ret = dvp_rpc_dissociate(dvp->rpc, dvp->mem, pImage->pBuffer[p], pImage->reserved, pImage->numBytes, pImage->memType);
+            ret = dvp_rpc_dissociate(dvp->rpc, dvp->mem, pImage->pBuffer[p], &hdls[p], pImage->numBytes, pImage->memType);
             if (ret == DVP_FALSE)
             {
                 DVP_PRINT(DVP_ZONE_ERROR, "Failed to dissociate Display buffer %p with remote core!\n", pImage->pBuffer[p]);
