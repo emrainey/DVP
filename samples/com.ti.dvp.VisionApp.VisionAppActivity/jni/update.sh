@@ -4,6 +4,8 @@ if [ -z "${DVP_ROOT}" ]; then exit; fi;
 VISIONAPP=com.ti.dvp.VisionApp.VisionAppActivity
 DEST=${DVP_ROOT}/samples/${VISIONAPP}/jni/lib/armeabi
 
+if [ ! -d "${DEST}" ]; then mkdir -p ${DEST}; fi
+
 SLIBS="imgfilter vcam sosal cthreaded"
 DLIBS="dvp dvp_kgm_cpu dvp_kgm_dsp dvp_kgm_simcop OMX_Core utils cutils binder camera_client ui gui"
 
