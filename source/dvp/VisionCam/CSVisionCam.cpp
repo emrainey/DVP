@@ -97,18 +97,17 @@ status_e CSVisionCam::useBuffers(DVP_Image_t *prvBufArr __attribute__((unused)),
                                  uint32_t numPrvBuf __attribute__((unused)),
                                  VisionCamPort_e port __attribute__((unused)))
 {
-    return STATUS_SUCCESS;
+    return STATUS_NOT_IMPLEMENTED;
 }
 
 status_e CSVisionCam::releaseBuffers(VisionCamPort_e port __attribute__((unused)))
 {
-    return STATUS_SUCCESS;
+    return STATUS_NOT_IMPLEMENTED;
 }
 
 status_e CSVisionCam::flushBuffers(VisionCamPort_e port __attribute__((unused)))
 {
-    // nothing to do?
-    return STATUS_SUCCESS;
+    return STATUS_NOT_IMPLEMENTED;
 }
 
 status_e CSVisionCam::sendCommand(VisionCamCmd_e cmdId, void *param, uint32_t size, VisionCamPort_e port __attribute__((unused)))
@@ -413,7 +412,7 @@ void CSVisionCam::dataCallbackTimestamp(int64_t timestampUs __attribute__((unuse
 {
 }
 
-status_e CSVisionCam::connect(int32_t cameraId)
+status_e CSVisionCam::connect(VisionCamSensorSelection cameraId)
 {
     DVP_PRINT(DVP_ZONE_CAM, "connect: camera %d\n", cameraId);
     if ((mConnected == true_e) && (mCamera != NULL))
