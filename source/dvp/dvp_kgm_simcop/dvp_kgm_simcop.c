@@ -875,7 +875,9 @@ MODULE_EXPORT DVP_BOOL DVP_KernelGraphManagerDeinit(void)
     semaphore_delete(&coreLock);
     DVP_PerformancePrint(&perf, KGM_TAG);
 
-#ifdef DVP_USE_IPC
+    //For now the deinit is done automatically when the omaprpc driver
+    //file descriptor is closed
+#if defined(DVP_USE_IPC) && !defined(DVP_USE_OMAPRPC)
     int status = 0;
     DVP_PRINT(DVP_ZONE_KGM, "Destroying "KGM_TAG"\n");
     RPC_COMPLAIN_IF_FAILED(status,dvp_rpc_remote_execute(rpc, core, DVP_KGM_REMOTE_DEINIT, NULL, 0, NULL));
