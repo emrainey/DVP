@@ -459,8 +459,18 @@ typedef struct _dvp_histogram_t {
     DVP_Buffer_t scratch;       /*!<  Internal scratch memory; Used in the ND histogram */
 } DVP_Histogram_t;
 
-/*! \brief This structure is used with Gamma kernels.
- * \ingroup group_gamma
+/*!
+ * \brief This structure is used with image pyramid kernels, where the output is a single buffer with images of varying resoltions.
+ * \ingroup group_kernels
+ */
+typedef struct _dvp_pyramid_t {
+    DVP_Image_t input;
+    DVP_Buffer_t output;
+} DVP_Pyramid_t;
+
+/*!
+ * \brief This structure is used with Gamma kernels.
+ * \ingroup group_kernels
  */
 typedef struct _dvp_gamma_t {
     DVP_Image_t input;

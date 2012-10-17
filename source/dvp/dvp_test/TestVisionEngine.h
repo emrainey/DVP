@@ -78,6 +78,7 @@ public:
     status_e Test_CannyGraphSetup();
     status_e Test_MiscGraphSetup();
     status_e Test_VrunGraphSetup();
+    status_e Test_VrunGraphSetup2();
     status_e Test_CommonGraphSetup();
     status_e Test_HistGraphSetup();
     status_e Test_NV12GraphSetup();

@@ -523,6 +523,86 @@ enum {
      * \param [output] Image color type supported: FOURCC_UYVY or FOURCC_NV12
      */
     DVP_KN_LDC_DISTORTION_AND_AFFINE,
+
+    /*!
+     * Image Pyramid of 4 levels (input is level 0, output contains 3 downsampled levels), each level is a 2x2 subsample of the last. (VLIB-API.Sec 22.0)  \n
+     * Configuration Structure: DVP_Pyramid_t
+     * \param [input]  Image color type supported: FOURCC_Y800
+     * \param [output] Output buffer size should be width*height*21/64 bytes (w*h/4 + w*h/16 + w*h/64)
+     */
+    DVP_KN_VRUN_IMAGE_PYRAMID_8,
+
+    /*!
+     * Gaussian 3x3 Image Convolution Pyramid (one 2x2 downsampled level) with a fixed operator (VLIB-API.Sec 24.0)  \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8,
+
+    /*!
+     * Gaussian 5x5 Image Convolution Pyramid (one 2x2 downsampled level) with a fixed operator (VLIB-API.Sec 24.0)  \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8,
+
+    /*!
+     * Gaussian 7x7 Image Convolution Pyramid (one 2x2 downsampled level) with a fixed operator (VLIB-API.Sec 24.0)  \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8,
+
+    /*!
+     * Gaussian 3x3 Image Convolution Pyramid (one 2x2 downsampled level) with only horizontal gradients (VLIB-API.Sec 26.0) \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8,
+
+    /*!
+     * Gaussian 5x5 Image Convolution Pyramid (one 2x2 downsampled level) with only horizontal gradients (VLIB-API.Sec 26.0) \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8,
+
+    /*!
+     * Gaussian 7x7 Image Convolution Pyramid (one 2x2 downsampled level) with only horizontal gradients (VLIB-API.Sec 26.0) \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8,
+
+    /*!
+     * Gaussian 3x3 Image Convolution Pyramid (one 2x2 downsampled level) with only vertical gradients (VLIB-API.Sec 26.0) \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8,
+
+    /*!
+     * Gaussian 5x5 Image Convolution Pyramid (one 2x2 downsampled level) with only vertical gradients (VLIB-API.Sec 26.0) \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8,
+
+    /*!
+     * Gaussian 7x7 Image Convolution Pyramid (one 2x2 downsampled level) with only vertical gradients (VLIB-API.Sec 26.0) \n
+     * Configuration Structure: DVP_Transform_t
+     * \param [input]   Image color type supported: FOURCC_Y800
+     * \param [output]  Image color type supported: FOURCC_Y800 (Output buffer size should be width/2, height/2)
+     */
+    DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8,
 };
 
 /*!

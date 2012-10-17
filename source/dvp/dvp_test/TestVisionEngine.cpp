@@ -144,8 +144,7 @@ status_e TestVisionEngine::GraphSetup()
                 status = Test_VrunGraphSetup();
                 break;
             case TI_GRAPH_TYPE_TEST7:
-                m_testcore = DVP_CORE_CPU;
-                status = Test_CommonGraphSetup();
+                status = Test_VrunGraphSetup2();
                 break;
             case TI_GRAPH_TYPE_TEST8:
                 status = Test_HistGraphSetup();
@@ -1086,19 +1085,52 @@ status_e TestVisionEngine::SVGA_RVM_GraphSetup()
             dvp_knode_to(&m_pNodes[6], DVP_Transform_t)->input = m_images[3];
             dvp_knode_to(&m_pNodes[6], DVP_Transform_t)->output = m_images[8];
 
-            m_pNodes[7].header.kernel = DVP_KN_VLIB_IMAGE_PYRAMID_8;
-            dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->input = m_images[3];
-            dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->output = m_images[9];
+            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            {
+                m_pNodes[7].header.kernel = DVP_KN_VLIB_IMAGE_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->input = m_images[3];
+                dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->output = m_images[9];
+            }
+#if defined(DVP_USE_VRUN)
+            else
+            {
+                m_pNodes[7].header.kernel = DVP_KN_VRUN_IMAGE_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->input = m_images[3];
+                dvp_knode_to(&m_pNodes[7], DVP_Pyramid_t)->output = m_images[9];
+            }
+#endif
 
-            m_pNodes[8].header.kernel = DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8;
-            dvp_knode_to(&m_pNodes[8], DVP_Gradient_t)->input = m_images[3];
-            dvp_knode_to(&m_pNodes[8], DVP_Gradient_t)->output = m_images[10];
-            dvp_knode_to(&m_pNodes[8], DVP_Gradient_t)->scratch = m_images[5];
+            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            {
+                m_pNodes[8].header.kernel = DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[8], DVP_Gradient_t)->input = m_images[3];
+                dvp_knode_to(&m_pNodes[8], DVP_Gradient_t)->output = m_images[10];
+                dvp_knode_to(&m_pNodes[8], DVP_Gradient_t)->scratch = m_images[5];
+            }
+#if defined(DVP_USE_VRUN)
+            else
+            {
+                m_pNodes[8].header.kernel = DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->input = m_images[3];
+                dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->output = m_images[10];
+            }
+#endif
 
-            m_pNodes[9].header.kernel = DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8;
-            dvp_knode_to(&m_pNodes[9], DVP_Gradient_t)->input = m_images[3];
-            dvp_knode_to(&m_pNodes[9], DVP_Gradient_t)->output = m_images[11];
-            dvp_knode_to(&m_pNodes[9], DVP_Gradient_t)->scratch = m_images[5];
+            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            {
+                m_pNodes[9].header.kernel = DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[9], DVP_Gradient_t)->input = m_images[3];
+                dvp_knode_to(&m_pNodes[9], DVP_Gradient_t)->output = m_images[11];
+                dvp_knode_to(&m_pNodes[9], DVP_Gradient_t)->scratch = m_images[5];
+            }
+#if defined(DVP_USE_VRUN)
+            else
+            {
+                m_pNodes[9].header.kernel = DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[9], DVP_Transform_t)->input = m_images[3];
+                dvp_knode_to(&m_pNodes[9], DVP_Transform_t)->output = m_images[11];
+            }
+#endif
 
             // put all the nodes in the section.
             m_graphs[0].sections[0].pNodes = &m_pNodes[0];
@@ -2370,6 +2402,164 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
     return status;
 }
 
+status_e TestVisionEngine::Test_VrunGraphSetup2() // The first VRUN test is too long
+{
+    status_e status = STATUS_SUCCESS;
+
+#if defined(DVP_USE_VRUN)
+    DVP_MemType_e opType = DVP_MTYPE_DEFAULT;
+    DVP_Image_t tmpImages[3];
+
+    if (m_hDVP)
+    {
+        if (AllocateImageStructs(14))
+        {
+            DVP_Image_Init(&m_images[0], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_Y800); // Luma
+            DVP_Image_Init(&m_images[2], m_width/2, m_height/2, FOURCC_Y800); // Gaussian 3x3
+            DVP_Image_Init(&m_images[3], m_width/2, m_height/2, FOURCC_Y800); // Gaussian 5x5
+            DVP_Image_Init(&m_images[4], m_width/2, m_height/2, FOURCC_Y800); // Gaussian 7x7
+            DVP_Image_Init(&m_images[5], m_width/2, m_height/2, FOURCC_Y800); // GradientH 3x3
+            DVP_Image_Init(&m_images[6], m_width/2, m_height/2, FOURCC_Y800); // GradientH 5x5
+            DVP_Image_Init(&m_images[7], m_width/2, m_height/2, FOURCC_Y800); // GradientH 7x7
+            DVP_Image_Init(&m_images[8], m_width/2, m_height/2, FOURCC_Y800); // GradientV 3x3
+            DVP_Image_Init(&m_images[9], m_width/2, m_height/2, FOURCC_Y800); // GradientV 5x5
+            DVP_Image_Init(&m_images[10], m_width/2, m_height/2, FOURCC_Y800); // GradientV 7x7
+            DVP_Image_Init(&m_images[11], m_width/2, m_height/2, FOURCC_Y800); // ImgPyr lv 1
+            DVP_Image_Init(&m_images[12], m_width/4, m_height/4, FOURCC_Y800); // ImgPyr lv 2
+            DVP_Image_Init(&m_images[13], m_width/8, m_height/8, FOURCC_Y800); // ImgPyr lv 3
+
+            if (!DVP_Image_Alloc(m_hDVP, &m_images[0], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[1], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[2], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[3], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[4], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[5], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[6], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[7], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[8], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[9], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[10], opType))
+                return STATUS_NOT_ENOUGH_MEMORY;
+        }
+        else
+            return STATUS_NOT_ENOUGH_MEMORY;
+
+        if (AllocateBufferStructs(1))
+        {
+            DVP_Buffer_Init(&m_buffers[0], 1, m_width*m_height*21/64);  // Img Pyramid
+            if (!DVP_Buffer_Alloc(m_hDVP, &m_buffers[0], DVP_MTYPE_DEFAULT))
+                return STATUS_NOT_ENOUGH_MEMORY;
+        }
+        else
+            return STATUS_NOT_ENOUGH_MEMORY;
+
+        if (AllocateNodes(11) && AllocateSections(&m_graphs[0], 1))
+        {
+            /* Luma Extraction */
+            m_pNodes[0].header.kernel = DVP_KN_XYXY_TO_Y800;
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = m_images[0];
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = m_images[1];
+
+            m_pNodes[1].header.kernel = DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->output = m_images[2];
+
+            m_pNodes[2].header.kernel = DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[2], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[2], DVP_Transform_t)->output = m_images[3];
+
+            m_pNodes[3].header.kernel = DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[3], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[3], DVP_Transform_t)->output = m_images[4];
+
+            m_pNodes[4].header.kernel = DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[4], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[4], DVP_Transform_t)->output = m_images[5];
+
+            m_pNodes[5].header.kernel = DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[5], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[5], DVP_Transform_t)->output = m_images[6];
+
+            m_pNodes[6].header.kernel = DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[6], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[6], DVP_Transform_t)->output = m_images[7];
+
+            m_pNodes[7].header.kernel = DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->output = m_images[8];
+
+            m_pNodes[8].header.kernel = DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->output = m_images[9];
+
+            m_pNodes[9].header.kernel = DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8;
+            dvp_knode_to(&m_pNodes[9], DVP_Transform_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[9], DVP_Transform_t)->output = m_images[10];
+
+            m_pNodes[10].header.kernel = DVP_KN_VRUN_IMAGE_PYRAMID_8;
+            if(m_width % 128)
+                m_pNodes[10].header.kernel = DVP_KN_NOOP;
+
+            dvp_knode_to(&m_pNodes[10], DVP_Pyramid_t)->input = m_images[1];
+            dvp_knode_to(&m_pNodes[10], DVP_Pyramid_t)->output = m_buffers[0];
+
+            m_images[11].pBuffer[0] = m_buffers[0].pData;
+            m_images[11].pData[0]   = m_buffers[0].pData;
+            m_images[11].y_stride   = m_width/2;
+            m_images[11].memType    = m_buffers[0].memType;
+
+            m_images[12].pBuffer[0] = m_buffers[0].pData;
+            m_images[12].pData[0]   = m_images[11].pData[0] + m_width*m_height/4;
+            m_images[12].y_stride   = m_width/4;
+            m_images[12].memType    = m_buffers[0].memType;
+
+            m_images[13].pBuffer[0] = m_buffers[0].pData;
+            m_images[13].pData[0]   = m_images[12].pData[0] + m_width*m_height/16;
+            m_images[13].y_stride   = m_width/8;
+            m_images[13].memType    = m_buffers[0].memType;
+
+            // put all the nodes in the section.
+            m_graphs[0].sections[0].pNodes = &m_pNodes[0];
+            m_graphs[0].sections[0].numNodes = m_numNodes;
+            m_graphs[0].order[0] = 0;
+        }
+        status = CameraInit(this, m_images[0].color);
+        if (status == STATUS_SUCCESS)
+        {
+            if (m_imgdbg_enabled && AllocateImageDebug(14))
+            {
+                ImageDebug_Init(&m_imgdbg[0], &m_images[0], m_imgdbg_path, "00_input");
+                ImageDebug_Init(&m_imgdbg[1], &m_images[1], m_imgdbg_path, "01_luma");
+                ImageDebug_Init(&m_imgdbg[2], &m_images[2], m_imgdbg_path, "02_gauss3X3");
+                ImageDebug_Init(&m_imgdbg[3], &m_images[3], m_imgdbg_path, "03_gauss5X5");
+                ImageDebug_Init(&m_imgdbg[4], &m_images[4], m_imgdbg_path, "04_gauss7X7");
+                ImageDebug_Init(&m_imgdbg[5], &m_images[5], m_imgdbg_path, "05_gradH3X3");
+                ImageDebug_Init(&m_imgdbg[6], &m_images[6], m_imgdbg_path, "06_gradH5X5");
+                ImageDebug_Init(&m_imgdbg[7], &m_images[7], m_imgdbg_path, "07_gradH7X7");
+                ImageDebug_Init(&m_imgdbg[8], &m_images[8], m_imgdbg_path, "08_gradV3X3");
+                ImageDebug_Init(&m_imgdbg[9], &m_images[9], m_imgdbg_path, "09_gradV5X5");
+                ImageDebug_Init(&m_imgdbg[10], &m_images[10], m_imgdbg_path, "10_gradV7X7");
+                ImageDebug_Init(&m_imgdbg[11], &m_images[11], m_imgdbg_path, "11_pryamidL1");
+                ImageDebug_Init(&m_imgdbg[12], &m_images[12], m_imgdbg_path, "12_pryamidL2");
+                ImageDebug_Init(&m_imgdbg[13], &m_images[13], m_imgdbg_path, "13_pryamidL3");
+                ImageDebug_Open(m_imgdbg, m_numImgDbg);
+            }
+            // clear the performance
+            DVP_Perf_Clear(&m_graphs[0].totalperf);
+            DVP_PerformanceClear(m_hDVP, m_pNodes, m_numNodes);
+            DVP_PRINT(DVP_ZONE_ENGINE, "About to process %u frames!\n",m_numFrames);
+        }
+    }
+    else
+        status = STATUS_NO_RESOURCES;
+#else
+        status = STATUS_NOT_IMPLEMENTED;
+#endif
+    return status;
+}
+
+
 status_e TestVisionEngine::Test_CommonGraphSetup()
 {
     status_e status = STATUS_SUCCESS;
@@ -3250,8 +3440,16 @@ status_e TestVisionEngine::Test_TeslaGraphSetup()
             DVP_Image_Init(&m_images[3], m_width, m_height, FOURCC_UYVY);
             DVP_Image_Init(&m_images[4], m_width, m_height, FOURCC_Y16); //HSLp (H 16bit)
             DVP_Image_Init(&m_images[5], m_width-4, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[6], (m_width-4)/2, (m_height-3)/2, FOURCC_Y800);
-            DVP_Image_Init(&m_images[7], (m_width-4)/2, (m_height-3)/2, FOURCC_Y800);
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore == DVP_CORE_CPU))
+            {
+                DVP_Image_Init(&m_images[6], (m_width-4)/2, (m_height-3)/2, FOURCC_Y800);
+                DVP_Image_Init(&m_images[7], (m_width-4)/2, (m_height-3)/2, FOURCC_Y800);
+            }
+            else
+            {
+                DVP_Image_Init(&m_images[6], (m_width)/2, (m_height)/2, FOURCC_Y800);
+                DVP_Image_Init(&m_images[7], (m_width)/2, (m_height)/2, FOURCC_Y800);
+            }
             DVP_Image_Init(&m_images[8], (m_width/8), (m_height/8)*21, FOURCC_Y800);
             DVP_Image_Init(&m_images[9], (m_width/8), (m_height/8)*21, FOURCC_Y16);
             DVP_Image_Init(&m_images[10], m_width, m_height, FOURCC_Y16);
@@ -3303,7 +3501,10 @@ status_e TestVisionEngine::Test_TeslaGraphSetup()
             DVP_Image_Init(&m_images[56], m_width, m_height, FOURCC_RGBA); //hyst thresh scratch
             DVP_Image_Init(&m_images[57], m_width, m_height+1, FOURCC_RGBA); //intimg16
             DVP_Image_Init(&m_images[58], m_width, m_height, FOURCC_Y800);//extractBack16
-            DVP_Image_Init(&m_images[59], (m_width-4)/2, (m_height-4)/2, FOURCC_Y800);
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore == DVP_CORE_CPU))
+                DVP_Image_Init(&m_images[59], (m_width-4)/2, (m_height-4)/2, FOURCC_Y800);
+            else
+                DVP_Image_Init(&m_images[59], (m_width)/2, (m_height)/2, FOURCC_Y800);
             DVP_Image_Init(&m_images[60], (m_width-4)/2, (m_height-4)/2, FOURCC_Y16);
             DVP_Image_Init(&m_images[61], m_width-4, 5, FOURCC_RGBA);//scratch buffer for gauss5x5
             DVP_Image_Init(&m_images[62], m_width/8, m_height, FOURCC_Y800); //pack
@@ -3699,22 +3900,56 @@ status_e TestVisionEngine::Test_TeslaGraphSetup()
             dvp_knode_to(&m_pNodes[5], DVP_Int2Pl_t)->output3 = m_images[52];
             m_pNodes[5].header.affinity = DVP_CORE_DSP;
 
-            m_pNodes[6].header.kernel = DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8;
-            dvp_knode_to(&m_pNodes[6], DVP_Gradient_t)->input = m_images[1];
-            dvp_knode_to(&m_pNodes[6], DVP_Gradient_t)->output = m_images[6];
-            dvp_knode_to(&m_pNodes[6], DVP_Gradient_t)->scratch = m_images[5];
-            m_pNodes[6].header.affinity = DVP_CORE_DSP;
-
-            m_pNodes[7].header.kernel = DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8;
-            dvp_knode_to(&m_pNodes[7], DVP_Gradient_t)->input = m_images[1];
-            dvp_knode_to(&m_pNodes[7], DVP_Gradient_t)->output = m_images[7];
-            dvp_knode_to(&m_pNodes[7], DVP_Gradient_t)->scratch = m_images[5];
-            m_pNodes[7].header.affinity = DVP_CORE_DSP;
-
-            m_pNodes[8].header.kernel = DVP_KN_VLIB_IMAGE_PYRAMID_8;
-            dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->input = m_images[1];
-            dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->output = m_images[8];
-            m_pNodes[8].header.affinity = DVP_CORE_DSP;
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore == DVP_CORE_CPU))
+            {
+                m_pNodes[6].header.kernel = DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[6], DVP_Gradient_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[6], DVP_Gradient_t)->output = m_images[6];
+                dvp_knode_to(&m_pNodes[6], DVP_Gradient_t)->scratch = m_images[5];
+                m_pNodes[6].header.affinity = DVP_CORE_DSP;
+            }
+#if defined(DVP_USE_VRUN)
+            else
+            {
+                m_pNodes[6].header.kernel = DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[6], DVP_Transform_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[6], DVP_Transform_t)->output = m_images[6];
+                m_pNodes[6].header.affinity = DVP_CORE_SIMCOP;
+            }
+#endif
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore == DVP_CORE_CPU))
+            {
+                m_pNodes[7].header.kernel = DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[7], DVP_Gradient_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[7], DVP_Gradient_t)->output = m_images[7];
+                dvp_knode_to(&m_pNodes[7], DVP_Gradient_t)->scratch = m_images[5];
+                m_pNodes[7].header.affinity = DVP_CORE_DSP;
+            }
+#if defined(DVP_USE_VRUN)
+            else
+            {
+                m_pNodes[7].header.kernel = DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[7], DVP_Transform_t)->output = m_images[7];
+                m_pNodes[7].header.affinity = DVP_CORE_SIMCOP;
+            }
+#endif
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore == DVP_CORE_CPU))
+            {
+                m_pNodes[8].header.kernel = DVP_KN_VLIB_IMAGE_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->output = m_images[8];
+                m_pNodes[8].header.affinity = DVP_CORE_DSP;
+            }
+#if defined(DVP_USE_VRUN)
+            else
+            {
+                m_pNodes[8].header.kernel = DVP_KN_VRUN_IMAGE_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[8], DVP_Transform_t)->output = m_images[8];
+                m_pNodes[8].header.affinity = DVP_CORE_SIMCOP;
+            }
+#endif
 
             m_pNodes[9].header.kernel = DVP_KN_VLIB_IMAGE_PYRAMID_16;
             dvp_knode_to(&m_pNodes[9], DVP_Transform_t)->input = m_images[2];
@@ -4051,11 +4286,21 @@ status_e TestVisionEngine::Test_TeslaGraphSetup()
             dvp_knode_to(&m_pNodes[46], DVP_Transform_t)->input = m_images[2];
             dvp_knode_to(&m_pNodes[46], DVP_Transform_t)->output = m_images[58];
 
-            m_pNodes[47].header.kernel = DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8;
-            dvp_knode_to(&m_pNodes[47], DVP_Gradient_t)->input = m_images[1];
-            dvp_knode_to(&m_pNodes[47], DVP_Gradient_t)->output = m_images[59];
-            dvp_knode_to(&m_pNodes[47], DVP_Gradient_t)->scratch = m_images[61];
-
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore == DVP_CORE_CPU))
+            {
+                m_pNodes[47].header.kernel = DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[47], DVP_Gradient_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[47], DVP_Gradient_t)->output = m_images[59];
+                dvp_knode_to(&m_pNodes[47], DVP_Gradient_t)->scratch = m_images[61];
+            }
+#if defined(DVP_USE_VRUN)
+            else
+            {
+                m_pNodes[47].header.kernel = DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8;
+                dvp_knode_to(&m_pNodes[47], DVP_Transform_t)->input = m_images[1];
+                dvp_knode_to(&m_pNodes[47], DVP_Transform_t)->output = m_images[59];
+            }
+#endif
             m_pNodes[48].header.kernel = DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16;
             dvp_knode_to(&m_pNodes[48], DVP_Gradient_t)->input = m_images[2];
             dvp_knode_to(&m_pNodes[48], DVP_Gradient_t)->output = m_images[60];
@@ -4120,8 +4365,8 @@ status_e TestVisionEngine::Test_TeslaGraphSetup()
                 ImageDebug_Init(&m_imgdbg[2], &m_images[2], m_imgdbg_path, "02_luma16bitX");
                 ImageDebug_Init(&m_imgdbg[3], &m_images[3], m_imgdbg_path, "02_luma16bitY");
                 ImageDebug_Init(&m_imgdbg[4], &m_images[4], m_imgdbg_path, "03_HSL_H");
-                ImageDebug_Init(&m_imgdbg[5], &m_images[6], m_imgdbg_path, "04_GradPyrH5");
-                ImageDebug_Init(&m_imgdbg[6], &m_images[7], m_imgdbg_path, "05_GradPyrV5");
+                ImageDebug_Init(&m_imgdbg[5], &m_images[6], m_imgdbg_path, "04_GradPyrV5");
+                ImageDebug_Init(&m_imgdbg[6], &m_images[7], m_imgdbg_path, "05_GradPyrH5");
                 ImageDebug_Init(&m_imgdbg[7], &m_images[8], m_imgdbg_path, "06_Pyramid8");
                 ImageDebug_Init(&m_imgdbg[8], &m_images[9], m_imgdbg_path, "07_Pyramid16");
                 ImageDebug_Init(&m_imgdbg[9], &m_images[10], m_imgdbg_path, "08_initMean16");
@@ -5426,7 +5671,7 @@ status_e TestVisionEngine::Test_Imglib()
             dvp_knode_to(&m_pNodes[47], DVP_Int2Pl_t)->output2 = m_images[54];
             dvp_knode_to(&m_pNodes[47], DVP_Int2Pl_t)->output3 = m_images[55];
 
-            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore ==DVP_CORE_CPU))
                 m_pNodes[48].header.kernel = DVP_KN_IMG_SAD_8x8;
 #if defined(DVP_USE_VRUN)
             else
@@ -5439,7 +5684,7 @@ status_e TestVisionEngine::Test_Imglib()
             dvp_knode_to(&m_pNodes[48], DVP_SAD_t)->refPitch = 8;
             dvp_knode_to(&m_pNodes[48], DVP_SAD_t)->refStartOffset = 0;
 
-            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore ==DVP_CORE_CPU))
                 m_pNodes[49].header.kernel = DVP_KN_IMG_SAD_16x16;
 #if defined(DVP_USE_VRUN)
             else
@@ -5452,7 +5697,7 @@ status_e TestVisionEngine::Test_Imglib()
             dvp_knode_to(&m_pNodes[49], DVP_SAD_t)->refPitch = 16;
             dvp_knode_to(&m_pNodes[49], DVP_SAD_t)->refStartOffset = 0;
 
-            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore ==DVP_CORE_CPU))
                 m_pNodes[50].header.kernel = DVP_KN_IMG_SAD_3x3;
 #if defined(DVP_USE_VRUN)
             else
@@ -5464,7 +5709,7 @@ status_e TestVisionEngine::Test_Imglib()
             dvp_knode_to(&m_pNodes[50], DVP_SAD_t)->refPitch = 3;
             dvp_knode_to(&m_pNodes[50], DVP_SAD_t)->refStartOffset = 0;
 
-            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore ==DVP_CORE_CPU))
                 m_pNodes[51].header.kernel = DVP_KN_IMG_SAD_5x5;
 #if defined(DVP_USE_VRUN)
             else
@@ -5476,7 +5721,7 @@ status_e TestVisionEngine::Test_Imglib()
             dvp_knode_to(&m_pNodes[51], DVP_SAD_t)->refPitch = 5;
             dvp_knode_to(&m_pNodes[51], DVP_SAD_t)->refStartOffset = 0;
 
-            if(m_testcore == DVP_CORE_DSP || DVP_CORE_CPU)
+            if((m_testcore == DVP_CORE_DSP) || (m_testcore ==DVP_CORE_CPU))
                 m_pNodes[52].header.kernel = DVP_KN_IMG_SAD_7x7;
 #if defined(DVP_USE_VRUN)
             else

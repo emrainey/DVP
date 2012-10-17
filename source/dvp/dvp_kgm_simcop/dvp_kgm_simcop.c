@@ -157,6 +157,18 @@ static DVP_CoreFunction_t remote_kernels[] = {
     {"SIMCOP SAD 3x3",         DVP_KN_VRUN_SAD_3x3,                 0},
     {"SIMCOP SAD 5x5",         DVP_KN_VRUN_SAD_5x5,                 0},
     {"SIMCOP SAD 7x7",         DVP_KN_VRUN_SAD_7x7,                 0},
+
+    {"SIMCOP ImgPyramid8",          DVP_KN_VRUN_IMAGE_PYRAMID_8,         0},
+    {"SIMCOP Gauss3x3Pyramid8",     DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8,  0},
+    {"SIMCOP Gauss5x5Pyramid8",     DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8,  0},
+    {"SIMCOP Gauss7x7Pyramid8",     DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8,  0},
+    {"SIMCOP GradientH3x3Pyramid8", DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8, 0},
+    {"SIMCOP GradientH5x5Pyramid8", DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8, 0},
+    {"SIMCOP GradientH7x7Pyramid8", DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8, 0},
+    {"SIMCOP GradientV3x3Pyramid8", DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8, 0},
+    {"SIMCOP GradientV5x5Pyramid8", DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8, 0},
+    {"SIMCOP GradientV7x7Pyramid8", DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8, 0},
+
 #endif
 #ifdef DVP_USE_DEI
     {"SIMCOP DEI INIT",        DVP_KN_DEI_DEINTERLACER_INIT,        0},
@@ -557,6 +569,28 @@ static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 s
                     dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->nmsStep1Dst, DVP_FALSE, (DVP_PTR)pTmp, &translations);
                     break;
                 }
+                case DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8:
+                case DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8:
+                case DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8:
+                {
+                    DVP_Transform_t *pGrad = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pGrad->input, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pGrad->output, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    break;
+                }
+                case DVP_KN_VRUN_IMAGE_PYRAMID_8:
+                {
+                    DVP_Pyramid_t *pPyramid = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pPyramid->input, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_buffer(rpc, DVP_GetSupportedRemoteCore(), &pPyramid->output, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    break;
+                }
 #endif
                 default:
                     return 0; // other kernels are not supported.
@@ -811,6 +845,28 @@ static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 s
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->nmsStep1X, DVP_FALSE);
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->nmsStep1Y, DVP_FALSE);
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->nmsStep1Dst, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8:
+                case DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8:
+                case DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8:
+                case DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8:
+                {
+                    DVP_Transform_t *pGrad = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pGrad->input, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pGrad->output, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_VRUN_IMAGE_PYRAMID_8:
+                {
+                    DVP_Pyramid_t *pPyramid = dvp_knode_to(&pNodes[n], DVP_Pyramid_t);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pPyramid->input, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pPyramid->output, DVP_TRUE);
                     break;
                 }
 #endif
@@ -1362,6 +1418,33 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 if (DVP_Image_Validate(&pIO->nmsStep1X, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->nmsStep1Y, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->nmsStep1Dst, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8:
+            case DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8:
+            case DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8:
+            case DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8:
+            case DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8:
+            case DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8:
+            case DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8:
+            case DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8:
+            case DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    pIO->input.width  > (pIO->output.width*2) ||
+                    pIO->input.height > (pIO->output.height*2))
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VRUN_IMAGE_PYRAMID_8:
+            {
+                DVP_Pyramid_t *pPyramid = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                if (DVP_Image_Validate(&pPyramid->input, 16, 16, 128, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pPyramid->output) == DVP_FALSE ||
+                    pPyramid->output.numBytes < pPyramid->input.width*pPyramid->input.height*21/64)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }

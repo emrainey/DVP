@@ -43,6 +43,10 @@ if [[ "$@" =~ "vrun" ]]; then
     export DVP_TEST_GRAPH_NUM=8
     export DVP_TEST_GRAPH_STR="vrun"
 fi
+if [[ "$@" =~ "vrun2" ]]; then
+    export DVP_TEST_GRAPH_NUM=9
+    export DVP_TEST_GRAPH_STR="vrun2"
+fi
 if [[ "$@" =~ "ldc" ]]; then
     export DVP_TEST_GRAPH_NUM=17
     export DVP_TEST_GRAPH_STR="ldc"
