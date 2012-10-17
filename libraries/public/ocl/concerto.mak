@@ -23,8 +23,12 @@ ifeq ($(TARGET_PLATFORM),PC)
         endif
     endif
 else ifeq ($(TARGET_PLATFORM),PANDA)
-    # panda has a package for OpenCL
-    CL_AVAILABLE := true
+    # panda has a package for OpenCL, check to see if it's been installed.
+    CL_AVAILABLE := false
+    CL_INC := $(realpath /usr/include/CL)
+    ifneq ($(CL_INC),)
+        CL_AVAILABLE := true
+    endif
 else
     # We don't support this anywhere else.
     CL_AVAILABLE := false
