@@ -19,6 +19,7 @@ package com.ti.dvp;
 import java.io.IOException;
 import java.util.List;
 
+import android.graphics.ImageFormat;
 //import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -27,6 +28,14 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+/**
+ * A class for receiving the output of the camera
+ * after the preview frames have been processed by a DVP graph.
+ * The graph is constructed and executed by a JNI library. Access
+ * to the camera is implemented either through Android's
+ * android.hardware.Camera class or some implementation of VisionCam.
+ *
+ */
 public class VisionEngine implements Camera.PreviewCallback {
     static {
         System.loadLibrary("dvp_jni"); // this will cause the JNI layer to be loaded and run-time linked.
@@ -51,17 +60,46 @@ public class VisionEngine implements Camera.PreviewCallback {
     private GraphCompletedThread m_thread;
     private GraphCompletedListener m_listener;
 
+    /**
+     * A dummy surface texture to tell the camera to use
+     * for preview because we can't start preview otherwise.
+     * The texture given to setPreviewSurfaceTexture
+     * is used to preview the output of DVP graph.
+     *
+     * @see #setPreviewSurfaceTexture(SurfaceTexture)
+     */
     private SurfaceTexture m_DummyTexture;
+
     private Surface m_DummySurface;
+
+    /**
+     * The surface the DVP uses to write the output of the DVP graph to.
+     */
     private Surface m_DisplaySurface;
 
+    /**
+     * If true tells the DVP JNI that it has to use its own camera
+     * for registering for preview frames.
+     */
     private boolean m_useNativeCamera;
 
-    
+    /**
+     * An interface for sending notifications to the users
+     * of this class that the execution of the DVP graph has
+     * completed.
+     *
+     */
     public interface GraphCompletedListener {
         public void onGraphCompleted();
     }
 
+    /**
+     * Class constructor.
+     *
+     * @param listener        the object that has to be notified of graph completion
+     * @param useNativeCamera if true an implementation of VisionCam, otherwise
+     *                        android.hardware.Camera is used.
+     */
     public VisionEngine(GraphCompletedListener listener, boolean useNativeCamera)
     {
         m_camera = null;
@@ -92,11 +130,19 @@ public class VisionEngine implements Camera.PreviewCallback {
         destroy();
     }
 
+    /**
+     * Implementation of Camera.PreviewCallback method
+     */
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.d(TAG, "Calling GraphUpdate!");
         GraphUpdate(data, m_width, m_height, m_format);
     }
 
+    /**
+     * Tells the camera where to render the preview to.
+     *
+     * @param surface the SurfaceHolder object used for the preview.
+     */
     public void setPreviewSurface(SurfaceHolder surface) {
         if (m_camera != null) {
             try {
@@ -105,6 +151,11 @@ public class VisionEngine implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * Tells the camera where to render the preview to.
+     *
+     * @param texture the SurfaceTexture object used for preview.
+     */
     public void setPreviewSurfaceTexture(SurfaceTexture texture) {
         if (m_camera != null) {
             try {
@@ -125,6 +176,12 @@ public class VisionEngine implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * Initializes Android's camera.
+     *
+     * @return true if camera has been initialized successfully or <br>
+     *         false if no camera is found or can't be initialized
+     */
     public boolean CameraInit()
     {
         Log.d(TAG, "CameraInit()");
@@ -242,12 +299,20 @@ public class VisionEngine implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * Creates an object of GraphCompletedThread
+     * and starts its thread.
+     */
     private void StartNotification() {
         m_thread = new GraphCompletedThread();
         m_thread.setRunning(true);
         m_thread.start();
     }
 
+    /**
+     * Stops the thread running in GraphCompletedThread
+     * object.
+     */
     private void StopNotification() {
         m_thread.setRunning(false);
         CancelWaitForComplete();
@@ -258,6 +323,12 @@ public class VisionEngine implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * This class runs a thread that waits the DVP
+     * graph to completion and notifies the subscribers
+     * to GraphCompletedListener.
+     *
+     */
     private class GraphCompletedThread extends Thread {
         private boolean m_running = false;
 
@@ -284,18 +355,132 @@ public class VisionEngine implements Camera.PreviewCallback {
 
     private int handle;
     private int graphEnum;
+
+    /**
+     * Initializes the JNI library and VisionCam if necessary.
+     * Postcondition of this method is {@link #FinalizeNative(int)}.
+     *
+     * @param  initCamera true if VisionCam should be used as source or <br>
+     *                    false if Android's camera is used
+     * @return an integer type handle to the created DVP graph
+     */
     private native int InitNative(boolean initCamera);
+
+    /**
+     * Releases resources held by the JNI library.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     * Precondition to this method is {@link #GraphTeardownNative(int, int)}.
+     *
+     * @param handle handle specifying the graph.
+     */
     private native void FinalizeNative(int handle);
+
+    /**
+     * Constructs a DVP graph.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     * Postcondition of this method is {@link #GraphTeardownNative(int, int)}.
+     *
+     * @param handle    handle identifying an already allocated graph.
+     * @param graphEnum what type of graph. Currently not used.
+     * @param width     width of the image buffers used by the graph.
+     * @param height    height of the image buffers used by the graph.
+     * @param format    image format of the preview buffers returned by camera.
+     *                  For example ImageFormat.YUY2 or ImageFormat.NV12.
+     * @return          true if the graph is constructed successfully or <br>
+     *                  false if errors are found.
+     */
     private native boolean GraphSetupNative(int handle, int graphEnum, int width, int height, int format);
+
+    /**
+     * Updates the graph with last received image. Used only with Android's camera.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     * Precondition to this method is {@link #GraphSetupNative(int, int, int, int, int)}.
+     *
+     * @param handle    handle identifying an already allocated graph.
+     * @param graphEnum what type of graph. Currently not used.
+     * @param buffer    the image preview data
+     * @param width     width of the preview image.
+     * @param height    height of the preview image.
+     * @param bpp       how many bytes per pixel has the buffer
+     * @return          true
+     */
     private native boolean GraphUpdateNative(int handle, int graphEnum, byte[] buffer, int width, int height, int bpp);
+
+    /**
+     * Deconstructs a DVP graph.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     * Precondition to this method is {@link #GraphSetupNative(int, int, int, int, int)}.
+     *
+     * @param handle    handle identifying an already allocated graph.
+     * @param graphEnum what type of graph. Currently not used.
+     * @return          true
+     */
     private native boolean GraphTeardownNative(int handle, int graphEnum);
+
+    /**
+     * Waits for notification from DVP that graph execution
+     * has been completed.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     */
     private native void WaitForCompleteNative();
+
+    /**
+     * Cancels a call to WaitForCompleteNative.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     */
     private native void CancelWaitForCompleteNative();
+
+    /**
+     * Prints VisionCam parameters.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     */
     private native void DumpCameraParametersNative();
+
+    /**
+     * Tells the VisionCam to connect to the specified camera.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     *
+     * @param id number of the camera to connect to
+     * @return   true if connection is established or <br>
+     *           false if unable to connect
+     */
     private native boolean SelectCameraNative(int id);
+
+    /**
+     * Tells the JNI library what Surface (ANativeWindow) to use
+     * to write the output of the DVP graph to.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     *
+     * @param surface a Surface object
+     * @param width   with of the surface window
+     * @param height  height of the surface window
+     * @param format  format of the surface window
+     * @return        true if preview is set successfully or <br>
+     *                false if not set.
+     */
     private native boolean SetPreviewSurfaceNative(Surface surface, int width, int height, int format);
+
+    /**
+     * Tells the VisionCam to start preview.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     * Precondition to this method is {@link #SelectCameraNative(int)}.
+     * Precondition to this method is {@link #SetPreviewSurfaceNative(Surface, int, int, int)}.
+     *
+     * @param surface a SurfaceTexture object required by CSVisionCam to start preview.
+     * @return        true if preview is started successfully or <br>
+     *                false if unable to start preview
+     */
     private native boolean StartPreviewNative(SurfaceTexture surface);
+
+    /**
+     * Tells the VisionCam to stop preview.
+     * Precondition to this method is {@link #InitNative(boolean)}.
+     *
+     * @return true if preview is stopped or <br>
+     *         false if errors are found
+     */
     private native boolean StopPreviewNative();
+
     private native byte[] GetBuffersNative(int buffID);
 }
 
