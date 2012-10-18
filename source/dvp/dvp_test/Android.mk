@@ -53,6 +53,21 @@ LOCAL_SHARED_LIBRARIES := libdvp libcutils libbinder
 LOCAL_MODULE := dvp_simple
 include $(BUILD_EXECUTABLE)
 
+
+# A test for Deinterlacer and color converter in DVP
+include $(CLEAR_VARS)
+LOCAL_MODULE_TAGS := tests
+LOCAL_PRELINK_MODULE := false
+LOCAL_ARM_MODE := arm
+LOCAL_CFLAGS := $(DVP_DEBUGGING) $(DVP_CFLAGS) $(DVP_FEATURES)
+LOCAL_SRC_FILES := dvp_dein.c
+LOCAL_C_INCLUDES += $(DVP_INCLUDES)
+LOCAL_STATIC_LIBRARIES :=
+LOCAL_SHARED_LIBRARIES := libdvp libcutils libbinder
+LOCAL_MODULE := dvp_dein
+include $(BUILD_EXECUTABLE)
+	
+
 # A query utility for DVP
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests

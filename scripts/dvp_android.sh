@@ -116,10 +116,10 @@ export TARGET_ROOT="${MYDROID}/${TI_HW_ROOT}/${TARGET_PROJ}"
 export TARGET_LIBS="dvp dvp_kgm_cpu dvp_kgm_simcop dvp_kgm_dsp"
 if [ "${TARGET_ANDROID}" == "ICS" ] || [ "${TARGET_ANDROID}" == "JB" ]; then
 export TARGET_SLIB="cthreaded VisionEngine pyuv sosal vcam v4l2 imgdbg sosal_shm omaprpc gfxdisp anw sf"
-export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_test dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test gfxd_test modload_test dvp_unittest"
+export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_dein dvp_test dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test gfxd_test modload_test dvp_unittest"
 else
 export TARGET_SLIB="cthreaded VisionEngine pyuv sosal vcam v4l2 imgdbg sosal_shm"
-export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_test dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test modload_test dvp_unittest"
+export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_dein dvp_test dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test modload_test dvp_unittest"
 fi
 export TARGET_BINS="shm_service"
 export TARGET_APPS=""
