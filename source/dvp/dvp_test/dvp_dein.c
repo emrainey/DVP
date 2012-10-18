@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2009-2011 Texas Instruments, Inc.
+ *  Copyright (C) 2009-2012 Texas Instruments, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     DVP_Image_t m_images[3];
     DVP_Handle hDVP = 0;
 
-    volatile DVP_U08 *virt_fld_in_current;
+    DVP_U08 *virt_fld_in_current;
 
     DVP_Image_t *fld_in_prev_ptr;
     DVP_Image_t *fld_in_current_ptr;
@@ -199,7 +199,8 @@ int main(int argc, char *argv[])
             {
                 DVP_PRINT(DVP_ZONE_INFO, "Init OK\n");
             }
-            if(dein->initialized  == 0)
+
+            if(dein->initialized == 0)
             {
                 DVP_PRINT(DVP_ZONE_ERROR,"De-interlacer Init failed\n");
                 DVP_KernelGraph_Deinit(hDVP);
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
             if (DVP_KernelGraph_Process (hDVP, &graph, NULL, DVP_KernelGraphCompleted) == dimof(sections))
             {
                 DVP_PrintPerformanceGraph(hDVP, &graph);
-                DVP_PRINT(DVP_ZONE_ENGINE, "Frame processed \n");
+                DVP_PRINT(DVP_ZONE_ENGINE, "Frame processed\n");
             }
 
             image_buffer_stride = m_images[2].y_stride;
@@ -226,7 +227,22 @@ int main(int argc, char *argv[])
                 fwrite(line_buf, sizeof(char), (TEST_IMG_INPUT_X+16)*2, fp_outp);
             }
 
+            // Destroy the Nodes
+            DVP_KernelNode_Free(hDVP, pNodes, numNodes);
+
         }//end of if (pNodes)
+
+        // Free memory
+        for (i = 0; i < dimof(m_images); i++)
+        {
+            DVP_Image_Free(hDVP, &m_images[i]);
+            DVP_Image_Deinit(&m_images[i]);
+        }
+        for (i = 0; i < dimof(m_buffers); i++)
+        {
+            DVP_Buffer_Free(hDVP, &m_buffers[i]);
+            DVP_Buffer_Deinit(&m_buffers[i]);
+        }
 
         DVP_KernelGraph_Deinit(hDVP);
 
