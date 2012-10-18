@@ -1335,10 +1335,11 @@ typedef struct _dvp_kernelgraphsection_t {
  * \ingroup group_graphs
  */
 typedef struct _dvp_kernelgraph_t {
-    DVP_KernelGraphSection_t *sections;     /*!<  The array of sections of the graph */
-    DVP_U32                   numSections;     /*!<  This is the length of sections, and order, individually. */
-    DVP_U32                  *order;     /*!<  The array of order declarations */
-    DVP_Perf_t                totalperf;     /*!<  This is the total performance of the entire graph */
+    DVP_KernelGraphSection_t *sections;     /*!< The array of sections of the graph */
+    DVP_U32                   numSections;  /*!< This is the length of sections, and order, individually. */
+    DVP_U32                  *order;        /*!< The array of order declarations */
+    DVP_Perf_t                totalperf;    /*!< This is the total performance of the entire graph */
+    DVP_BOOL                  verified;     /*!< This indicates that the graph has been verified. */
 } DVP_KernelGraph_t;
 
 /*! \brief The maximum kernel name length.

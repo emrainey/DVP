@@ -77,7 +77,7 @@ static bool_e dvp_kernelgraph_worker(threadpool_worker_t *worker)
     DVP_U32 numNodesExecuted = 0;
     DVP_PRINT(DVP_ZONE_KGAPI, "DVP KGW %u Thread "THREAD_FMT" Running!\n", worker->index, worker->handle);
 
-    numNodesExecuted = DVP_KernelGraphBoss(collector->dvp,collector->section, DVP_FALSE);
+    numNodesExecuted = DVP_KernelGraphBoss_Process(collector->dvp,collector->section, DVP_FALSE);
 
     // make the callback thread-safe
     semaphore_wait(&kgw->sem);
@@ -189,6 +189,40 @@ void DVP_MemImporter_Free(DVP_Handle handle)
     }
 }
 
+DVP_BOOL DVP_KernelGraph_Verify(DVP_Handle handle, DVP_KernelGraph_t *pGraph)
+{
+    DVP_t *dvp = (DVP_t *)handle;
+    if (dvp && pGraph)
+    {
+        // make sure to "lock the graph", if we can't then we're tearing down.
+        if (dvp_graph_lock(&dvp->graphLock) == DVP_FALSE)
+            return DVP_FALSE;
+
+        if (pGraph->verified == DVP_FALSE)
+        {
+            DVP_U32 s = 0;
+            DVP_U32 numNodesVerified = 0;
+            DVP_U32 numNodes = 0;
+            for (s = 0; s < pGraph->numSections; s++)
+            {
+                numNodes += pGraph->sections[s].numNodes;
+                numNodesVerified += DVP_KernelGraphBoss_Verify(dvp, &pGraph->sections[s]);
+            }
+
+            if (numNodes == numNodesVerified)
+                pGraph->verified = DVP_TRUE;
+
+            DVP_PRINT(DVP_ZONE_KGAPI, "%u nodes of %u passed verification!\n", numNodesVerified, numNodes);
+        }
+
+        dvp_graph_unlock(&dvp->graphLock);
+
+        return pGraph->verified;
+    }
+    else
+        return DVP_FALSE;
+}
+
 DVP_U32 DVP_KernelGraph_Process(DVP_Handle handle, DVP_KernelGraph_t *pGraph, void *cookie, DVP_SectionComplete_f callback)
 {
     DVP_t *dvp = (DVP_t *)handle;
@@ -201,6 +235,14 @@ DVP_U32 DVP_KernelGraph_Process(DVP_Handle handle, DVP_KernelGraph_t *pGraph, vo
     // make sure to "lock the graph", if we can't then we're tearing down.
     if (dvp_graph_lock(&dvp->graphLock) == DVP_FALSE)
         return 0;
+
+    if (pGraph->verified == DVP_FALSE)
+    {
+        dvp_graph_unlock(&dvp->graphLock);
+        if (DVP_KernelGraph_Verify(handle, pGraph) == DVP_FALSE)
+            return 0;
+        dvp_graph_lock(&dvp->graphLock);
+    }
 
     DVP_PerformanceStart(&(pGraph->totalperf));
 
@@ -272,7 +314,7 @@ DVP_U32 DVP_KernelGraph_Process(DVP_Handle handle, DVP_KernelGraph_t *pGraph, vo
 
             // force inline or synchronous execution.
             // This thread will do the local computation or call remote cores.
-            numNodesExecuted = DVP_KernelGraphBoss(dvp,ppSections[0], DVP_TRUE);
+            numNodesExecuted = DVP_KernelGraphBoss_Process(dvp,ppSections[0], DVP_TRUE);
             if (callback)
             {
                 // find the section index

@@ -36,8 +36,10 @@ DVP_U32 DVP_KernelGraphManagerLoad(DVP_GraphManager_t *pManager)
         pManager->calls.getLoad     = (DVP_GetMaximumLoad_f)         module_symbol(pManager->handle, "DVP_GetMaximumLoad");
         pManager->calls.deinit      = (DVP_GraphManagerDeinit_f)     module_symbol(pManager->handle, "DVP_KernelGraphManagerDeinit");
         pManager->calls.restart     = (DVP_GraphManagerRestart_f)    module_symbol(pManager->handle, "DVP_KernelGraphManagerRestart");
+        pManager->calls.verify      = (DVP_KernelGraphManagerVerify_f)module_symbol(pManager->handle, "DVP_KernelGraphManagerVerify");
         if (pManager->calls.init == NULL ||
             pManager->calls.manager == NULL ||
+            pManager->calls.verify == NULL ||
             pManager->calls.getKernels == NULL ||
             pManager->calls.getLocal == NULL ||
             pManager->calls.getRemote == NULL ||

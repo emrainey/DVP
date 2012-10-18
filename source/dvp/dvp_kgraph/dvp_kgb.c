@@ -609,6 +609,7 @@ DVP_U32 DVP_ConfigureNodes(DVP_t *dvp, DVP_KernelGraphSection_t *section, DVP_BO
             if (triedMgrs >= dvp->numMgrs)
             {
                 DVP_PRINT(DVP_ZONE_ERROR, "ERROR! No core supports kernel %u!\n", pNodes[n].header.kernel);
+                pNodes[n].header.error = DVP_ERROR_NOT_IMPLEMENTED;
                 faults++;
                 break;
             }
@@ -627,7 +628,54 @@ DVP_U32 DVP_ConfigureNodes(DVP_t *dvp, DVP_KernelGraphSection_t *section, DVP_BO
     return faults;
 }
 
-DVP_U32 DVP_KernelGraphBoss(DVP_t *dvp, DVP_KernelGraphSection_t *section, DVP_BOOL sync)
+DVP_U32 DVP_KernelGraphBoss_Verify(DVP_t *dvp,  DVP_KernelGraphSection_t *section)
+{
+    DVP_U32 n = 0;
+    DVP_U32 faults = 0;
+    DVP_U32 verified = 0;
+    DVP_KernelNode_t *pNodes = section->pNodes;
+    DVP_U32 numNodes = section->numNodes;
+
+    DVP_PRINT(DVP_ZONE_KGB, "Verifing Section %p with %u nodes\n", section, section->numNodes);
+
+    // configure the nodes
+    faults = DVP_ConfigureNodes(dvp, section, DVP_FALSE);
+
+    if (faults == 0)
+    {
+        DVP_PRINT(DVP_ZONE_KGB, "KGB: Verifying Graph!\n");
+        for (n = 0; n < numNodes; /* no inc */)
+        {
+            DVP_U32 targetMgrIndex = pNodes[n].header.mgrIndex;
+            DVP_U32 subgraphNumNodes = 1; // at least one node is on this core...
+            DVP_U32 numNodeVerified = 0;
+#ifdef DVP_OPTIMIZED_GRAPHS
+            DVP_U32 i;
+            // determine how many nodes forward of the current node are on the same core...
+            for (i = n+1; i < numNodes; i++)
+            {
+                if (pNodes[i].header.mgrIndex == targetMgrIndex)
+                    subgraphNumNodes++;
+                else
+                    break;
+            }
+#endif
+            DVP_PRINT(DVP_ZONE_KGB, "KGB: Verifying %u nodes on %s core\n", subgraphNumNodes, dvp->managers[pNodes[n].header.mgrIndex].name);
+            // CALL VERIFY
+            numNodeVerified = dvp->managers[pNodes[n].header.mgrIndex].calls.verify(pNodes,n,subgraphNumNodes);
+            verified += numNodeVerified;
+            n += subgraphNumNodes;
+        }
+        return verified;
+    }
+    else
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Section %p has faults in affinity or kernel availability\n", section);
+        return 0;
+    }
+}
+
+DVP_U32 DVP_KernelGraphBoss_Process(DVP_t *dvp, DVP_KernelGraphSection_t *section, DVP_BOOL sync)
 {
     DVP_U32 n = 0; // node index
     DVP_U32 faults = 0;
@@ -639,9 +687,6 @@ DVP_U32 DVP_KernelGraphBoss(DVP_t *dvp, DVP_KernelGraphSection_t *section, DVP_B
     DVP_PRINT(DVP_ZONE_KGB, "Executing Section %p with %u nodes (%s)\n", section, section->numNodes, (sync?"SYNC":"QUEUED"));
 
     DVP_PerformanceStart(perf);
-
-    // configure the nodes
-    faults = DVP_ConfigureNodes(dvp, section, DVP_FALSE);
 
     // we're going to try this over and over until we can execute with no faults in configuration.
     do {

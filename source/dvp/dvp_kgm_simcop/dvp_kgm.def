@@ -8,4 +8,6 @@ EXPORTS
 	DVP_KernelGraphManager
 	DVP_KernelGraphManagerDeinit
 	DVP_GetMaximumLoad
+	DVP_KernelGraphManagerRestart
+	DVP_KernelGraphManagerVerify
 

@@ -82,6 +82,11 @@ typedef DVP_Core_e (*DVP_GetSupportedRemoteCore_f)(void);
  */
 typedef DVP_U32 (*DVP_GetMaximumLoad_f)(void);
 
+/*! \brief The function pointer to the function which verifies the graph before execution.
+ * \ingroup group_dvp_kgm
+ */
+typedef  DVP_U32 (*DVP_KernelGraphManagerVerify_f)(DVP_KernelNode_t *pSubNodes, DVP_U32 startNode, DVP_U32 numNodes);
+
 /*!
  * \brief This is the interface structure to a DVP Kernel Graph Manager.
  * \ingroup group_dvp_kgm
@@ -96,6 +101,7 @@ typedef struct _dvp_graph_manager_funcs_t {
     DVP_GetMaximumLoad_f          getLoad;
     DVP_GraphManagerDeinit_f      deinit;
     DVP_GraphManagerRestart_f     restart;
+    DVP_KernelGraphManagerVerify_f verify;
 } DVP_GraphManager_Calls_t;
 
 /*! \brief This indicates that the manager's priority is invalid and will not be used.

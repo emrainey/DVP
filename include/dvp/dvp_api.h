@@ -104,7 +104,18 @@ DVP_Error_e DVP_KernelGraphSection_Init(DVP_Handle handle,
 typedef void (*DVP_SectionComplete_f)(void *cookie, DVP_KernelGraph_t *graph, DVP_U32 sectionIndex, DVP_U32 numNodesExecuted);
 
 /*!
- * \brief This function processes a DVP_KernelGraph_t and will inform
+ * \brief This function verifies the correctness of a DVP graph.
+ * \param [in] handle The handle to DVP returned from \ref DVP_KernelGraph_Init.
+ * \param [in] graph The pointer to a Kernel Graph structure.
+ * \return Returns a boolean to indicate if the graph is correct.
+ * \note Each Kernel Node in the graph will be set to a specific error value.
+ * \post \ref DVP_KernelGraph_Process
+ * \ingroup group_graphs
+ */
+DVP_BOOL DVP_KernelGraph_Verify(DVP_Handle handle, DVP_KernelGraph_t *graph);
+
+/*!
+ * \brief This function processes a \ref DVP_KernelGraph_t and will inform
  * the client after each section of nodes executed in that graph,
  * successful or not.
  * \param [in] handle The handle to DVP returned from \ref DVP_KernelGraph_Init.
@@ -112,6 +123,8 @@ typedef void (*DVP_SectionComplete_f)(void *cookie, DVP_KernelGraph_t *graph, DV
  * \param [in] cookie A user supplied pointer to pass to the callback
  * \param [in] callback The function to call after each graph completes.
  * \note In parallel mode, the callback is mutex protected.
+ * \pre \ref DVP_KernelGraph_Process must be called at least once before process
+ * or an overhead penalty of checking the graph will be incurred.
  * \ingroup group_graphs
  */
 DVP_U32 DVP_KernelGraph_Process(DVP_Handle handle,

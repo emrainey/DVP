@@ -4163,6 +4163,114 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManager(DVP_KernelNode_t *pSubNodes, DVP_U3
     }
 }
 
+MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
+                                                   DVP_U32 startNode,
+                                                   DVP_U32 numNodes)
+{
+    DVP_U32 n;
+    DVP_U32 verified = 0;
+    for (n = startNode; n < startNode + numNodes; n++)
+    {
+        // assume it will pass then set errors if detected.
+        pSubNodes[n].header.error = DVP_SUCCESS;
+
+        // check each supported kernel
+        switch (pSubNodes[n].header.kernel)
+        {
+            // for Transforms, check WxH and NULL base pointers
+            case DVP_KN_ECHO:
+            // BASE
+            case DVP_KN_XYXY_TO_Y800:
+            case DVP_KN_YXYX_TO_Y800:
+            case DVP_KN_Y800_TO_XYXY:
+            case DVP_KN_UYVY_TO_RGBp:
+            case DVP_KN_UYVY_TO_BGR:
+            case DVP_KN_UYVY_TO_HSLp:
+            case DVP_KN_UYVY_TO_LABp:
+            case DVP_KN_UYVY_TO_YUV420p:
+            case DVP_KN_UYVY_TO_YUV422p:
+            case DVP_KN_UYVY_TO_YUV444p:
+            case DVP_KN_YUV420p_TO_RGBp:
+            case DVP_KN_YUV420p_TO_UYVY:
+            case DVP_KN_YUV422p_TO_RGB565:
+            case DVP_KN_YUV422p_TO_UYVY:
+            case DVP_KN_YUV444p_TO_RGBp:
+            case DVP_KN_YUV444p_TO_UYVY:
+            case DVP_KN_NV12_TO_UYVY:
+            case DVP_KN_NV12_TO_YUV444p:
+            // YUV
+            case DVP_KN_YUV_ARGB_TO_UYVY:
+            case DVP_KN_YUV_BGR_TO_IYUV:
+            case DVP_KN_YUV_BGR_TO_UYVY:
+            case DVP_KN_YUV_IYUV_TO_BGR:
+            case DVP_KN_YUV_IYUV_TO_RGB565:
+            case DVP_KN_YUV_IYUV_TO_RGBp:
+            // case DVP_KN_YUV_NV12_TO_YU24_HALF_SCALE:
+            // case DVP_KN_YUV_UYVY_HALF_SCALE:
+            // case DVP_KN_YUV_UYVY_QTR_SCALE:
+            // case DVP_KN_YUV_UYVY_ROTATE_CCW_90:
+            // case DVP_KN_YUV_UYVY_ROTATE_CW_90:
+            case DVP_KN_YUV_UYVY_TO_BGR:
+            case DVP_KN_YUV_UYVY_TO_IYUV:
+            case DVP_KN_YUV_UYVY_TO_RGBp:
+            case DVP_KN_YUV_UYVY_TO_RGBp_Y800_YU24:
+            case DVP_KN_YUV_UYVY_TO_YU24:
+            case DVP_KN_YUV_XYXY_TO_Y800:
+            // case DVP_KN_YUV_Y800_ROTATE_CCW_90:
+            // case DVP_KN_YUV_Y800_ROTATE_CW_90:
+            case DVP_KN_YUV_Y800_TO_XYXY:
+            case DVP_KN_YUV_YXYX_TO_Y800:
+            {
+                DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
+                DVP_PRINT(DVP_ZONE_KGM, "Verifying Transform Type!\n");
+                if (pT->input.width != pT->output.width ||
+                    pT->input.height != pT->output.height ||
+                    pT->input.pData[0] == NULL ||
+                    pT->output.pData[0] == NULL)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_THRESHOLD:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
+                if (pIO->input.planes != pIO->output.planes ||
+                    pIO->input.height != pIO->output.height ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.x_stride != pIO->output.x_stride)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_XSTRIDE_CONVERT:
+            case DVP_KN_XSTRIDE_SHIFT:
+            {
+                DVP_U32 j, p, y = 0;
+                DVP_Transform_t *pIO = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
+                if (pIO->input.planes != pIO->output.planes ||
+                    pIO->input.height != pIO->output.height ||
+                    pIO->input.width != pIO->output.width)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+
+            /*! \todo add each kernel supported in the CPU manager to this list */
+
+            // the do-nothing list...
+            case DVP_KN_IMAGE_DEBUG:
+            case DVP_KN_BUFFER_DEBUG:
+            case DVP_KN_NOOP:
+                break;
+
+            default:
+                // only set unimplemented when all thr kernels have been added.
+                //pNodes[n].header.error = DVP_ERROR_NOT_IMPLEMENTED;
+                break;
+        }
+        if (pSubNodes[n].header.error == DVP_SUCCESS)
+            verified++;
+    }
+    return verified;
+}
+
 
 #if defined(SYSBIOS_SL)
 static static_function_t dvp_kgm_functions[] = {
@@ -4174,6 +4282,7 @@ static static_function_t dvp_kgm_functions[] = {
     {"DVP_GetSupportedRemoteCore",   (function_f)DVP_GetSupportedRemoteCore},
     {"DVP_GetMaximumLoad",           (function_f)DVP_GetMaximumLoad},
     {"DVP_KernelGraphManagerDenit",  (function_f)DVP_KernelGraphManagerDeinit},
+    {"DVP_KernelGraphManagerVerify", (function_f)DVP_KernelGraphManagerVerify},
 };
 
 static_module_table_t dvp_kgm_cpu_table = {

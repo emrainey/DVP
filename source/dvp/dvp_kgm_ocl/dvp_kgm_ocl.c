@@ -160,6 +160,18 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManager(DVP_KernelNode_t *pSubNodes, DVP_U3
     return processed;
 }
 
+MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
+                                                   DVP_U32 startNode,
+                                                   DVP_U32 numNodes)
+{
+    DVP_U32 n;
+    for (n = startNode; n < startNode + numNodes; n++)
+    {
+        pNodes[n].header.error = DVP_SUCCESS;
+    }
+    return numNodes;
+}
+
 
 #if defined(SYSBIOS_SL)
 static static_function_t dvp_kgm_functions[] = {
@@ -171,6 +183,7 @@ static static_function_t dvp_kgm_functions[] = {
     {"DVP_GetSupportedRemoteCore",   (function_f)DVP_GetSupportedRemoteCore},
     {"DVP_GetMaximumLoad",           (function_f)DVP_GetMaximumLoad},
     {"DVP_KernelGraphManagerDenit",  (function_f)DVP_KernelGraphManagerDeinit},
+    {"DVP_KernelGraphManagerVerify", (function_f)DVP_KernelGraphManagerVerify},
 };
 
 static_module_table_t dvp_kgm_ocl_table = {

@@ -117,43 +117,52 @@ DVP_t *DVP_KernelGraphBossInit();
 
 /*!
  * \brief This function deinitializes the graph boss.
- * \param dvp The pointer to the DVP_t context.
+ * \param [in] dvp The handle to the dvp instance.
  * \ingroup group_dvp_kgb
  */
 void DVP_KernelGraphBossDeinit(DVP_t *dvp);
 
 /*!
- * \brief This function process a single section of the graph in either a synchronous or asychronous mode.
- * \param dvp
- * \param section
- * \param sync
+ * \brief This function verifies a single section of the graph.
+ * \param [in] dvp The pointer to the DVP_t context.
+ * \param [in] section The pointer to the section to verify.
+ * \return Returns the number of valid nodes.
  * \ingroup group_dvp_kgb
  */
-DVP_U32 DVP_KernelGraphBoss(DVP_t *dvp,  DVP_KernelGraphSection_t *section, DVP_BOOL sync);
+DVP_U32 DVP_KernelGraphBoss_Verify(DVP_t *dvp,  DVP_KernelGraphSection_t *section);
+
+/*!
+ * \brief This function process a single section of the graph in either a synchronous or asychronous mode.
+ * \param [in] dvp The pointer to the DVP_t context.
+ * \param [in] section The pointer to the section to process.
+ * \param [in] sync A boolean indicating if the section should be executed in-line with this call.
+ * \ingroup group_dvp_kgb
+ */
+DVP_U32 DVP_KernelGraphBoss_Process(DVP_t *dvp,  DVP_KernelGraphSection_t *section, DVP_BOOL sync);
 
 /*!
  * \brief This function allows the caller to limit max load of a requested core in the shared load table.
- * \param dvp
- * \param core
- * \param limit
+ * \param [in] dvp The pointer to the DVP_t context.
+ * \param [in] core
+ * \param [in] limit
  * \ingroup group_dvp_kgb
  */
 void DVP_SetMaxLoad(DVP_t *dvp, DVP_Core_e core, DVP_U32 limit);
 
 /**
  * This function allows the caller to retrieve the max load of the requested core from the shared load table.
- * \param dvp      The handle to the dvp instance.
- * \param core     The core being queried.
- * \param pMaxLoad The maximum load reported from the manager.
+ * \param [in] dvp The pointer to the DVP_t context.
+ * \param [in] core     The core being queried.
+ * \param [in] pMaxLoad The maximum load reported from the manager.
  * \ingroup group_dvp_kgb
  */
 DVP_U32 DVP_GetMaxLoad(DVP_t *dvp, DVP_Core_e core, DVP_U32 *pMaxLoad);
 
 /**
  * \brief Queries an individual core in DVP.
- * \param dvp The pointer to the DVP_t context.
- * \param core The core to query.
- * \param info A pointer to a preallocated structure which will contain the core
+ * \param [in] dvp The pointer to the DVP_t context.
+ * \param [in] core The core to query.
+ * \param [in] info A pointer to a preallocated structure which will contain the core
  * info.
  * \ingroup group_dvp_kgb
  */
@@ -161,9 +170,9 @@ void DVP_QueryCore(DVP_t *dvp, DVP_Core_e core, DVP_CoreInfo_t *info);
 
 /*!
  * \brief Queries the boss to determine if the specified core supports this kernel.
- * \param dvp The pointer to the DVP_t context.
- * \param kernel The kenel enum to search for.
- * \param core The core to search.
+ * \param [in] dvp The pointer to the DVP_t context.
+ * \param [in] kernel The kenel enum to search for.
+ * \param [in] core The core to search.
  * \retval DVP_TRUE The core supports the kernel
  * \retval DVP_FALSE The core does not support the kernel.
  * \ingroup group_dvp_kgb
@@ -176,6 +185,7 @@ DVP_BOOL DVP_QueryCoreForKernel(DVP_t *dvp, DVP_KernelNode_e kernel, DVP_Core_e 
 DVP_Mem_t *dvp_mem_init();
 
 /*! This function disables the memory system.
+ * \param [in,out] pmem The pointer to the memory structure, which will be set to NULL, after freeing.
  * \ingroup group_dvp_kgb
  */
 void dvp_mem_deinit(DVP_Mem_t **pmem);

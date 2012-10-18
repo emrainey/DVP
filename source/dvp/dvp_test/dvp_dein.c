@@ -36,7 +36,7 @@ DVP_U08 line_buf[4096];
 
 void DVP_KernelGraphCompleted(void *cookie, DVP_KernelGraph_t *graph, DVP_U32 sectionIndex, DVP_U32 numNodesExecuted)
 {
-    DVP_PRINT(DVP_ZONE_ENGINE, "TEST: {%p} Graph %p Section [%u] completed %u of %u nodes\n", cookie, graph, sectionIndex, numNodesExecuted, graph->sections[sectionIndex].numNodes);
+    DVP_PRINT(DVP_ZONE_ALWAYS, "TEST: {%p} Graph %p Section [%u] completed %u of %u nodes\n", cookie, graph, sectionIndex, numNodesExecuted, graph->sections[sectionIndex].numNodes);
     return;
 }
 
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
             /*init deinterlacer */
             if (DVP_KernelGraph_Process (hDVP, &graph, NULL, DVP_KernelGraphCompleted) == dimof(sections))
             {
-                DVP_PRINT(DVP_ZONE_INFO, "Init OK\n");
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Init OK\n");
             }
 
             if(dein->initialized == 0)
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
             if (DVP_KernelGraph_Process (hDVP, &graph, NULL, DVP_KernelGraphCompleted) == dimof(sections))
             {
                 DVP_PrintPerformanceGraph(hDVP, &graph);
-                DVP_PRINT(DVP_ZONE_ENGINE, "Frame processed\n");
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Frame processed\n");
             }
 
             image_buffer_stride = m_images[2].y_stride;
