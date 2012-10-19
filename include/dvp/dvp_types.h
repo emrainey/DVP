@@ -1203,7 +1203,7 @@ typedef enum _dvp_knode_e {
      * Computes a Integral Image over the FOURCC_Y800 data. FOURCC_Y32 output\n
      * Configuration Structure: DVP_Transform_t
      * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_RGBA
+     * \param [output] Image color type supported: FOURCC_Y32
      */
     DVP_KN_INTEGRAL_IMAGE_8,
 

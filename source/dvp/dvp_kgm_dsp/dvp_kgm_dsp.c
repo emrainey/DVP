@@ -2541,7 +2541,7 @@ static static_function_t dvp_kgm_functions[] = {
     {"DVP_GetSupportedRemoteCalls",  (function_f)DVP_GetSupportedRemoteCalls},
     {"DVP_GetSupportedRemoteCore",   (function_f)DVP_GetSupportedRemoteCore},
     {"DVP_GetMaximumLoad",           (function_f)DVP_GetMaximumLoad},
-    {"DVP_KernelGraphManagerDenit",  (function_f)DVP_KernelGraphManagerDeinit},
+    {"DVP_KernelGraphManagerDeinit", (function_f)DVP_KernelGraphManagerDeinit},
     {"DVP_KernelGraphManagerVerify", (function_f)DVP_KernelGraphManagerVerify},
 };
 

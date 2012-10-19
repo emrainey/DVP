@@ -48,6 +48,33 @@ DVP_PTR dvp_calloc(DVP_Handle handle, DVP_U32 numElem, DVP_U32 sizeElem)
     return ptrs[0];
 }
 
+DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage)
+{
+    DVP_U32 p;
+    if (pImage == NULL)
+        return DVP_FALSE;
+
+    if (pImage->planes == 0 ||
+        pImage->width == 0 ||
+        pImage->height == 0 ||
+        pImage->bufHeight == 0 ||
+        pImage->bufWidth == 0 ||
+        pImage->color == 0 ||
+        pImage->memType < DVP_MTYPE_MPUCACHED_VIRTUAL ||
+        pImage->memType > DVP_MTYPE_MAX ||
+        pImage->numBytes == 0 ||
+        pImage->x_stride == 0 ||
+        pImage->y_stride == 0)
+        return DVP_FALSE;
+
+    for (p = 0; p < pImage->planes; p++)
+    {
+        if (pImage->pBuffer[p] == NULL || pImage->pData[p] == NULL)
+            return DVP_FALSE;
+    }
+    return DVP_TRUE;
+}
+
 void DVP_Image_Dup(DVP_Image_t *dst, DVP_Image_t *src)
 {
     memcpy(dst, src, sizeof(DVP_Image_t));
@@ -806,6 +833,19 @@ size_t DVP_Image_Serialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len)
     }
     mutex_unlock(&dims_mutex);
     return offset;
+}
+
+DVP_BOOL DVP_Buffer_Validate(DVP_Buffer_t *pBuffer)
+{
+    if (pBuffer == NULL)
+        return DVP_FALSE;
+
+    if (pBuffer->elemSize == 0 ||
+        pBuffer->numBytes == 0 ||
+        pBuffer->memType >= DVP_MTYPE_MAX ||
+        pBuffer->pData == NULL)
+        return DVP_FALSE;
+    return DVP_TRUE;
 }
 
 DVP_BOOL DVP_Buffer_Free(DVP_Handle handle, DVP_Buffer_t *pBuffer)

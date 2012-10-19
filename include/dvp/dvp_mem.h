@@ -175,6 +175,15 @@ DVP_U32 DVP_Image_PlaneSize(DVP_Image_t *pImage, DVP_U32 plane);
 DVP_U32 DVP_Image_Size(DVP_Image_t *pImage);
 
 /*!
+ * \brief Validates the values of the various members of the Image structure.
+ * \param [in] pImage The pointer to the Image structure.
+ * \retval DVP_TRUE all member variables are valid.
+ * \retval DVP_FALSE some member variable is invalid.
+ * \ingroup group_images
+ */
+DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage);
+
+/*!
  * \brief Allocates and maps a flat buffer to all remote cores.
  * \param [in] handle The handle to DVP.
  * \param [in] pBuffer The pointer to the buffer structure to fill in.
@@ -237,6 +246,16 @@ void DVP_Buffer_Init(DVP_Buffer_t *pBuffer, DVP_U32 elemSize, DVP_U32 numBytes);
  * \ingroup group_buffers
  */
 void DVP_Buffer_Deinit(DVP_Buffer_t *pBuffer);
+
+
+/*!
+ * \brief Validates the values of the various members of the Buffer structure.
+ * \param [in] pImage The pointer to the Buffer structure.
+ * \retval DVP_TRUE all member variables are valid.
+ * \retval DVP_FALSE some member variable is invalid.
+ * \ingroup group_buffers
+ */
+DVP_BOOL DVP_Buffer_Validate(DVP_Buffer_t *pBuffer);
 
 /*!
  * \brief The function allocates the requested number of DVP_KernelNode_t structures in shared memory and maps them to all enabled remote cores.
