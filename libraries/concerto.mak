@@ -39,11 +39,6 @@ DVP_FEATURES += DVP_USE_AR
 DVP_INC += $(VISION_ROOT)/libraries/protected/ar/include
 endif
 
-ifneq (,$(findstring dei,$(VISION_LIBRARIES)))
-DVP_FEATURES += DVP_USE_DEI
-DVP_INC += $(VISION_ROOT)/libraries/protected/dei/include
-endif
-
 ifneq (,$(findstring orb,$(VISION_LIBRARIES)))
 DVP_FEATURES += DVP_USE_ORB
 DVP_INC += $(VISION_ROOT)/libraries/protected/orb/include

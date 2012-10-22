@@ -53,7 +53,7 @@ endif
 
 ifneq (,$(findstring dei,$(VISION_LIBRARIES)))
 DVP_FEATURES += -DDVP_USE_DEI
-DVP_INCLUDES += $(VISION_ROOT)/libraries/protected/dei/include
+DVP_INCLUDES += $(DVP_ROOT)/libraries/public/dei/include
 endif
 
 ifneq (,$(findstring dsplib,$(VISION_LIBRARIES)))
@@ -68,12 +68,12 @@ endif
 
 ifneq (,$(findstring imgfilter,$(VISION_LIBRARIES)))
 DVP_FEATURES += -DDVP_USE_IMGFILTER
-DVP_INCLUDES += $(DVP_TOP)/libraries/public/imgfilter/include
+DVP_INCLUDES += $(DVP_ROOT)/libraries/public/imgfilter/include
 endif
 
 ifneq (,$(findstring yuv,$(VISION_LIBRARIES)))
 DVP_FEATURES += -DDVP_USE_YUV
-DVP_INCLUDES += $(DVP_TOP)/libraries/public/yuv/include
+DVP_INCLUDES += $(DVP_ROOT)/libraries/public/yuv/include
 endif
 
 ifeq ($(TARGET_SCPU),C64T)
