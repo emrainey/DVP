@@ -4198,6 +4198,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_YUV444p_TO_UYVY:
             case DVP_KN_NV12_TO_UYVY:
             case DVP_KN_NV12_TO_YUV444p:
+
+#if defined(DVP_USE_YUV)
             // YUV
             case DVP_KN_YUV_ARGB_TO_UYVY:
             case DVP_KN_YUV_BGR_TO_IYUV:
@@ -4230,6 +4232,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
+#endif
             case DVP_KN_THRESHOLD:
             {
                 DVP_Transform_t *pIO = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
