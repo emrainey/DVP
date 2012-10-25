@@ -65,10 +65,7 @@
 #undef OMX_CAMERA_SUPPORTS_SIMULTANEOUS_SENSOR_GESTURES
 //#define OMX_CAMERA_SUPPORTS_HMSGAMMA
 #endif
-#if !defined(AOSP) && !defined(CPCAM) && !defined(TUNA) && !defined(MAGURO)
-#undef OMX_CAMERA_SUPPORTS_FD_RAW
-#undef OMX_CAMERA_SUPPORTS_IMAGE_PYRAMID
-#endif
+
 #if !defined(AOSP) && !defined(CPCAM) && !defined(JELLYBEAN) && (defined(TUNA) || defined(MAGURO))
 #define OMX_CAMERA_SUPPORTS_CAMERA_VIEW
 #endif
