@@ -25,58 +25,427 @@
  * \ingroup group_algo_dsplib
  */
 enum {
-        DVP_KN_DSP_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_DSPLIB),
-        DVP_KN_DSP_ADD16,       //!< 16-bit Addition
-        DVP_KN_DSP_ADD32,       //!< 32-bit Addition
-        DVP_KN_DSP_AUTOCORR16,  //!< Autocorrelation
-        DVP_KN_DSP_BITEXP32,    //!< Block exponent
-        DVP_KN_DSP_BLKESWAP16,  //!< Endian-swap a block of 16-bit values
-        DVP_KN_DSP_BLKESWAP32,  //!< Endian-swap a block of 32-bit values
-        DVP_KN_DSP_BLKESWAP64,  //!< Endian-swap a block of 64-bit values
-        DVP_KN_DSP_BLKMOVE,     //!< Block Move
-        DVP_KN_DSP_DOTPRODSQR,  //!< Vector dot product and square
-        DVP_KN_DSP_DOTPROD,     //!< Vector dot product
-        DVP_KN_DSP_FFT_16x16,   //!< Complex forward FFT with digital reversal
-        DVP_KN_DSP_FFT_16x16R,  //!< Complex forward mixed radix 16- x 16-bit FFT with rounding
-        DVP_KN_DSP_FFT_16x16_IMRE,
-        DVP_KN_DSP_FFT_16x32,   //!< Complex forward mixed radix 16- x 32-bit FFT with rounding
-        DVP_KN_DSP_FFT_32x32,   //!< Complex forward mixed radix 32- x 32-bit FFT with rounding
-        DVP_KN_DSP_FFT_32x32s,  //!< Complex forward mixed radix 32- x 32-bit FFT with scaling
-        DVP_KN_DSP_FIR_CPLX,    //!< Complex FIR filter (radix 2)
-        DVP_KN_DSP_FIR_HM4x4,   //!< Complex FIR output with complex filter co-efficients (multiple of 4).
-        DVP_KN_DSP_FIR_GEN,     //!< Real FIR fitering
-        DVP_KN_DSP_FIR_HM17_RA8x8,
-        DVP_KN_DSP_FIR_LMS2,    //!< LMS Adaptive Filtering
-        DVP_KN_DSP_FIR_R4,      //!< Radix-4 FIR Filter
-        DVP_KN_DSP_FIR_R8,      //!< Radix-8 FIR Filter
-        DVP_KN_DSP_FIR_HM16_RM8A8x8,
-        DVP_KN_DSP_FIR_SYM,     //!< Symmetric FIR filter (radix-8)
-        DVP_KN_DSP_IFFT_16x16,  //!< Complex inverse mixed radix 16 x 16-bit FFT with rounding
-        DVP_KN_DSP_IFFT_16x16_IMRE, //!< Similar to IFFT16.16 with reversed positions for real and imaginary components in signals
-        DVP_KN_DSP_IFFT_16x32,  //!<  Complex inverse mixed radix 16 x 32-bit FFT with rounding
-        DVP_KN_DSP_IFFT_32x32,  //!< Complex inverse mixed radix 32 x 32-bit FFT with rounding
-        DVP_KN_DSP_IIR,         //!< IIR Filter with 5 coefficients
-        DVP_KN_DSP_IIR_LAT,     //!< All-Pole IIR Lattice Filter
-        DVP_KN_DSP_IIR_SS,      //!< Single-sample IIR filter
-        DVP_KN_DSP_MUL,         //!< Matrix Multiplication
-        DVP_KN_DSP_MUL_CPLX,    //!< Matrix Mulitplication of Complex Numbers
-        DVP_KN_DSP_MAT_TRANS,   //!< Matrix Transpose
-        DVP_KN_DSP_MAXIDX,      //!< Index of the maximum element of a vector
-        DVP_KN_DSP_MAXVAL,      //!< Maximum value of a vector
-        DVP_KN_DSP_MINERROR,    //!< Minimum energy error search
-        DVP_KN_DSP_MINVAL,      //!< Minimum value of a vector.
-        DVP_KN_DSP_MUL32,       //!< 32-bit vector multiply
-        DVP_KN_DSP_NEG32,       //!< 32-bit vector negate
-        DVP_KN_DSP_Q15TOFL,     //!< Q15 to float conversion --> Not supported on C64+ Fixed point DSP
-        DVP_KN_DSP_RECIP16,     //!< 16-bit reciprocal
-        DVP_KN_DSP_VECSUMSQ,    //!< Sum of squares
-        DVP_KN_DSP_W_VEC,       //!< Weighted vector sum
-        DVP_KN_GEN_TWIDDLE_FFT_16X16,   //!< Generate 16x16 twiddle factors needed for FFT operations
-        DVP_KN_GEN_TWIDDLE_FFT_16X16_IMRE,  //!< Generate 16x16 twiddle factors needed for FFT IMRE operations
-        DVP_KN_GEN_TWIDDLE_FFT_16X32,   //!< Generate 16x32 twiddle factors needed for FFT operations
-        DVP_KN_GEN_TWIDDLE_FFT_32x32,   //!< Generate 32x32 twiddle factors needed for FFT operations
-        DVP_KN_GEN_TWIDDLE_IFFT_16X16,  //!< Generate 16x16 twiddle factors needed for IFFT operations
-        DVP_KN_GEN_TWIDDLE_IFFT_16X16_IMRE  //!< Generate 16x16 twiddle factors needed for IFFT IMRE operations
+    DVP_KN_DSP_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_DSPLIB),
+
+    /*!
+     * performs addition of two 16-bit vectors\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_ADD16,
+
+    /*!
+     * performs addition of two 32-bit vectors\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_ADD32,
+
+    /*!
+     * Performs auto correlation of two 16-bit vectors\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_AUTOCORR16,
+
+    /*!
+     * Computes the exponents of all values in the input vector and returns the minimum exponent\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val1] Minumum exponent value: short or S16
+     */
+    DVP_KN_DSP_BITEXP32,
+
+    /*!
+     * Performs Endian swap of a block of 16-bit values\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_BLKESWAP16,
+
+    /*!
+     * Performs Endian swap of a block of 32-bit values\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_BLKESWAP32,
+
+    /*!
+     * Performs Endian swap of a block of 64-bit values\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_BLKESWAP64,
+
+    /*!
+     * Performs block move of 16-bit values from source to destination buffer\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_BLKMOVE,
+
+    /*!
+     * Performs dot product square of two 16-bit arrays\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_DOTPRODSQR,
+
+    /*!
+     * Performs dot product of two 16-bit arrays\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_DOTPROD,
+
+    /*!
+     * Computes a complex forward mixed radix FFT\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FFT_16x16,
+
+    /*!
+     * Computes a complex forward mixed radix FFT with rounding\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FFT_16x16R,
+
+    /*!
+     * Computes a complex forward mixed radix FFT with rounding and digit reversal. Each complex value is stored with interleaved real and imaginary parts\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FFT_16x16_IMRE,
+
+    /*!
+     * Computes a complex forward mixed radix FFT with rounding. Coefficients are 16-bit\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_FFT_16x32,
+
+    /*!
+     * Computes a complex forward mixed radix FFT with rounding. Coefficients are 32-bit\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+    */
+    DVP_KN_DSP_FFT_32x32,
+
+    /*!
+     * Computes a complex forward mixed radix FFT with rounding and scaling. Coefficients are 32-bit\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_FFT_32x32s,
+
+    /*!
+     * Performs FIR filter for complex input data\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_CPLX,
+
+    /*!
+     * Performs FIR filter for complex input data. Filter coefficients are complex. Number of coefficients are in multiples of 4\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_HM4x4,
+
+    /*!
+     * Performs Real FIR filter\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_GEN,
+
+    /*!
+     * Performs Real FIR filter. Number of outputs must be multiple of 8\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_HM17_RA8x8,
+
+    /*!
+     * Performs Least Mean Square Adaptive filtering. \n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_LMS2,
+
+    /*!
+     * Performs FIR filtering when number of coefficients is a multiple of 4\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_R4,
+
+    /*!
+     * Performs FIR filtering when number of coefficients is a multiple of 8\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_R8,
+
+    /*!
+     * Performs real FIR filtering when number of coefficients is a multiple of 8 and greater than or equal to 16\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_HM16_RM8A8x8,
+
+    /*!
+     * Performs symmetric filtering to the input samples\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_FIR_SYM,
+
+    /*!
+     * Computes a complex inverse mixed radix IFFT with rounding and digit reversal\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_IFFT_16x16,
+
+    /*!
+     * Computes a complex inverse mixed radix IFFT with rounding and digit reversal and reversed positions for real and imaginary components\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]    Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_IFFT_16x16_IMRE,
+
+    /*!
+     * Computes computes an extended precision complex inverse mixed radix FFT with rounding and digit reversal. Coeffecients are 16-bit\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_IFFT_16x32,
+
+    /*!
+     * Computes computes an extended precision complex inverse mixed radix FFT with rounding and digit reversal. Coeffecients are 32-bit\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_IFFT_32x32,
+
+    /*!
+     * Performs IIR filtering with 5 coefficients\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+    */
+    DVP_KN_DSP_IIR,
+
+    /*!
+     * Performs All pole IIR lattice filtering\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_IIR_LAT,
+
+    /*!
+     * Performs single sample  IIR filtering\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_IIR_SS,
+
+    /*!
+     * Performs a matrix multiplication on a pair of input vectors\n
+     * Configuration Structure: DVP_DSP_MatMul
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_MUL,
+
+    /*!
+     * Performs a matrix multiplication on a pair of complex input vectors\n
+     * Configuration Structure: DVP_DSP_MatMul
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_MUL_CPLX,
+
+    /*!
+     * Computes the transpose of a matrix\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_MAT_TRANS,
+
+    /*!
+     * Finds the index of the maximum element of a vector\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val1] Index to the maximum element of the input vector
+     */
+    DVP_KN_DSP_MAXIDX,
+
+    /*!
+     * Finds the maximum value of a vector and returns the value\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val1] Maximum value in the input vector
+     */
+    DVP_KN_DSP_MAXVAL,
+
+    /*!
+     * Performs a minimum energy error search\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val2] Maximum dot product result
+     */
+    DVP_KN_DSP_MINERROR,
+
+    /*!
+     * Finds the minimum value of a vector and returns the value\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val1] Minimum value in the input vector
+     */
+    DVP_KN_DSP_MINVAL,
+
+    /*!
+     * Performs a matrix multiplication on a pair of 32-bit input vectors\n
+     * Configuration Structure: DVP_DSP_MatMul
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_MUL32,
+
+    /*!
+     * This function negates the elements of a vector\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Output data type supported: int or S32
+     */
+    DVP_KN_DSP_NEG32,
+
+    /*!
+     * This function converts Q15 values stored in the input vector to IEEE Floating point. Not supported on C64x\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */ 
+    DVP_KN_DSP_Q15TOFL,
+
+    /*!
+     * This routine returns the fractional and exponential portion of the reciprocal of the input array of Q15 numbers. Not supported on C64x+\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_RECIP16,
+
+    /*!
+     * This routine returns the sum of squares of the elements contained in the input vector\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val1] Sum of squares: int or S32
+     */
+    DVP_KN_DSP_VECSUMSQ,
+
+    /*!
+     * This routine is used to obtain the weighted vector sum of the elements contained in the input vector\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Output data type supported: short or S16
+     */
+    DVP_KN_DSP_W_VEC,
+
+    /*!
+     * This routine is used to generate 16x16 twiddle factors needed for FFT operations\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val2] Twiddle factor:  short or S16
+     */
+    DVP_KN_GEN_TWIDDLE_FFT_16X16,
+
+    /*!
+     * This routine is used to generate 16x16 twiddle factors needed for FFT IMRE operations\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val2] Twiddle factor: short or S16
+     */
+    DVP_KN_GEN_TWIDDLE_FFT_16X16_IMRE,
+
+    /*!
+     * This routine is used to generate 16x32 twiddle factors needed for FFT operations\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val2] Twiddle factor :int or S32
+     */
+    DVP_KN_GEN_TWIDDLE_FFT_16X32,
+
+    /*!
+     * This routine is used to generate 32x32 twiddle factors needed for FFT operations\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: int or S32
+     * \param [output] Not applicable
+     * \param [val2] Twiddle factor :int or S32
+     */
+    DVP_KN_GEN_TWIDDLE_FFT_32x32,
+
+    /*!
+     * This routine is used to generate 16x16 twiddle factors needed for IFFT operations\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val2] Twiddle factor :short or S16
+     */
+    DVP_KN_GEN_TWIDDLE_IFFT_16X16,
+
+    /*!
+     * This routine is used to generate 16x16 twiddle factors needed for IFFT IMRE operations\n
+     * Configuration Structure: DVP_DSPFunc
+     * \param [input]  Input data type supported: short or S16
+     * \param [output] Not applicable
+     * \param [val2] Twiddle factor :short or S16
+     */
+    DVP_KN_GEN_TWIDDLE_IFFT_16X16_IMRE
 };
 
 /*! \brief This is not a generic function. It can find if x is the power of no.
@@ -107,31 +476,30 @@ static inline DVP_U16 isPowerOf (DVP_U32 x, DVP_U16  no )
  * \ingroup group_algo_dsplib
  */
 typedef struct  _dsp_matmul{
-    DVP_Buffer_t input0;
-    DVP_Buffer_t input1;
-    DVP_Buffer_t output0;
-    DVP_S32 r1; // Rows of input0
-    DVP_S32 c1; // Coloumns of input0
-    DVP_S32 r2; // Rows of input1
-    DVP_S32 c2; // Coloumns of input0
-    DVP_S32 qs; // User defined right shift on final result.
+    DVP_Buffer_t input0;  /*!<  Input Buffer 0 */
+    DVP_Buffer_t input1;  /*!<  Input Buffer 1 */
+    DVP_Buffer_t output0; /*!<  Output Buffer */
+    DVP_S32 r1;           /*!<  Rows of Input Buffer 0 */
+    DVP_S32 c1;           /*!<  Columns of Input Buffer 0 */
+    DVP_S32 r2;           /*!<  Rows of Input Buffer 1 */
+    DVP_S32 c2;           /*!<  Columns of Input Buffer 0 */
+    DVP_S32 qs;           /*!<  User defined shift */
 }DVP_DSP_MatMul;
 
 /*! \brief Generic Function Parameters to DSPLIB functions.
  * \ingroup group_algo_dsplib
  */
 typedef struct  _dsp_func{
-    DVP_Buffer_t input0;
-    DVP_Buffer_t input1;
-    DVP_Buffer_t twoway;
-    DVP_Buffer_t output0;
-    DVP_Buffer_t output1;
-    DVP_S32 val1;
-    DVP_S32 val2;
-    DVP_S32 val3;
+    DVP_Buffer_t input0;  /*!<  Input Buffer 0: generic input buffer  */
+    DVP_Buffer_t input1;  /*!<  Input Buffer 1: generic input buffer  */
+    DVP_Buffer_t twoway;  /*!<  In/Out Buffer: typically used to store filter co-efficients */
+    DVP_Buffer_t output0; /*!<  Output Buffer 0: generic output buffer  */
+    DVP_Buffer_t output1; /*!<  Output Buffer 1: generic output buffer  */
+    DVP_S32 val1;         /*!<  User defined value 1: typically used to store special integer arguments */
+    DVP_S32 val2;         /*!<  User defined value 2: typically used to store special integer arguments */
+    DVP_S32 val3;         /*!<  User defined value 3: typically used to store special integer arguments */
 }DVP_DSPFunc;
 
 #endif // DVP_USE_DSPLIB
 
 #endif // _DVP_KL_DSPLIB_H_
-

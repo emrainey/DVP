@@ -49,7 +49,7 @@ if [ "${TARGET_CPU}" == "ARM" ]; then
 fi
 export TARGET_SLIB="cthreaded VisionEngine pyuv sosal vcam v4l2 imgdbg vlib_${TARGET_CPU} rvm_${TARGET_CPU} yuv imglib_${TARGET_CPU} c6xsim"
 export TARGET_BINS=""
-export TARGET_TEST="dvp_demo dvp_simple dvp_test v4l2_test vcam_simple vcam_server sosal_test uinput_test"
+export TARGET_TEST="dvp_demo dvp_simple dvp_test dein_test v4l2_test vcam_simple vcam_server sosal_test uinput_test"
 export TARGET_APPS=""
 export TARGET_PKGS=""
 export TARGET_SRVC=""
@@ -336,7 +336,8 @@ do
         export PUBLIC_LIB_HEADER_LIST=" ${TARGET_ROOT}/libraries/public/yuv/include/yuv/dvp_kl_yuv.h
                                         ${TARGET_ROOT}/libraries/public/imgfilter/include/imgfilter/dvp_kl_imgfilter.h
                                         ${TARGET_ROOT}/libraries/public/ocl/include/ocl/dvp_kl_ocl.h
-                                        ${TARGET_ROOT}/libraries/public/vrun/include/vrun/dvp_kl_vrun.h"
+                                        ${TARGET_ROOT}/libraries/public/vrun/include/vrun/dvp_kl_vrun.h
+                                        ${TARGET_ROOT}/libraries/public/dsplib/include/dsplib/dvp_kl_dsplib.h"
         export PRIVATE_LIB_HEADER_LIST="${VISION_ROOT}/libraries/protected/imglib/include/imglib/dvp_kl_imglib.h
                                         ${VISION_ROOT}/libraries/protected/vlib/include/vlib/dvp_kl_vlib.h
                                         ${VISION_ROOT}/libraries/protected/rvm/include/rvm/dvp_kl_rvm.h

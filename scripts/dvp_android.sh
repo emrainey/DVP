@@ -116,10 +116,10 @@ export TARGET_ROOT="${MYDROID}/${TI_HW_ROOT}/${TARGET_PROJ}"
 export TARGET_LIBS="dvp dvp_kgm_cpu dvp_kgm_simcop dvp_kgm_dsp"
 if [ "${TARGET_ANDROID}" == "ICS" ] || [ "${TARGET_ANDROID}" == "JB" ]; then
 export TARGET_SLIB="cthreaded VisionEngine pyuv sosal vcam v4l2 imgdbg sosal_shm omaprpc gfxdisp anw sf"
-export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_dein dvp_test dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test gfxd_test modload_test dvp_unittest"
+export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_test dvp_dein dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test gfxd_test modload_test dvp_unittest"
 else
 export TARGET_SLIB="cthreaded VisionEngine pyuv sosal vcam v4l2 imgdbg sosal_shm"
-export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_dein dvp_test dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test modload_test dvp_unittest"
+export TARGET_TEST="dvp_demo dvp_dsplib dvp_simple dvp_test dvp_dein dvp_share dvp_crash_test dvp_info v4l2_test vcam_test vcam_simple vcam_server sosal_test imgfilter_test uinput_test modload_test dvp_unittest"
 fi
 export TARGET_BINS="shm_service"
 export TARGET_APPS=""
@@ -457,7 +457,8 @@ do
         export PUBLIC_LIB_HEADER_LIST=" ${TARGET_ROOT}/libraries/public/yuv/include/yuv/dvp_kl_yuv.h
                                         ${TARGET_ROOT}/libraries/public/imgfilter/include/imgfilter/dvp_kl_imgfilter.h
                                         ${TARGET_ROOT}/libraries/public/ocl/include/ocl/dvp_kl_ocl.h
-                                        ${TARGET_ROOT}/libraries/public/vrun/include/vrun/dvp_kl_vrun.h"
+                                        ${TARGET_ROOT}/libraries/public/vrun/include/vrun/dvp_kl_vrun.h
+                                        ${TARGET_ROOT}/libraries/public/dsplib/include/dsplib/dvp_kl_dsplib.h"
         export PRIVATE_LIB_HEADER_LIST="${MYDROID}/${VISION_ROOT}/libraries/protected/imglib/include/imglib/dvp_kl_imglib.h
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/vlib/include/vlib/dvp_kl_vlib.h
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/rvm/include/rvm/dvp_kl_rvm.h
