@@ -1551,6 +1551,7 @@ PREDEFINED             = POSIX \
                          DVP_USE_IMGFILTER \
                          DVP_USE_VRUN \
                          DVP_USE_DSPLIB \
+                         DVP_USE_DEI \
                          DVP_DEBUG=2 \
                          SOSAL_USE_ION \
                          SOSAL_USE_SHARED_T \

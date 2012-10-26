@@ -458,7 +458,8 @@ do
                                         ${TARGET_ROOT}/libraries/public/imgfilter/include/imgfilter/dvp_kl_imgfilter.h
                                         ${TARGET_ROOT}/libraries/public/ocl/include/ocl/dvp_kl_ocl.h
                                         ${TARGET_ROOT}/libraries/public/vrun/include/vrun/dvp_kl_vrun.h
-                                        ${TARGET_ROOT}/libraries/public/dsplib/include/dsplib/dvp_kl_dsplib.h"
+                                        ${TARGET_ROOT}/libraries/public/dsplib/include/dsplib/dvp_kl_dsplib.h
+                                        ${TARGET_ROOT}/libraries/public/dei/include/dei/dvp_kl_dei.h"
         export PRIVATE_LIB_HEADER_LIST="${MYDROID}/${VISION_ROOT}/libraries/protected/imglib/include/imglib/dvp_kl_imglib.h
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/vlib/include/vlib/dvp_kl_vlib.h
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/rvm/include/rvm/dvp_kl_rvm.h
