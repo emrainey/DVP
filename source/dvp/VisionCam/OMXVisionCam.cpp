@@ -1044,6 +1044,7 @@ status_e OMXVisionCam::useBuffers( DVP_Image_t *pImages, uint32_t numImages, Vis
         mBuffersInUse[port].mBuffers = pImages;
         mBuffersInUse[port].mNumberBuffers = (uint32_t)numImages;
 
+        data->mBufSize      = pImages[0].numBytes;
         data->mNumBufs      = mBuffersInUse[port].mNumberBuffers;
         data->mStride       = mBuffersInUse[port].mBuffers[0].y_stride;
 
@@ -2426,13 +2427,6 @@ status_e OMXVisionCam::setResolution (void *param, size_t size __attribute__ ((u
 
                 if( STATUS_SUCCESS == vcamError )
                 {
-                    if( VCAM_PORT_VIDEO == p
-                        && ( VisionCamResolutions[res].mWidth > VisionCamResolutions[VCAM_RES_VGA].mWidth
-                        || VisionCamResolutions[res].mHeight > VisionCamResolutions[VCAM_RES_VGA].mHeight ) )
-                    {
-                        res = VCAM_RES_VGA;
-                    }
-
                     mCurGreContext.mCameraPortParams[p].mWidth = VisionCamResolutions[res].mWidth;
                     mCurGreContext.mCameraPortParams[p].mHeight = VisionCamResolutions[res].mHeight;
                 }
@@ -3667,10 +3661,9 @@ OMX_ERRORTYPE OMXVisionCam::setPortDef( int32_t port )
         }
 
         if( omxError == OMX_ErrorNone )
+        {
             omxError = initPortCheck(&portCheck, p);
-
-        if( omxError == OMX_ErrorNone )
-            portData->mBufSize = portCheck.nBufferSize;
+        }
 
 #if defined(VCAM_SET_FORMAT_ROTATION)
             // set the rotation type on the port
@@ -4543,6 +4536,36 @@ OMX_ERRORTYPE OMXVisionCam::EmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
     return OMX_ErrorNotImplemented;
 }
 
+// #define PRINT_BUFFER_HEADER
+#ifdef PRINT_BUFFER_HEADER
+void printBufferHeader(OMX_BUFFERHEADERTYPE* pBuffHeader)
+{
+    static int32_t cnt = 0;
+
+    if( cnt % 10 )
+    {
+        DVP_PRINT( DVP_ZONE_ALWAYS, "Dump OMX Buffer Header:\n");
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nSize                   = %u\n",    pBuffHeader->nSize                  );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t pBuffer                 = %p\n",    pBuffHeader->pBuffer                );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nAllocLen               = %u\n",    pBuffHeader->nAllocLen              );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nFilledLen              = %u\n",    pBuffHeader->nFilledLen             );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nOffset                 = %u\n",    pBuffHeader->nOffset                );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t pAppPrivate             = %p\n",    pBuffHeader->pAppPrivate            );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t pPlatformPrivate        = %p\n",    pBuffHeader->pPlatformPrivate       );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t pInputPortPrivate       = %p\n",    pBuffHeader->pInputPortPrivate      );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t pOutputPortPrivate      = %p\n",    pBuffHeader->pOutputPortPrivate     );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t hMarkTargetComponent    = %p\n",    pBuffHeader->hMarkTargetComponent   );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t pMarkData               = %p\n",    pBuffHeader->pMarkData              );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nTickCount              = %u\n",    pBuffHeader->nTickCount             );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nTimeStamp              = %ll\n",   pBuffHeader->nTimeStamp             );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nFlags                  = 0x%x\n",  pBuffHeader->nFlags                 );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nOutputPortIndex        = %u\n",    pBuffHeader->nOutputPortIndex       );
+        DVP_PRINT( DVP_ZONE_ALWAYS, "\t nInputPortIndex         = %u\n",    pBuffHeader->nInputPortIndex        );
+    }
+    cnt++;
+}
+#endif // PRINT_BUFFER_HEADER
+
 //GRE fill buffer done callback
 OMX_ERRORTYPE OMXVisionCam::FillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
                                             OMX_IN OMX_PTR pAppData,
@@ -4557,6 +4580,10 @@ OMX_ERRORTYPE OMXVisionCam::FillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
     SimpleMsg_t msg;
     msg.event = EFrameReceived;
     msg.data = (void*)pBuffHeader;
+
+#ifdef PRINT_BUFFER_HEADER
+    printBufferHeader(pBuffHeader);
+#endif
 
     if( queue_write(pOMXCam->mFrameMessageQ, true_e, &msg) )
         semaphore_post(&pOMXCam->mFrameSem );

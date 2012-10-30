@@ -119,10 +119,10 @@ module_t initModule(VisionCam ** gCam );
 status_e deinitModule( module_t handle, VisionCam ** gCam );
 
 status_e allocPreviewPortBuffers(VisionCam *vCam, uint32_t width, uint32_t height);
-void deallocDislayBufers();
+void deallocPreviewPortBufers();
 
 status_e allocVideoPortBuffers(VisionCam *vCam, uint32_t width, uint32_t height);
-void deallocImageBufers();
+void deallocVideoPortBufers();
 
 status_e startServices( VisionCam * gCam );
 status_e stopServices( VisionCam * gCam );

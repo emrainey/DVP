@@ -127,7 +127,9 @@ void capFrame(void *input __attribute__ ((unused)))
     recNextFrame = !recNextFrame;
 
     if( recNextFrame )
-        puts("Very next frame will be recorded.");
+    {
+        puts("Next frame will be recorded.");
+    }
 }
 #endif // CAP_FRAME
 
@@ -144,7 +146,7 @@ status_e allocPreviewPortBuffers(VisionCam *vCam, uint32_t width, uint32_t heigh
 
     if( !dvpd[VCAM_PORT_PREVIEW] )
     {
-        dvpd[VCAM_PORT_PREVIEW] = DVP_Display_Create(width, height,
+        dvpd[VCAM_PORT_PREVIEW] = DVP_Display_Create(res.mWidth, res.mHeight , //width, height,
                                   res.mWidth, res.mHeight,
                                   DVP_DISPLAY_WIDTH, DVP_DISPLAY_HEIGHT,
                                   res.mWidth, res.mHeight,
@@ -163,7 +165,7 @@ status_e allocPreviewPortBuffers(VisionCam *vCam, uint32_t width, uint32_t heigh
             if( !DVP_Display_Alloc(dvpd[VCAM_PORT_PREVIEW], &dvpBuffsDisp[i]) )
             {
                 printf("Error allocating preview port buffers.\n");
-                deallocDislayBufers();
+                deallocPreviewPortBufers();
                 ret = STATUS_NOT_ENOUGH_MEMORY;
                 break;
             }
@@ -181,7 +183,7 @@ status_e allocPreviewPortBuffers(VisionCam *vCam, uint32_t width, uint32_t heigh
     return ret;
 }
 
-void deallocDislayBufers()
+void deallocPreviewPortBufers()
 {
     if( dvpBuffsDisp )
     {
@@ -229,9 +231,10 @@ status_e allocVideoPortBuffers(VisionCam *vCam, uint32_t width, uint32_t height)
 
     vCam->getParameter(VCAM_PARAM_2DBUFFER_DIM, &res, sizeof(res), VCAM_PORT_VIDEO);
 
+    printf("res.mWidth, res.mHeight %d , %d \n", res.mWidth, res.mHeight);
     if( !dvpd[VCAM_PORT_VIDEO] )
     {
-        dvpd[VCAM_PORT_VIDEO] = DVP_Display_Create(width, height,
+        dvpd[VCAM_PORT_VIDEO] = DVP_Display_Create(res.mWidth, res.mHeight , //width, height,
                                   res.mWidth, res.mHeight,
                                   DVP_DISPLAY_WIDTH, DVP_DISPLAY_HEIGHT,
                                   res.mWidth, res.mHeight,
@@ -250,10 +253,11 @@ status_e allocVideoPortBuffers(VisionCam *vCam, uint32_t width, uint32_t height)
             if( !DVP_Display_Alloc(dvpd[VCAM_PORT_VIDEO], &dvpBuffsImg[i]) )
             {
                 printf("Error allocating video display buffers.\n");
-                deallocImageBufers();
+                deallocVideoPortBufers();
                 ret = STATUS_NOT_ENOUGH_MEMORY;
                 break;
             }
+            DVP_PrintImage(DVP_ZONE_ALWAYS, &dvpBuffsImg[i]);
         }
     }
     else
@@ -268,7 +272,7 @@ status_e allocVideoPortBuffers(VisionCam *vCam, uint32_t width, uint32_t height)
     return ret;
 }
 
-void deallocImageBufers()
+void deallocVideoPortBufers()
 {
     if( dvpBuffsImg )
     {
@@ -317,7 +321,7 @@ status_e allocVideoPortBuffers(VisionCam *vCam, uint32_t width, uint32_t height)
             if( !DVP_Image_Alloc( hDVP, &dvpBuffsImg[i], DVP_MTYPE_MPUNONCACHED_2DTILED ) )
             {
                 printf("Error allocating image buffers.\n");
-                deallocImageBufers();
+                deallocVideoPortBufers();
 
                 ret = STATUS_NOT_ENOUGH_MEMORY;
                 break;
@@ -337,7 +341,7 @@ status_e allocVideoPortBuffers(VisionCam *vCam, uint32_t width, uint32_t height)
     return ret;
 }
 
-void deallocImageBufers()
+void deallocVideoPortBufers()
 {
     if( dvpBuffsImg )
     {
@@ -442,11 +446,11 @@ status_e stopServices( VisionCam * vCam )
 
     if( dvpBuffsDisp )
     {
-        deallocDislayBufers();
+        deallocPreviewPortBufers();
     }
 
     if( dvpBuffsImg )
-        deallocImageBufers();
+        deallocVideoPortBufers();
 
     if( STATUS_SUCCESS == result )
         result = vCam->disablePreviewCbk(sendBufferTo_V4L);
@@ -1146,7 +1150,7 @@ void enableFramePack( void *input )
     else puts("\tframe pack disabled");
 }
 
-bool save2Dimage( VisionCamFrame *fr)
+bool save2Dframe( VisionCamFrame *fr)
 {
     bool success = true;
     DVP_Image_t *pImage = NULL;
@@ -1165,8 +1169,11 @@ bool save2Dimage( VisionCamFrame *fr)
     if( outFile )
     {
         pImage = (DVP_Image_t *)fr->mFrameBuff;
+
+        // beginning of meaningful image data
         pos = pImage->pData[0] + fr->mOffsetY * pImage->y_stride
                                + fr->mOffsetX * pImage->x_stride;
+
         size_t widthInBytes = pImage->width * pImage->x_stride;
 
         for( uint32_t h = 0; h < fr->mHeight; h++ , pos += pImage->y_stride )
@@ -1177,16 +1184,84 @@ bool save2Dimage( VisionCamFrame *fr)
                 break;
             }
         }
+
         if( success )
+        {
             printf("%s written !\n", filename);
+        }
 
         fclose(outFile);
     }
     else
+    {
         success = false;
+    }
 
     return success;
 }
+#ifdef CAP_FRAME
+bool save2Dimage( DVP_Image_t *pImage)
+{
+    bool success = true;
+
+    if( recNextFrame )
+    {
+        static int cur = -1;
+        unsigned char *pos = NULL;
+        char filename[33];
+        FILE *outFile = NULL;
+
+        cur++;
+        if( cur%100 )
+        {
+            return false;
+        }
+
+        sprintf(filename, "/sdcard/vcam_image_%05d.yuv", cur);
+        outFile = fopen( filename, "wb");
+
+        if( outFile )
+        {
+            // beginning of meaningful image data
+            pos = pImage->pData[0] + pImage->y_start * pImage->y_stride
+                                   + pImage->x_start * pImage->x_stride;
+
+            size_t widthInBytes = pImage->width * pImage->x_stride;
+
+            for( uint32_t h = 0; h < pImage->bufHeight; h++ , pos += pImage->y_stride )
+            {
+                if( widthInBytes != fwrite(pos, 1, widthInBytes, outFile) )
+                {
+                    success = false;
+                    break;
+                }
+            }
+
+            if( success )
+            {
+                printf("%s written !\n", filename);
+            }
+            else
+            {
+                printf("Couldn't write raw image o a file.\n");
+            }
+
+            fflush(outFile);
+            fclose(outFile);
+        }
+        else
+        {
+            printf("Couldn't write raw image o a file.\n");
+            printf("Couild not open a file for writing!!!\n");
+            success = false;
+        }
+
+        recNextFrame = false;
+    }
+
+    return success;
+}
+#endif // CAP_FRAME
 
 void setDislpayableFrame(void *vCam __attribute__((unused)))
 {
@@ -1204,6 +1279,12 @@ static void sendBufferTo_V4L(VisionCamFrame *cameraFrame)
 
     if( displayedFrame == cameraFrame->mFrameSource )
     {
+#ifdef CAP_FRAME
+    if( recNextFrame )
+    {
+        save2Dimage(pImage);
+    }
+#endif
         if( frameQ[displayedFrame] )
         {
             queue_write(frameQ[displayedFrame], true_e, &pImage);
@@ -1289,7 +1370,7 @@ static void sendBufferTo_V4L(VisionCamFrame *cameraFrame)
 #define PRINT_HISTOGRAM_GAMMA
 #ifdef PRINT_HISTOGRAM_GAMMA
         if( 0 && 100 == frameCount[cameraFrame->mFrameSource - VCAM_PORT_MIN] )
-        {here
+        {
             if( cameraFrame->mMetadata.mGammaL)
             {
                 printf("Gamma L [#items]:%d\n",

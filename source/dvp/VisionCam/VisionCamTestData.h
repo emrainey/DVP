@@ -60,8 +60,9 @@ static bool faceDetectEnabled = false;
 static VisionCamVarFramerateType varFrate;
 
 //static VisionCamPort_e framesDisplayed = VCAM_PORT_PREVIEW;
+#ifdef CAP_FRAME
 static bool recNextFrame = false;
-
+#endif // CAP_FRAME
 static VisionCamRectType cropParams = {
     0,
     0,
