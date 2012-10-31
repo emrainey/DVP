@@ -92,11 +92,8 @@ VisionCam_3A_Export::VisionCam_3A_Export()
     execSRVC->Register( VCAM_3A_Car                 , &VisionCam_3A_Export::Set_3A_Car              , sizeof(OMX_TI_3ASKIP_IPIPE_CAR_CFGTYPE)         );
     execSRVC->Register( VCAM_3A_Lsc                 , &VisionCam_3A_Export::Set_3A_Lsc              , sizeof(OMX_TI_3ASKIP_IPIPE_LSC_CFGTYPE)         );
     execSRVC->Register( VCAM_3A_Histogram           , &VisionCam_3A_Export::Set_3A_Histogram        , sizeof(OMX_TI_3ASKIP_IPIPE_HIST_CFGTYPE)        );
-    execSRVC->Register( VCAM_3A_Boxcar              , &VisionCam_3A_Export::Set_3A_Boxcar           , sizeof(OMX_TI_3ASKIP_IPIPE_BOXCAR_CFGTYPE)      );
     execSRVC->Register( VCAM_3A_Bsc                 , &VisionCam_3A_Export::Set_3A_Bsc              , sizeof(OMX_TI_3ASKIP_IPIPE_BSC_CFGTYPE)         );
-    execSRVC->Register( VCAM_3A_3Dcc                , &VisionCam_3A_Export::Set_3A_3Dcc             , sizeof(OMX_TI_3ASKIP_IPIPE_3DCC_CFGTYPE)        );
     execSRVC->Register( VCAM_3A_DpcOtf              , &VisionCam_3A_Export::Set_3A_DpcOtf           , sizeof(OMX_TI_3ASKIP_IPIPE_DPCOTF_CFGTYPE)      );
-    execSRVC->Register( VCAM_3A_DpcLut              , &VisionCam_3A_Export::Set_3A_DpcLut           , sizeof(OMX_TI_3ASKIP_IPIPE_DPCLUT_CFGTYPE)      );
     execSRVC->Register( VCAM_3A_Cgs                 , &VisionCam_3A_Export::Set_3A_Cgs              , sizeof(OMX_TI_3ASKIP_IPIPE_CGS_CFGTYPE)         );
     execSRVC->Register( VCAM_3A_Dfs                 , &VisionCam_3A_Export::Set_3A_Dfs              , sizeof(OMX_TI_3ASKIP_IPIPEIF_DFS_CFGTYPE)       );
     execSRVC->Register( VCAM_3A_Dpc1                , &VisionCam_3A_Export::Set_3A_Dpc1             , sizeof(OMX_TI_3ASKIP_IPIPEIF_DPC_CFGTYPE)       );
@@ -104,10 +101,15 @@ VisionCam_3A_Export::VisionCam_3A_Export()
     execSRVC->Register( VCAM_3A_Dpcm                , &VisionCam_3A_Export::Set_3A_Dpcm             , sizeof(VCAM_3ASKIP_IPIPEIF_DPCM_CFGTYPE)        );
     execSRVC->Register( VCAM_3A_HLpf                , &VisionCam_3A_Export::Set_3A_HLpf             , sizeof(OMX_TI_3ASKIP_RSZ_LPF_CFGTYPE)           );
     execSRVC->Register( VCAM_3A_VLpf                , &VisionCam_3A_Export::Set_3A_VLpf             , sizeof(OMX_TI_3ASKIP_RSZ_LPF_CFGTYPE)           );
-    execSRVC->Register( VCAM_3A_H3aAewbParams       , &VisionCam_3A_Export::Set_3A_H3aAewbParams    , sizeof(OMX_TI_3ASKIP_H3A_AEWB_PARAMTYPE)        );
-    execSRVC->Register( VCAM_3A_H3aAfParams         , &VisionCam_3A_Export::Set_3A_H3aAfParams      , sizeof(OMX_TI_3ASKIP_H3A_AF_PARAMTYPE)          );
     execSRVC->Register( VCAM_3A_H3aCommonParams     , &VisionCam_3A_Export::Set_3A_H3aCommonParams  , sizeof(OMX_TI_3ASKIP_H3A_COMMON_CFGTYPE)        );
     execSRVC->Register( VCAM_3A_CamControlExpGain   , &VisionCam_3A_Export::Set_3A_CamControlExpGain, sizeof(OMX_TI_3ASKIP_CAM_CONTROL_EXPGAINTYPE)   );
+#ifdef OLD_3A_EXPORT /// @todo those shold be checked: which are still presens but with a different type names and which are no present at all
+    execSRVC->Register( VCAM_3A_3Dcc                , &VisionCam_3A_Export::Set_3A_3Dcc             , sizeof(OMX_TI_3ASKIP_IPIPE_3DCC_CFGTYPE)        );
+    execSRVC->Register( VCAM_3A_DpcLut              , &VisionCam_3A_Export::Set_3A_DpcLut           , sizeof(OMX_TI_3ASKIP_IPIPE_DPCLUT_CFGTYPE)      );
+    execSRVC->Register( VCAM_3A_Boxcar              , &VisionCam_3A_Export::Set_3A_Boxcar           , sizeof(OMX_TI_3ASKIP_IPIPE_BOXCAR_CFGTYPE)      );
+    execSRVC->Register( VCAM_3A_H3aAewbParams       , &VisionCam_3A_Export::Set_3A_H3aAewbParams    , sizeof(OMX_TI_3ASKIP_H3A_AEWB_PARAMTYPE)        );
+    execSRVC->Register( VCAM_3A_H3aAfParams         , &VisionCam_3A_Export::Set_3A_H3aAfParams      , sizeof(OMX_TI_3ASKIP_H3A_AF_PARAMTYPE)          );
+#endif // OLD_3A_EXPORT
 }
 
 VisionCam_3A_Export::~VisionCam_3A_Export()
@@ -821,6 +823,7 @@ status_e VisionCam_3A_Export::Set_3A_Histogram( void *param )
     return ret;
 }
 
+#ifdef OLD_3A_EXPORT
 status_e VisionCam_3A_Export::Set_3A_Boxcar( void *param )
 {
     status_e ret = STATUS_SUCCESS;
@@ -842,6 +845,7 @@ status_e VisionCam_3A_Export::Set_3A_Boxcar( void *param )
 
     return ret;
 }
+#endif // #ifdef OLD_3A_EXPORT
 
 status_e VisionCam_3A_Export::Set_3A_Bsc( void *param )
 {
@@ -865,6 +869,7 @@ status_e VisionCam_3A_Export::Set_3A_Bsc( void *param )
     return ret;
 }
 
+#ifdef OLD_3A_EXPORT
 status_e VisionCam_3A_Export::Set_3A_3Dcc( void *param )
 {
     status_e ret = STATUS_SUCCESS;
@@ -886,7 +891,7 @@ status_e VisionCam_3A_Export::Set_3A_3Dcc( void *param )
 
     return ret;
 }
-
+#endif // OLD_3A_EXPORT
 status_e VisionCam_3A_Export::Set_3A_DpcOtf( void *param )
 {
     status_e ret = STATUS_SUCCESS;
@@ -909,6 +914,7 @@ status_e VisionCam_3A_Export::Set_3A_DpcOtf( void *param )
     return ret;
 }
 
+#ifdef OLD_3A_EXPORT
 status_e VisionCam_3A_Export::Set_3A_DpcLut( void *param )
 {
     status_e ret = STATUS_SUCCESS;
@@ -930,6 +936,7 @@ status_e VisionCam_3A_Export::Set_3A_DpcLut( void *param )
 
     return ret;
 }
+#endif // #ifdef OLD_3A_EXPORT
 
 status_e VisionCam_3A_Export::Set_3A_Cgs( void *param )
 {
@@ -1091,6 +1098,7 @@ status_e VisionCam_3A_Export::Set_3A_VLpf( void *param )
     return ret;
 }
 
+#ifdef OLD_3A_EXPORT
 status_e VisionCam_3A_Export::Set_3A_H3aAewbParams( void *param )
 {
     status_e ret = STATUS_SUCCESS;
@@ -1113,7 +1121,9 @@ status_e VisionCam_3A_Export::Set_3A_H3aAewbParams( void *param )
 
     return ret;
 }
+#endif // #ifdef OLD_3A_EXPORT
 
+#ifdef OLD_3A_EXPORT
 status_e VisionCam_3A_Export::Set_3A_H3aAfParams( void *param )
 {
     status_e ret = STATUS_SUCCESS;
@@ -1136,6 +1146,7 @@ status_e VisionCam_3A_Export::Set_3A_H3aAfParams( void *param )
 
     return ret;
 }
+#endif // #ifdef OLD_3A_EXPORT
 
 status_e VisionCam_3A_Export::Set_3A_H3aCommonParams( void *param )
 {

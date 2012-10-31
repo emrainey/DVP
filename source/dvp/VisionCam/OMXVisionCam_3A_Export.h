@@ -18,7 +18,7 @@
 #define _VISION_CAM_3A_MANUAL_H_
 
 #include <sosal/sosal.h>
-#include <OMX_Mod_Corections.h>
+#include <OMX_TI_IVCommon.h>
 #include <dvp/VisionCam_3A_ExportTypes.h>
 #include <VisionCamUtils.h>
 #include <dvp/dvp_debug.h>
