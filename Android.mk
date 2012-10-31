@@ -1,19 +1,20 @@
+# Copyright (C) 2012 Texas Instruments, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ifeq ($(BOARD_USES_DVP),true)
 
-# Define our own prebuilt macro since the default one doesn't have a tag.
-define add-prebuilt-object
-    include $$(CLEAR_VARS)
-    LOCAL_SRC_FILES := $(1)
-    LOCAL_MODULE_STEM := $(notdir $(basename $(1)))
-    LOCAL_MODULE_SUFFIX := $(suffix $(1))
-    LOCAL_MODULE := $(notdir $(basename $(1)))
-    LOCAL_MODULE_CLASS := $(2)
-    LOCAL_MODULE_TAGS := $(3)
-    include $$(BUILD_PREBUILT)
-endef
-
 TI_HW_ROOT ?= hardware/ti
-
 PLAT_NUMBERS := $(subst ., ,$(PLATFORM_VERSION))
 PLAT_MAJOR := $(word 1,$(PLAT_NUMBERS))
 PLAT_MINOR := $(word 2,$(PLAT_NUMBERS))
@@ -33,15 +34,18 @@ else ifeq ($(PLAT_MAJOR),4)
     endif
 endif
 
+ifneq ($(DVP_DEBUG),)
 $(info Android Version $(TARGET_ANDROID_VERSION))
+endif
 
 DVP_TOP := $(call my-dir)
 DVP_ROOT := $(DVP_TOP)
 SOSAL_TOP := $(call my-dir)
 
-#COMMIT_ID := $(shell cd $(DVP_TOP) && git show | grep commit | awk '{print $$2}')
 COMMIT_ID := $(shell cd $(DVP_TOP) && git describe --tags --dirty)
+ifneq ($(DVP_DEBUG),)
 $(info COMMIT_ID = $(COMMIT_ID))
+endif
 
 ifeq ($(TARGET_ANDROID_VERSION), FROYO)
     IPC_TYPE := syslink
@@ -53,7 +57,9 @@ else ifeq ($(TARGET_ANDROID_VERSION), JELLYBEAN)
     IPC_TYPE := rpmsg
 endif
 
+ifneq ($(DVP_DEBUG),)
 $(info IPC_TYPE is $(IPC_TYPE))
+endif
 
 ifeq ($(IPC_TYPE),syslink)
     RCM_INC := $(TI_HW_ROOT)/syslink/syslink/api/include
@@ -98,7 +104,13 @@ _T := $(TARGET_PLATFORM)
 # Make sure to remove illegal C macro characters like '-'
 TARGET_PLATFORM := $(subst -,_,$(_T))
 
-TARGET_NUM_CORES := 2
+ifeq ($(TARGET_BOARD_PLATFORM),omap4)
+   TARGET_NUM_CORES := 2
+else ifeq ($(TARGET_BOARD_PLATFORM),omap5)
+   TARGET_NUM_CORES := 2
+else
+   TARGET_NUM_CORES := 2
+endif
 
 # convert the product to a platform
 ifeq ($(TARGET_PRODUCT),blaze_tablet)

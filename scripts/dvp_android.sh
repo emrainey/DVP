@@ -93,13 +93,13 @@ if [ -z "${TI_HW_ROOT}" ]; then
     export TI_HW_ROOT=hardware/ti
 fi
 if [ -z "${TARGET_ANDROID}" ]; then
-    export TARGET_ANDROID=GB
-    if [ "${_PRODUCT_}" == "blaze_tablet" ]; then
-        export TARGET_ANDROID=ICS
+    export TARGET_ANDROID=ICS
+    if [ "${_PRODUCT_}" == "blaze_tablet" ] || [ "${_PRODUCT_}" == "blaze" ] || [ "${_PRODUCT_}" == "omap5sevm" ]; then
+        export TARGET_ANDROID=JB
     fi
 fi
 if [ "${_PRODUCT_}" == "maguro" ] || [ "${_PRODUCT_}" == "tuna" ]; then
-    export TARGET_ANDROID=ICS
+    export TARGET_ANDROID=JB
 fi
 if [ "${_PRODUCT_}" == "p2" ]; then
     export TARGET_ANDROID=ICS
