@@ -196,17 +196,37 @@ public:
         return NULL;
     }
 
-    /** @fn execFuncPrt_t getData( int32_t index )
-      * retunrs a pointer to a member function that is registered against given ID.
+    /** @fn void *getData( int32_t index )
+      * gets the data that will be passed to a function, registerred against index
       *
       * @param index - the ID with which the function is registered.
-      * @return pointer to a data that must be passed.
+      * @return pointer to a data that will be passed.
     */
     void *getData( int32_t index )
     {
         execListNode_t *n = getExecNode(index);
         if( n ) return n->data;
         return NULL;
+    }
+
+    /** @fn void setData( int32_t index )
+      * sets the data that will be passes to a function, registeres againt index
+      *
+      * @param index - the ID with which the function is registered.
+      * @return true_e if operation is successful; false_e if nothing is registerred against index
+    */
+    bool_e setData( int32_t index , void *data)
+    {
+        execListNode_t *n = getExecNode(index);
+        if( n )
+        {
+            n->data = data;
+            return true_e;
+        }
+        else
+        {
+            return false_e;
+        }
     }
 
     /** @fn size_t getDataSize( int32_t index )

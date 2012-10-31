@@ -207,6 +207,9 @@ status_e OMXVisionCam::init(void *cookie)
 
     memset( &(mCurGreContext), 0, sizeof( VCAM_ComponentContext ) );
 
+    mSetParameterExecutor = NULL;
+    initParameterSetters();
+
     mCurGreContext.mPortsInUse[VCAM_PORT_ALL] = OMX_ALL;
     mCurGreContext.mPortsInUse[VCAM_PORT_PREVIEW] = VCAM_CAMERA_PORT_VIDEO_OUT_PREVIEW;
     mCurGreContext.mPortsInUse[VCAM_PORT_VIDEO]   = VCAM_CAMERA_PORT_VIDEO_OUT_VIDEO;
@@ -270,7 +273,8 @@ status_e OMXVisionCam::init(void *cookie)
     mGammaResetPolulated = false_e;
 #endif // _USE_GAMMA_RESET_HC_
 
-    mPendingConfigs = new VisionCamExecutionService<OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>(this);
+//    mPendingConfigs = new VisionCamExecutionService<OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>(this);
+    mPendingConfigs = new VisionCamExecutionService<OMXVisionCam, OMXVisionCam::pendingConfigsFunPtr_t>(this);
 
     return greError;
 }
@@ -344,6 +348,108 @@ OMXVisionCam::~OMXVisionCam()
     mutex_deinit(&mUserRequestLock);
     DVP_PRINT(DVP_ZONE_CAM, "OMX Vision Cam is destroyed!\n");
 }
+
+bool_e OMXVisionCam::initParameterSetters()
+{
+    bool_e  ret = false_e;
+    mSetParameterExecutor = new VisionCamExecutionService<OMXVisionCam, OMXVisionCam::setParameterFuncPtr_t>(this);
+    if( mSetParameterExecutor )
+    {
+        bool_e checkTable[VCAM_PARAM_MAX - VCAM_PARAM_MIN - 1];
+        memset(checkTable, false_e, sizeof(checkTable));
+
+        ret = registerParameterSetters(checkTable);
+
+        for( int32_t i = 0; i < dimof(checkTable); i++ )
+        {
+            if( checkTable[i] != true_e )
+            {
+                int32_t paramId = VCAM_PARAM_MIN + 1 + i;
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Failed to register setter function for parameter with ID %d ( 0x%x )", paramId, paramId);
+            }
+        }
+    }
+    else
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Error: Could not initialize parameter setters!\n");
+    }
+    return ret;
+}
+
+bool_e OMXVisionCam::registerParameterSetters( bool_e *checkTable )
+{
+    bool_e ret = false_e;
+
+    if( mSetParameterExecutor )
+    {
+#define FILL_CHECK_TABLE(i) checkTable[i - VCAM_PARAM_MIN - 1 ]
+
+        FILL_CHECK_TABLE(VCAM_PARAM_COLOR_SPACE_FOURCC)     = mSetParameterExecutor->Register( VCAM_PARAM_COLOR_SPACE_FOURCC    , &OMXVisionCam::setColorSpace          , sizeof(fourcc_t)                  );
+        FILL_CHECK_TABLE(VCAM_PARAM_BRIGHTNESS)             = mSetParameterExecutor->Register( VCAM_PARAM_BRIGHTNESS            , &OMXVisionCam::setBrightness          , sizeof(uint32_t)                  );
+        FILL_CHECK_TABLE(VCAM_PARAM_CONTRAST)               = mSetParameterExecutor->Register( VCAM_PARAM_CONTRAST              , &OMXVisionCam::setContrast            , sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_SHARPNESS)              = mSetParameterExecutor->Register( VCAM_PARAM_SHARPNESS             , &OMXVisionCam::setSharpness           , sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_SATURATION)             = mSetParameterExecutor->Register( VCAM_PARAM_SATURATION            , &OMXVisionCam::setSaturation          , sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_FPS_FIXED)              = mSetParameterExecutor->Register( VCAM_PARAM_FPS_FIXED             , &OMXVisionCam::setFrameRate_Fixed     , sizeof(uint32_t)                  );
+        FILL_CHECK_TABLE(VCAM_PARAM_FPS_VAR)                = mSetParameterExecutor->Register( VCAM_PARAM_FPS_VAR               , &OMXVisionCam::setFrameRate_Variable  , sizeof(VisionCamVarFramerateType) );
+        FILL_CHECK_TABLE(VCAM_PARAM_FLICKER)                = mSetParameterExecutor->Register( VCAM_PARAM_FLICKER               , &OMXVisionCam::setFlicker             , sizeof(VisionCamFlickerType)      );
+        FILL_CHECK_TABLE(VCAM_PARAM_CROP)                   = mSetParameterExecutor->Register( VCAM_PARAM_CROP                  , &OMXVisionCam::setCrop                , sizeof(VisionCamRectType)         );
+        FILL_CHECK_TABLE(VCAM_PARAM_STEREO_INFO)            = mSetParameterExecutor->Register( VCAM_PARAM_STEREO_INFO           , &OMXVisionCam::setStereoInfo          , sizeof(VisionCamStereoInfo)       );
+        FILL_CHECK_TABLE(VCAM_PARAM_CAP_MODE)               = mSetParameterExecutor->Register( VCAM_PARAM_CAP_MODE              , &OMXVisionCam::setCameraOperatingMode , sizeof(VisionCamCaptureMode)      );
+        FILL_CHECK_TABLE(VCAM_PARAM_SENSOR_SELECT)          = mSetParameterExecutor->Register( VCAM_PARAM_SENSOR_SELECT         , &OMXVisionCam::setSensor              , sizeof(VisionCamSensorSelection)  );
+        FILL_CHECK_TABLE(VCAM_PARAM_EXPOSURE_COMPENSATION)  = mSetParameterExecutor->Register( VCAM_PARAM_EXPOSURE_COMPENSATION , &OMXVisionCam::setExposureCompensation, sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_RESOLUTION)             = mSetParameterExecutor->Register( VCAM_PARAM_RESOLUTION            , &OMXVisionCam::setResolution          , sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_MANUAL_EXPOSURE)        = mSetParameterExecutor->Register( VCAM_PARAM_MANUAL_EXPOSURE       , &OMXVisionCam::setManualExporureTime  , sizeof(uint32_t)                  );
+        FILL_CHECK_TABLE(VCAM_PARAM_EXPOSURE_ISO)           = mSetParameterExecutor->Register( VCAM_PARAM_EXPOSURE_ISO          , &OMXVisionCam::setISO                 , sizeof(uint32_t)                  );
+        FILL_CHECK_TABLE(VCAM_PARAM_AWB_MODE)               = mSetParameterExecutor->Register( VCAM_PARAM_AWB_MODE              , &OMXVisionCam::setWhiteBalanceMode    , sizeof(VisionCamWhiteBalType)     );
+        FILL_CHECK_TABLE(VCAM_PARAM_COLOR_TEMP)             = mSetParameterExecutor->Register( VCAM_PARAM_COLOR_TEMP            , &OMXVisionCam::setColorTemp           , sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_MIRROR)                 = mSetParameterExecutor->Register( VCAM_PARAM_MIRROR                , &OMXVisionCam::setMirror              , sizeof(int32_t)                   );
+
+#if defined(OMX_CAMERA_SUPPORTS_IMAGE_PYRAMID)
+        FILL_CHECK_TABLE(VCAM_PARAM_IMAGE_PYRAMID)          = mSetParameterExecutor->Register( VCAM_PARAM_IMAGE_PYRAMID         , &OMXVisionCam::setImagePyramid        , sizeof(VisionCamImagePyramidType) );
+#endif // OMX_CAMERA_SUPPORTS_IMAGE_PYRAMID
+
+#if ( defined(DUCATI_1_5) || defined(DUCATI_2_0) ) && defined(OMX_CAMERA_SUPPORTS_MANUAL_CONTROLS)
+        FILL_CHECK_TABLE(VCAM_PARAM_AWB_MIN_DELAY_TIME)     = mSetParameterExecutor->Register( VCAM_PARAM_AWB_MIN_DELAY_TIME    , &OMXVisionCam::setAWBminDelayTime     , sizeof(uint32_t)                  );
+        FILL_CHECK_TABLE(VCAM_PARAM_GESTURES_INFO)          = mSetParameterExecutor->Register( VCAM_PARAM_GESTURES_INFO         , &OMXVisionCam::setGestureInfo         , sizeof(VisionCamGestureInfo)      );
+        FILL_CHECK_TABLE(VCAM_PARAM_AGC_MIN_DELAY_TIME)     = mSetParameterExecutor->Register( VCAM_PARAM_AGC_MIN_DELAY_TIME    , &OMXVisionCam::setAGC_MinimumDelay    , sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_AGC_LOW_TH)             = mSetParameterExecutor->Register( VCAM_PARAM_AGC_LOW_TH            , &OMXVisionCam::setAGC_LowThreshold    , sizeof(int32_t)                   );
+        FILL_CHECK_TABLE(VCAM_PARAM_AGC_HIGH_TH)            = mSetParameterExecutor->Register( VCAM_PARAM_AGC_HIGH_TH           , &OMXVisionCam::setAGC_HighThreshold   , sizeof(int32_t)                   );
+#endif // ((DUCATI_1_5) || defined(DUCATI_2_0) ) && (OMX_CAMERA_SUPPORTS_MANUAL_CONTROLS)
+
+        FILL_CHECK_TABLE(VCAM_PARAM_HEIGHT)                 = mSetParameterExecutor->Register( VCAM_PARAM_HEIGHT                , &OMXVisionCam::setPreviewHeight        , sizeof(uint32_t)                 );
+        FILL_CHECK_TABLE(VCAM_PARAM_WIDTH)                  = mSetParameterExecutor->Register( VCAM_PARAM_WIDTH                 , &OMXVisionCam::setPreaviewWidth        , sizeof(uint32_t)                 );
+        FILL_CHECK_TABLE(VCAM_PARAM_DO_AUTOFOCUS)           = mSetParameterExecutor->Register( VCAM_PARAM_DO_AUTOFOCUS          , &OMXVisionCam::startAutoFocus          , sizeof(VisionCamFocusMode)       );
+        FILL_CHECK_TABLE(VCAM_PARAM_DO_MANUALFOCUS)         = mSetParameterExecutor->Register( VCAM_PARAM_DO_MANUALFOCUS        , &OMXVisionCam::startManualFocus        , sizeof(uint32_t)                 );
+
+#ifndef EXPORTED_3A
+        FILL_CHECK_TABLE(VCAM_PARAM_WB_COLOR_GAINS)         = mSetParameterExecutor->Register( VCAM_PARAM_WB_COLOR_GAINS        , &OMXVisionCam::setWBalColorGains       , sizeof(VisionCamWhiteBalGains)   );
+        FILL_CHECK_TABLE(VCAM_PARAM_GAMMA_TBLS)             = mSetParameterExecutor->Register( VCAM_PARAM_GAMMA_TBLS            , &OMXVisionCam::setGammaTableColorGains , sizeof(VisionCamGammaTableType)  );
+#endif // EXPORTED_3A
+
+#if defined(VCAM_SET_FORMAT_ROTATION)
+        FILL_CHECK_TABLE(VCAM_PARAM_ROTATION)               = mSetParameterExecutor->Register( VCAM_PARAM_ROTATION              , &OMXVisionCam::setFormatRotation       , sizeof(int32_t)                  );
+#else
+        FILL_CHECK_TABLE(VCAM_PARAM_ROTATION)               = mSetParameterExecutor->Register( VCAM_PARAM_ROTATION              , &OMXVisionCam::setPreviewRotation      , sizeof(int32_t)                  );
+#endif VCAM_SET_FORMAT_ROTATION
+
+#ifdef EXPORTED_3A
+        FILL_CHECK_TABLE(VCAM_PARAM_EXPORTED_3A_HOLD)       = mSetParameterExecutor->Register( VCAM_PARAM_EXPORTED_3A_HOLD      , &OMXVisionCam::startCollectingMaual3AParams   , 0                         );
+        FILL_CHECK_TABLE(VCAM_PARAM_EXPORTED_3A_SET)        = mSetParameterExecutor->Register( VCAM_PARAM_EXPORTED_3A_SET       , &OMXVisionCam::setManual3AParam               , sizeof(VisionCam_3Asettings_Base_t) );
+        FILL_CHECK_TABLE(VCAM_PARAM_EXPORTED_3A_APPLY)      = mSetParameterExecutor->Register( VCAM_PARAM_EXPORTED_3A_APPLY     , &OMXVisionCam::applyCollectedManual3AParams   , 0                         );
+        FILL_CHECK_TABLE(VCAM_PARAM_EXPORTED_3A_RESET)      = mSetParameterExecutor->Register( VCAM_PARAM_EXPORTED_3A_RESET     , &OMXVisionCam::resetManual3AParams            , 0                         );
+#endif // EXPORTED_3A
+
+#undef FILL_CHECK_TABLE
+    }
+    else
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Error: Parameter executor is NULL!\n");
+        DVP_PRINT(DVP_ZONE_ERROR, "Error: Couldn't register parameter setters!\n");
+    }
+
+    return ret;
+}
+
 
 /**
 * This is used to get esier the state of component.
@@ -1339,7 +1445,9 @@ status_e OMXVisionCam::sendCommand( VisionCamCmd_e cmdId, void *param, uint32_t 
     }
 
     if (greError == STATUS_SUCCESS)
+    {
         greError = ConvertError(omxError);
+    }
 
     if (greError != STATUS_SUCCESS)
     {
@@ -1354,8 +1462,7 @@ status_e OMXVisionCam::sendCommand( VisionCamCmd_e cmdId, void *param, uint32_t 
 */
 status_e OMXVisionCam::setParameter( VisionCamParam_e paramId, void* param, uint32_t size, VisionCamPort_e port)
 {
-    status_e greError = STATUS_SUCCESS;
-    OMX_ERRORTYPE omxError = OMX_ErrorNone;
+    status_e vcamError = STATUS_SUCCESS;
 
     SOSAL::AutoLock lock( &mUserRequestLock );
 
@@ -1372,402 +1479,41 @@ status_e OMXVisionCam::setParameter( VisionCamParam_e paramId, void* param, uint
     if (getComponentState() == OMX_StateInvalid)
         return STATUS_INVALID_STATE;
 
-    switch( paramId )
+    if( VCAM_PARAM_MIN  < paramId && paramId < VCAM_PARAM_MAX )
     {
-        case VCAM_PARAM_HEIGHT:
+        if( mSetParameterExecutor )
         {
-            int32_t p;
-            LOOP_PORTS( port , p )
-                mCurGreContext.mCameraPortParams[p].mHeight = *((OMX_U32*)param);
-            break;
-        }
-
-        case VCAM_PARAM_WIDTH:
-        {
-            int32_t p;
-            LOOP_PORTS( port , p )
-                    mCurGreContext.mCameraPortParams[p].mWidth = *((OMX_U32*)param);
-            break;
-        }
-
-
-        case VCAM_PARAM_COLOR_SPACE_FOURCC:
-        {
-            greError = setColorSpace(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_DO_AUTOFOCUS:
-        {
-            greError = startAutoFocus( *((VisionCamFocusMode*)param) );
-            break;
-        }
-
-        case VCAM_PARAM_DO_MANUALFOCUS:
-        {
-            mManualFocusDistance = *((uint32_t*)param);
-            greError = startAutoFocus( VCAM_FOCUS_CONTROL_ON );
-            break;
-        }
-
-        case VCAM_PARAM_BRIGHTNESS:
-        {
-            greError = setBrightness(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_CONTRAST:
-        {
-            greError = setContrast(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_SHARPNESS:
-        {
-            greError = setSharpness(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_SATURATION:
-        {
-            greError = setSaturation(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_FPS_FIXED:
-        {
-            greError = setFrameRate_Fixed(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_FPS_VAR:
-        {
-            greError = setFrameRate_Variable(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_FLICKER:
-        {
-            greError = setFlicker(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_CROP:
-        {
-            greError = setCrop(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_STEREO_INFO:
-        {
-            greError = setStereoInfo(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_CAP_MODE:
-        {
-            greError = setCameraOperatingMode(param, size, port );
-            break;
-        }
-
-        case VCAM_PARAM_SENSOR_SELECT:
-        {
-            greError = setSensor(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_EXPOSURE_COMPENSATION:
-        {
-            greError = setExposureCompensation(param, size, port );
-            break;
-        }
-
-        case VCAM_PARAM_RESOLUTION:
-        {
-            greError = setResolution (param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_MANUAL_EXPOSURE:
-        {
-            greError = setManualExporureTime(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_EXPOSURE_ISO:
-        {
-            greError = setISO(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_AWB_MODE:
-        {
-            greError = setWhiteBalanceMode(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_COLOR_TEMP:
-        {
-
-            greError = setColorTemp(param, size, port);
-            break;
-        }
-#ifndef EXPORTED_3A
-        case VCAM_PARAM_WB_COLOR_GAINS:
-        {
-#ifdef USE_WB_GAIN_PATCH
-            VisionCamWhiteBalGains wbGains = *((VisionCamWhiteBalGains*)param);
-            uint16_t * tmp;
-            CALCULATE_WB_GAINS_OFFSET(uint16_t,mWBbuffer,tmp);
-
-            tmp[ RED ] = wbGains.mRed;
-            tmp[ GREEN_RED ] = wbGains.mGreen_r;
-            tmp[ GREEN_BLUE ] = wbGains.mGreen_b;
-            tmp[ BLUE ] = wbGains.mBlue;
-
-            OMX_TI_CONFIG_SHAREDBUFFER skipBuffer;
-            skipBuffer.nSize = sizeof( OMX_TI_CONFIG_SHAREDBUFFER );
-            memcpy( &skipBuffer.nVersion , mLocalVersion , sizeof(OMX_VERSIONTYPE) );
-
-            if( wbGains.mRed >= COLOR_GAIN_MIN &&  wbGains.mRed <= COLOR_GAIN_MAX
-                && wbGains.mGreen_b >= COLOR_GAIN_MIN && wbGains.mGreen_b <= COLOR_GAIN_MAX
-                && wbGains.mGreen_r >= COLOR_GAIN_MIN && wbGains.mGreen_r <= COLOR_GAIN_MAX
-                && wbGains.mBlue >= COLOR_GAIN_MIN && wbGains.mBlue <= COLOR_GAIN_MAX )
+            mSetParameterExecutor->setData(paramId, param); // save the data, so we could use it later
+            setParameterFuncPtr_t execFn = mSetParameterExecutor->getFunc(paramId);
+            if( execFn )
             {
-                skipBuffer.pSharedBuff = (OMX_U8*)mWBbuffer;
-                skipBuffer.nSharedBuffSize = sizeof(mWBbuffer);
-            }
-            else if( !wbGains.mRed && !wbGains.mGreen_b && !wbGains.mGreen_r && !wbGains.mBlue )
-            {   /// all gains are zero => auto mode
-                skipBuffer.pSharedBuff = (OMX_U8*)mWBresetBuffer;
-                skipBuffer.nSharedBuffSize = sizeof(mWBresetBuffer);
+                vcamError = (this->*execFn)(param, size, port);
             }
             else
             {
-                greError = STATUS_INVALID_PARAMETER;
-                break;
+                DVP_PRINT(DVP_ZONE_WARNING, "No Execution service provided for this parameter.\n");
             }
-
-            int32_t p = port;
-//            LOOP_PORTS(port, p)
-            {
-                skipBuffer.nPortIndex = p;
-                omxError = OMX_SetConfig( mCurGreContext.mHandleComp,
-                                        (OMX_INDEXTYPE) OMX_TI_IndexConfigAAAskipBuffer,
-                                        &skipBuffer );
-            }
-#endif // USE_WB_GAIN_PATCH
-            break;
         }
-
-        case VCAM_PARAM_GAMMA_TBLS:
+        else
         {
-            VisionCamGammaTableType *gammaTbl = (VisionCamGammaTableType*)(param);
-            OMX_TI_CONFIG_SHAREDBUFFER skipBuffer;
-            OMX_STRUCT_INIT(skipBuffer, OMX_TI_CONFIG_SHAREDBUFFER, mLocalVersion);
-
-            uint32_t* base = (uint32_t *)(mGammaTablesBuf + 12); // 12 bytes offset for first table
-            uint16_t *redTbl      = (uint16_t*)(base[0] + (uint32_t)&base[2]);
-            uint16_t *blueTbl     = (uint16_t*)(base[1] + (uint32_t)&base[2]);
-            uint16_t *greenTbl    = (uint16_t*)(base[2] + (uint32_t)&base[2]);
-
-#ifdef _USE_GAMMA_RESET_HC_
-            if( !mGammaResetPolulated )
-            {
-                skipBuffer.pSharedBuff = (OMX_U8*)mGammaResetTablesBuf;
-                skipBuffer.nSharedBuffSize = sizeof(mGammaResetTablesBuf);
-                omxError = OMX_GetConfig( mCurGreContext.mHandleComp,
-                                    (OMX_INDEXTYPE) OMX_TI_IndexConfigAAAskipBuffer,
-                                    &skipBuffer );
-
-                if( OMX_ErrorNone == omxError )
-                    mGammaResetPolulated = true;
-            }
-#endif // _USE_GAMMA_RESET_HC_
-
-            if( gammaTbl->mRedTable && gammaTbl->mGreenTable && gammaTbl->mBlueTable )
-            {
-                if( gammaTbl->mRedTable != redTbl )
-                {
-                    memcpy(redTbl, gammaTbl->mRedTable, GAMMA_TABLE_SIZE );
-                }
-
-                if( gammaTbl->mGreenTable != greenTbl )
-                {
-                    memcpy(greenTbl, gammaTbl->mGreenTable, GAMMA_TABLE_SIZE );
-                }
-
-                if( gammaTbl->mBlueTable != blueTbl )
-                {
-                    memcpy(blueTbl, gammaTbl->mBlueTable, GAMMA_TABLE_SIZE );
-                }
-
-                skipBuffer.pSharedBuff = (OMX_U8*)mGammaTablesBuf;
-                skipBuffer.nSharedBuffSize = sizeof(mGammaTablesBuf)/sizeof(mGammaTablesBuf[0]);
-            }
-            else
-            {
-#ifdef _USE_GAMMA_RESET_HC_
-                if( mGammaResetPolulated )
-                {
-                    skipBuffer.pSharedBuff = (OMX_U8*)mGammaResetTablesBuf;
-                    skipBuffer.nSharedBuffSize = sizeof(mGammaResetTablesBuf)/sizeof(mGammaResetTablesBuf[0]);
-                }
-                else
-                {
-                    DVP_PRINT(DVP_ZONE_WARNING, "No data present in reset Gamma Tables. Leaving Gamma unchanged!!!");
-                }
-#else
-                skipBuffer.pSharedBuff = (OMX_U8*)mGammaResetTablesBuf;
-                skipBuffer.nSharedBuffSize = sizeof(mGammaResetTablesBuf)/sizeof(mGammaResetTablesBuf[0]);
-#endif // _USE_GAMMA_RESET_HC_
-            }
-
-            omxError = OMX_SetConfig( mCurGreContext.mHandleComp,
-                                    (OMX_INDEXTYPE) OMX_TI_IndexConfigAAAskipBuffer,
-                                    &skipBuffer );
-
-            break;
-        }
-#endif // not defined EXPORTED_3A
-
-#if defined(VCAM_SET_FORMAT_ROTATION)
-        case VCAM_PARAM_ROTATION:
-        {
-            int32_t p;
-            LOOP_PORTS( port , p )
-            {
-                mCurGreContext.mCameraPortParams[p].mRotation = *((OMX_S32 *)param);
-            }
-            break;
-        }
-#else
-        case VCAM_PARAM_ROTATION:
-        {
-            OMX_CONFIG_ROTATIONTYPE rotation;
-            OMX_STRUCT_INIT(rotation, OMX_CONFIG_ROTATIONTYPE, mLocalVersion);
-            rotation.nRotation = *((OMX_S32*)param);
-
-            int32_t p;
-            LOOP_PORTS( port , p )
-            {
-                rotation.nPortIndex = mCurGreContext.mPortsInUse[p];
-                OMX_CHECK(omxError, OMX_SetConfig(mCurGreContext.mHandleComp,
-                                                  OMX_IndexConfigCommonRotate,
-                                                  &rotation));
-                DVP_PRINT(DVP_ZONE_CAM, "Setting Rotation to %ld (size: %u)\n", rotation.nRotation, sizeof(rotation));
-            }
-            break;
-        }
-#endif
-        case VCAM_PARAM_MIRROR:
-        {
-            /// @todo test Mirror again (because ot the getLutvalue() usage)
-            greError = setMirror(param, size, port);
-            break;
-        }
-
-#if ( defined(DUCATI_1_5) || defined(DUCATI_2_0) ) && defined(OMX_CAMERA_SUPPORTS_MANUAL_CONTROLS)
-        case VCAM_PARAM_AWB_MIN_DELAY_TIME:
-        {
-            greError = setAWBminDelayTime(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_GESTURES_INFO:
-        {
-            greError = setGestureInfo(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_AGC_MIN_DELAY_TIME:
-        {
-            greError = setAGC_MinimumDelay(param, size, port);
-            break;
-        }
-
-        case VCAM_PARAM_AGC_LOW_TH:
-        {
-            greError = setAGC_LowThreshold(param, size, port);
-            break;
-        }
-        case VCAM_PARAM_AGC_HIGH_TH:
-        {
-            greError = setAGC_HighThreshold(param, size, port);
-            break;
-        }
-#endif
-        case VCAM_PARAM_NAME:
-            // do nothing as this is not supported but it should not fail either
-            break;
-
-#ifdef EXPORTED_3A
-        case VCAM_PARAM_EXPORTED_3A_HOLD:
-        {
-            greError = m3A_Export.hold_3A();
-            break;
-        }
-
-        case VCAM_PARAM_EXPORTED_3A_SET:
-        {
-            VisionCam_3Asettings_Base_t* p = (VisionCam_3Asettings_Base_t* )param;
-            greError = m3A_Export.set( p->eParamType, p->pData, sizeof(p->pData) );
-
-            if( !m3A_Export.isHeld() && STATUS_SUCCESS == greError )
-            {
-                greError = _3A_ApplyExported();
-            }
-
-            break;
-        }
-
-        case VCAM_PARAM_EXPORTED_3A_APPLY:
-        {
-            greError = m3A_Export.release_3A();
-
-            if( STATUS_SUCCESS == greError )
-            {
-                greError = _3A_ApplyExported();
-            }
-
-            break;
-        }
-
-        case VCAM_PARAM_EXPORTED_3A_RESET:
-        {
-            greError = m3A_Export.reset();
-            break;
-        }
-#endif // EXPORTED_3A
-#if defined(OMX_CAMERA_SUPPORTS_IMAGE_PYRAMID)
-        case VCAM_PARAM_IMAGE_PYRAMID:
-        {
-            greError = setImagePyramid(param, size, port);
-            break;
-        }
-#endif
-        default:
-        {
-            DVP_PRINT(DVP_ZONE_ERROR, "Impossible parameter id requested: %d\n", paramId);
-            DVP_PRINT(DVP_ZONE_ERROR, "see VisionCamParam_e for possible parameter ids\n");
-            greError = STATUS_NOT_IMPLEMENTED;
-            if(paramId < VCAM_PARAM_MIN || paramId > VCAM_PARAM_MAX)
-                greError = STATUS_INVALID_PARAMETER;
+            DVP_PRINT(DVP_ZONE_WARNING, "No Execution service provided for all parameters.\n");
+            vcamError = STATUS_NOT_IMPLEMENTED;
         }
     }
-
-    if( OMX_ErrorNone != omxError )
+    else
     {
-        greError = ConvertError(omxError);
+        DVP_PRINT( DVP_ZONE_ERROR, "No such parameter supported. Requested is %d ( 0x%x )" , paramId, paramId );
+        DVP_PRINT( DVP_ZONE_ERROR, "Supported are between %d ( 0x%x ) and %d ( 0x%x )\n" ,
+                                    VCAM_PARAM_MIN, VCAM_PARAM_MIN, VCAM_PARAM_MAX, VCAM_PARAM_MAX );
+        vcamError = STATUS_INVALID_PARAMETER;
     }
 
-    if( greError != STATUS_SUCCESS )
+    if( vcamError != STATUS_SUCCESS )
     {
-        DVP_PRINT(DVP_ZONE_ERROR, "setParameter() exits with error 0x%x (dec: %d) [OMX:0x%08x] for param id 0x%x\n",
-                greError, greError, omxError, paramId);
+        DVP_PRINT(DVP_ZONE_ERROR, "setParameter() exits with error 0x%x (dec: %d) for param id 0x%x\n", vcamError, vcamError, paramId);
     }
 
-    return greError;
+    return vcamError;
 }
 
 status_e OMXVisionCam::setColorSpace(void *param, size_t size __attribute__ ((unused)), VisionCamPort_e port)
@@ -1845,7 +1591,9 @@ status_e OMXVisionCam::setColorSpace(void *param, size_t size __attribute__ ((un
                         }
                     }
                     else
+                    {
                         vcamError = ConvertError(omxError);
+                    }
                 }
             }
             else
@@ -1864,7 +1612,7 @@ status_e OMXVisionCam::setBrightness(void *param, size_t size __attribute__ ((un
 
     OMX_CONFIG_BRIGHTNESSTYPE brightness;
     brightness.nSize = sizeof(OMX_CONFIG_BRIGHTNESSTYPE);
-    brightness.nBrightness = *((int*)param);
+    brightness.nBrightness = *((uint32_t*)param);
     memcpy( &brightness.nVersion, mLocalVersion, sizeof(mLocalVersion) );
 
     int32_t p = port;
@@ -1883,7 +1631,7 @@ status_e OMXVisionCam::setContrast(void *param, size_t size __attribute__ ((unus
 
     OMX_CONFIG_CONTRASTTYPE contrast;
     contrast.nSize = sizeof( OMX_CONFIG_CONTRASTTYPE );
-    contrast.nContrast = *((int*)param);
+    contrast.nContrast = *((int32_t*)param);
     memcpy( &contrast.nVersion, mLocalVersion, sizeof(mLocalVersion) );
 
     int32_t p = port;
@@ -1900,7 +1648,7 @@ status_e OMXVisionCam::setSharpness(void *param, size_t size __attribute__ ((unu
     OMX_ERRORTYPE omxError = OMX_ErrorUndefined;
     OMX_IMAGE_CONFIG_PROCESSINGLEVELTYPE procSharpness;
     procSharpness.nSize = sizeof( OMX_IMAGE_CONFIG_PROCESSINGLEVELTYPE );
-    procSharpness.nLevel = *((int*)param);
+    procSharpness.nLevel = *((int32_t*)param);
     memcpy( &procSharpness.nVersion, mLocalVersion, sizeof(mLocalVersion) );
 
     if( procSharpness.nLevel == 0 )
@@ -1923,7 +1671,7 @@ status_e OMXVisionCam::setSaturation(void *param, size_t size __attribute__ ((un
     OMX_ERRORTYPE omxError = OMX_ErrorUndefined;
     OMX_CONFIG_SATURATIONTYPE saturation;
     saturation.nSize = sizeof(OMX_CONFIG_SATURATIONTYPE);
-    saturation.nSaturation = *((int*)param);
+    saturation.nSaturation = *((int32_t*)param);
     memcpy( &saturation.nVersion, mLocalVersion, sizeof(mLocalVersion) );
 
     int32_t p = port;
@@ -2384,7 +2132,7 @@ status_e OMXVisionCam::setExposureCompensation(void * param, size_t size __attri
 
     if( STATUS_SUCCESS == vcamError )
     {
-        int compVal = *((int*)param);
+        int32_t compVal = *((int32_t*)param);
         expValues.xEVCompensation = ( compVal * ( 1 << 16 ) )  / 10;
 
         int32_t p = port;
@@ -2463,7 +2211,10 @@ status_e OMXVisionCam::setManualExporureTime(void *param, size_t size __attribut
                 expValues.bAutoShutterSpeed = OMX_FALSE;
             }
             else
+            {
                 expValues.bAutoShutterSpeed = OMX_TRUE;
+
+            }
 
             omxError = OMX_SetConfig( mCurGreContext.mHandleComp , OMX_IndexConfigCommonExposureValue , &expValues );
             vcamError = ConvertError(omxError);
@@ -2531,7 +2282,7 @@ status_e OMXVisionCam::setColorTemp(void *param, size_t size __attribute__ ((unu
     OMX_CONFIG_WHITEBALCONTROLTYPE wb;
     OMX_STRUCT_INIT(wb, OMX_CONFIG_WHITEBALCONTROLTYPE, mLocalVersion);
 
-    if( 0 == *(int*)param )
+    if( 0 == *(int32_t*)param )
     {
         wb.eWhiteBalControl = OMX_WhiteBalControlAuto;
     }
@@ -2810,6 +2561,224 @@ status_e OMXVisionCam::_3A_ApplyExported()
     return ret;
 }
 #endif
+
+status_e OMXVisionCam::setPreviewHeight(void* param, uint32_t size, VisionCamPort_e port)
+{
+    int32_t p;
+    LOOP_PORTS( port , p )
+        mCurGreContext.mCameraPortParams[p].mHeight = *((OMX_U32*)param);
+    return STATUS_SUCCESS;
+}
+
+status_e OMXVisionCam::setPreaviewWidth(void* param, uint32_t size, VisionCamPort_e port)
+{
+    int32_t p;
+    LOOP_PORTS( port , p )
+            mCurGreContext.mCameraPortParams[p].mWidth = *((OMX_U32*)param);
+    return STATUS_SUCCESS;
+}
+
+status_e OMXVisionCam::startAutoFocus(void* param, uint32_t size, VisionCamPort_e port)
+{
+    return startAutoFocus( *((VisionCamFocusMode*)param) );
+}
+
+status_e OMXVisionCam::startManualFocus(void* param, uint32_t size, VisionCamPort_e port)
+{
+    mManualFocusDistance = *((uint32_t*)param);
+    return startAutoFocus( VCAM_FOCUS_CONTROL_ON );
+}
+
+#ifndef EXPORTED_3A
+status_e OMXVisionCam::setWBalColorGains(void* param, uint32_t size, VisionCamPort_e port)
+{
+    status_e vcamError = STATUS_BASE;
+    OMX_ERRORTYPE omxError = OMX_ErrorUndefined;
+#ifdef USE_WB_GAIN_PATCH
+    VisionCamWhiteBalGains wbGains = *((VisionCamWhiteBalGains*)param);
+    uint16_t * tmp;
+    CALCULATE_WB_GAINS_OFFSET(uint16_t,mWBbuffer,tmp);
+
+    tmp[ RED ] = wbGains.mRed;
+    tmp[ GREEN_RED ] = wbGains.mGreen_r;
+    tmp[ GREEN_BLUE ] = wbGains.mGreen_b;
+    tmp[ BLUE ] = wbGains.mBlue;
+
+    OMX_TI_CONFIG_SHAREDBUFFER skipBuffer;
+    skipBuffer.nSize = sizeof( OMX_TI_CONFIG_SHAREDBUFFER );
+    memcpy( &skipBuffer.nVersion , mLocalVersion , sizeof(OMX_VERSIONTYPE) );
+
+    if( wbGains.mRed >= COLOR_GAIN_MIN &&  wbGains.mRed <= COLOR_GAIN_MAX
+        && wbGains.mGreen_b >= COLOR_GAIN_MIN && wbGains.mGreen_b <= COLOR_GAIN_MAX
+        && wbGains.mGreen_r >= COLOR_GAIN_MIN && wbGains.mGreen_r <= COLOR_GAIN_MAX
+        && wbGains.mBlue >= COLOR_GAIN_MIN && wbGains.mBlue <= COLOR_GAIN_MAX )
+    {
+        skipBuffer.pSharedBuff = (OMX_U8*)mWBbuffer;
+        skipBuffer.nSharedBuffSize = sizeof(mWBbuffer);
+    }
+    else if( !wbGains.mRed && !wbGains.mGreen_b && !wbGains.mGreen_r && !wbGains.mBlue )
+    {   /// all gains are zero => auto mode
+        skipBuffer.pSharedBuff = (OMX_U8*)mWBresetBuffer;
+        skipBuffer.nSharedBuffSize = sizeof(mWBresetBuffer);
+    }
+    else
+    {
+        vcamError = STATUS_INVALID_PARAMETER;
+        return vcamError;
+    }
+
+    int32_t p = port;
+    //            LOOP_PORTS(port, p)
+    {
+        skipBuffer.nPortIndex = p;
+        omxError = OMX_SetConfig( mCurGreContext.mHandleComp,
+                                (OMX_INDEXTYPE) OMX_TI_IndexConfigAAAskipBuffer,
+                                &skipBuffer );
+    }
+    vcamError = ConvertError(omxError);
+#endif // USE_WB_GAIN_PATCH
+    return vcamError;
+}
+#endif // EXPORTED_3A
+
+#ifndef EXPORTED_3A
+status_e OMXVisionCam::setGammaTableColorGains(void* param, uint32_t size, VisionCamPort_e port)
+{
+    OMX_ERRORTYPE omxError = OMX_ErrorUndefined;
+
+    VisionCamGammaTableType *gammaTbl = (VisionCamGammaTableType*)(param);
+    OMX_TI_CONFIG_SHAREDBUFFER skipBuffer;
+    OMX_STRUCT_INIT(skipBuffer, OMX_TI_CONFIG_SHAREDBUFFER, mLocalVersion);
+
+    uint32_t* base = (uint32_t *)(mGammaTablesBuf + 12); // 12 bytes offset for first table
+    uint16_t *redTbl      = (uint16_t*)(base[0] + (uint32_t)&base[2]);
+    uint16_t *blueTbl     = (uint16_t*)(base[1] + (uint32_t)&base[2]);
+    uint16_t *greenTbl    = (uint16_t*)(base[2] + (uint32_t)&base[2]);
+
+#ifdef _USE_GAMMA_RESET_HC_
+    if( !mGammaResetPolulated )
+    {
+        skipBuffer.pSharedBuff = (OMX_U8*)mGammaResetTablesBuf;
+        skipBuffer.nSharedBuffSize = sizeof(mGammaResetTablesBuf);
+        omxError = OMX_GetConfig( mCurGreContext.mHandleComp,
+                            (OMX_INDEXTYPE) OMX_TI_IndexConfigAAAskipBuffer,
+                            &skipBuffer );
+
+        if( OMX_ErrorNone == omxError )
+            mGammaResetPolulated = true;
+    }
+#endif // _USE_GAMMA_RESET_HC_
+
+    if( gammaTbl->mRedTable && gammaTbl->mGreenTable && gammaTbl->mBlueTable )
+    {
+        if( gammaTbl->mRedTable != redTbl )
+        {
+            memcpy(redTbl, gammaTbl->mRedTable, GAMMA_TABLE_SIZE );
+        }
+
+        if( gammaTbl->mGreenTable != greenTbl )
+        {
+            memcpy(greenTbl, gammaTbl->mGreenTable, GAMMA_TABLE_SIZE );
+        }
+
+        if( gammaTbl->mBlueTable != blueTbl )
+        {
+            memcpy(blueTbl, gammaTbl->mBlueTable, GAMMA_TABLE_SIZE );
+        }
+
+        skipBuffer.pSharedBuff = (OMX_U8*)mGammaTablesBuf;
+        skipBuffer.nSharedBuffSize = sizeof(mGammaTablesBuf)/sizeof(mGammaTablesBuf[0]);
+    }
+    else
+    {
+#ifdef _USE_GAMMA_RESET_HC_
+    if( mGammaResetPolulated )
+    {
+        skipBuffer.pSharedBuff = (OMX_U8*)mGammaResetTablesBuf;
+        skipBuffer.nSharedBuffSize = sizeof(mGammaResetTablesBuf)/sizeof(mGammaResetTablesBuf[0]);
+    }
+    else
+    {
+        DVP_PRINT(DVP_ZONE_WARNING, "No data present in reset Gamma Tables. Leaving Gamma unchanged!!!");
+    }
+#else
+    skipBuffer.pSharedBuff = (OMX_U8*)mGammaResetTablesBuf;
+    skipBuffer.nSharedBuffSize = sizeof(mGammaResetTablesBuf)/sizeof(mGammaResetTablesBuf[0]);
+#endif // _USE_GAMMA_RESET_HC_
+    }
+
+    omxError = OMX_SetConfig( mCurGreContext.mHandleComp,
+                            (OMX_INDEXTYPE) OMX_TI_IndexConfigAAAskipBuffer,
+                            &skipBuffer );
+    return ConvertError(omxError);
+
+}
+#endif // EXPORTED_3A
+
+status_e OMXVisionCam::setFormatRotation(void* param, uint32_t size, VisionCamPort_e port)
+{
+    int32_t p;
+    LOOP_PORTS( port , p )
+    {
+        mCurGreContext.mCameraPortParams[p].mRotation = *((OMX_S32 *)param);
+    }
+    return STATUS_SUCCESS;
+}
+
+status_e OMXVisionCam::setPreviewRotation(void* param, uint32_t size, VisionCamPort_e port)
+{
+    OMX_ERRORTYPE omxError = OMX_ErrorUndefined;
+    OMX_CONFIG_ROTATIONTYPE rotation;
+    OMX_STRUCT_INIT(rotation, OMX_CONFIG_ROTATIONTYPE, mLocalVersion);
+    rotation.nRotation = *((OMX_S32*)param);
+
+    int32_t p;
+    LOOP_PORTS( port , p )
+    {
+        rotation.nPortIndex = mCurGreContext.mPortsInUse[p];
+        OMX_CHECK(omxError, OMX_SetConfig(mCurGreContext.mHandleComp,
+                                          OMX_IndexConfigCommonRotate,
+                                          &rotation));
+        DVP_PRINT(DVP_ZONE_CAM, "Setting Rotation to %ld (size: %u)\n", rotation.nRotation, sizeof(rotation));
+    }
+    return ConvertError(omxError);
+}
+
+#if defined (EXPORTED_3A)
+status_e OMXVisionCam::startCollectingMaual3AParams(void* param, uint32_t size, VisionCamPort_e port)
+{
+    return m3A_Export.hold_3A();
+}
+
+status_e OMXVisionCam::setManual3AParam(void* param, uint32_t size, VisionCamPort_e port)
+{
+    VisionCam_3Asettings_Base_t* p = (VisionCam_3Asettings_Base_t* )param;
+    status_e vcamError = m3A_Export.set( p->eParamType, p->pData, sizeof(p->pData) );
+
+    if( !m3A_Export.isHeld() && STATUS_SUCCESS == vcamError )
+    {
+        vcamError = _3A_ApplyExported();
+    }
+    return vcamError;
+}
+
+status_e OMXVisionCam::applyCollectedManual3AParams(void* param, uint32_t size, VisionCamPort_e port)
+{
+    status_e vcamError = STATUS_BASE;
+    vcamError = m3A_Export.release_3A();
+
+    if( STATUS_SUCCESS == vcamError )
+    {
+        vcamError = _3A_ApplyExported();
+    }
+    return vcamError;
+}
+
+status_e OMXVisionCam::resetManual3AParams(void* param, uint32_t size, VisionCamPort_e port)
+{
+    return m3A_Export.reset();
+}
+#endif //  EXPORTED_3A
 
 /*
 *  APIs to get configured Vision Cam parameters
@@ -3548,25 +3517,36 @@ status_e OMXVisionCam::waitForFocus()
     return ConvertError(omxError);
 }
 
-status_e OMXVisionCam::startAutoFocus( VisionCamFocusMode focusMode )
+//status_e OMXVisionCam::startAutoFocus( VisionCamFocusMode focusMode )
+status_e OMXVisionCam::startAutoFocus( uint32_t inp )
 {
     OMX_ERRORTYPE omxError = OMX_ErrorNone;
     bool_e hasEvent = true_e;
 
+    VisionCamFocusMode focusMode = (VisionCamFocusMode)inp;
     OMX_CONFIG_BOOLEANTYPE enable;
 
 //    for( int32_t port = VCAM_PORT_MIN; port < VCAM_PORT_MAX; port++ )
     {
         // @todo in case of two sensors running sumiltaneously check on which port to actiivate focus and for which to enqueue it.
-        if( !mCurGreContext.mCameraPortParams[VCAM_PORT_PREVIEW].mIsActive )
+        if( mPendingConfigs && !mPendingConfigs->getFunc(ePending_Focus) )
         {
             mPendingConfigs->Register(  ePending_Focus,
-                                        (VisionCamExecutionService<OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>::execFuncPrt_t)&OMXVisionCam::startAutoFocus,
-                                        sizeof(VisionCamFocusMode),
-                                        &focusMode
+//                                        /*(VisionCamExecutionService<OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>::execFuncPrt_t)*/&OMXVisionCam::startAutoFocus,
+                                        &OMXVisionCam::startAutoFocus,
+                                        sizeof(VisionCamFocusMode)
                                      );
-            return STATUS_SUCCESS;
         }
+    }
+
+    if( mPendingConfigs && mPendingConfigs->getFunc(ePending_Focus))
+    {
+        mPendingConfigs->setData(ePending_Focus, &focusMode);
+    }
+
+    if( !mCurGreContext.mCameraPortParams[VCAM_PORT_PREVIEW].mIsActive )
+    {
+        return STATUS_SUCCESS;
     }
 
     enable.nSize = sizeof(OMX_CONFIG_BOOLEANTYPE);
@@ -4607,8 +4587,11 @@ void OMXVisionCam::FirstFrameFunc(void * data)
             {
             case ePending_Focus:
                 VisionCamFocusMode *focData = (VisionCamFocusMode *)mPendingConfigs->getData(pend);
-                status_e (OMXVisionCam::*fn)(VisionCamFocusMode) = NULL;
-                fn = (status_e (OMXVisionCam::*)(VisionCamFocusMode))(mPendingConfigs->getFunc(pend));
+//                status_e (OMXVisionCam::*fn)(VisionCamFocusMode) = NULL;
+//                fn = (status_e (OMXVisionCam::*)(VisionCamFocusMode))(mPendingConfigs->getFunc(pend));
+
+                pendingConfigsFunPtr_t fn = mPendingConfigs->getFunc(pend);
+
                 if( fn && focData )
                 {
                     (this->*fn)(*focData);

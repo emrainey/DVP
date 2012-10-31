@@ -119,6 +119,7 @@ entryKey KEY_STEREO_LAYOUT              = "lout";
 entryKey KEY_PACK_FRAMES                = "pack";
 entryKey KEY_HOLD_EXPORTED_3A           = "3ahold";
 entryKey KEY_SET_EXPORTED_3A            = "3aset";
+entryKey KEY_APPLY_EXPORTED_3A          = "3apply";
 entryKey KEY_SET_DISPLAYED_FRM          = "disp";
 entryKey KEY_IMAGE_PYRAMID              = "ip";
 

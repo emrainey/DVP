@@ -714,7 +714,7 @@ private:
       * @see        VisionCamFocusMode
       * @return     STATUS_SUCCESS on success and any other error code otherwise.
     */
-    status_e startAutoFocus( VisionCamFocusMode focusMode );
+    status_e startAutoFocus(uint32_t inp);
 
     /** @fn status_e enableFaceDetect(VisionCamPort_e port)
       * This will configure the component to start/stop face detection.
@@ -833,35 +833,63 @@ private:
         return inst->freePortBuffers( whichPort );
     }
 
-    status_e setColorSpace(void *param, size_t size, VisionCamPort_e port);
-    status_e setBrightness(void *param, size_t size, VisionCamPort_e port);
-    status_e setContrast(void *param, size_t size, VisionCamPort_e port);
-    status_e setSharpness(void *param, size_t size, VisionCamPort_e port);
-    status_e setSaturation(void *param, size_t size, VisionCamPort_e port);
-    status_e setFrameRate_Fixed(void *param, size_t size, VisionCamPort_e port);
-    status_e setFrameRate_Variable(void *param, size_t size, VisionCamPort_e port);
-    status_e setFlicker(void *param, size_t size, VisionCamPort_e port);
-    status_e setCrop(void *param, size_t size, VisionCamPort_e port);
-    status_e setStereoInfo(void *param, size_t size, VisionCamPort_e port);
-    status_e setCameraOperatingMode(void *param, size_t size, VisionCamPort_e port );
-    status_e setSensor(void *param, size_t size, VisionCamPort_e port);
-    status_e setExposureCompensation(void * param, size_t size, VisionCamPort_e port );
-    status_e setResolution (void *param, size_t size, VisionCamPort_e port);
-    status_e setManualExporureTime(void *param, size_t size, VisionCamPort_e port);
-    status_e setISO(void *param, size_t size, VisionCamPort_e port);
-    status_e setWhiteBalanceMode(void *param, size_t size, VisionCamPort_e port);
-    status_e setColorTemp(void *param, size_t size, VisionCamPort_e port);
-    status_e setMirror(void *param, size_t size, VisionCamPort_e port);
-    status_e setImagePyramid(void *param, size_t size, VisionCamPort_e port);
-    status_e getImagePyramid(void *param, size_t size, VisionCamPort_e port);
+    /**
+    */
+    typedef status_e (OMXVisionCam::*setParameterFuncPtr_t)(void *param, size_t size, VisionCamPort_e port);
+    VisionCamExecutionService <OMXVisionCam, OMXVisionCam::setParameterFuncPtr_t> *mSetParameterExecutor;
+    bool_e initParameterSetters();
+    bool_e registerParameterSetters(bool_e *checkTable);
+
+    status_e setColorSpace          (void *param, size_t size, VisionCamPort_e port);
+    status_e setBrightness          (void *param, size_t size, VisionCamPort_e port);
+    status_e setContrast            (void *param, size_t size, VisionCamPort_e port);
+    status_e setSharpness           (void *param, size_t size, VisionCamPort_e port);
+    status_e setSaturation          (void *param, size_t size, VisionCamPort_e port);
+    status_e setFrameRate_Fixed     (void *param, size_t size, VisionCamPort_e port);
+    status_e setFrameRate_Variable  (void *param, size_t size, VisionCamPort_e port);
+    status_e setFlicker             (void *param, size_t size, VisionCamPort_e port);
+    status_e setCrop                (void *param, size_t size, VisionCamPort_e port);
+    status_e setStereoInfo          (void *param, size_t size, VisionCamPort_e port);
+    status_e setCameraOperatingMode (void *param, size_t size, VisionCamPort_e port);
+    status_e setSensor              (void *param, size_t size, VisionCamPort_e port);
+    status_e setExposureCompensation(void *param, size_t size, VisionCamPort_e port);
+    status_e setResolution          (void *param, size_t size, VisionCamPort_e port);
+    status_e setManualExporureTime  (void *param, size_t size, VisionCamPort_e port);
+    status_e setISO                 (void *param, size_t size, VisionCamPort_e port);
+    status_e setWhiteBalanceMode    (void *param, size_t size, VisionCamPort_e port);
+    status_e setColorTemp           (void *param, size_t size, VisionCamPort_e port);
+    status_e setMirror              (void *param, size_t size, VisionCamPort_e port);
+    status_e setImagePyramid        (void *param, size_t size, VisionCamPort_e port);
+    status_e getImagePyramid        (void *param, size_t size, VisionCamPort_e port);
 
 #if ( defined(DUCATI_1_5) || defined(DUCATI_2_0) ) && defined(OMX_CAMERA_SUPPORTS_MANUAL_CONTROLS)
-    status_e setAWBminDelayTime(void *param, size_t size, VisionCamPort_e port);
-    status_e setGestureInfo(void *param, size_t size, VisionCamPort_e port);
-    status_e setAGC_MinimumDelay(void *param, size_t size, VisionCamPort_e port);
-    status_e setAGC_LowThreshold(void *param, size_t size, VisionCamPort_e port);
-    status_e setAGC_HighThreshold(void *param, size_t size, VisionCamPort_e port);
+    status_e setAWBminDelayTime     (void *param, size_t size, VisionCamPort_e port);
+    status_e setGestureInfo         (void *param, size_t size, VisionCamPort_e port);
+    status_e setAGC_MinimumDelay    (void *param, size_t size, VisionCamPort_e port);
+    status_e setAGC_LowThreshold    (void *param, size_t size, VisionCamPort_e port);
+    status_e setAGC_HighThreshold   (void *param, size_t size, VisionCamPort_e port);
 #endif // ((DUCATI_1_5) || defined(DUCATI_2_0) ) && (OMX_CAMERA_SUPPORTS_MANUAL_CONTROLS)
+
+    status_e setPreviewHeight       (void* param, uint32_t size, VisionCamPort_e port);
+    status_e setPreaviewWidth       (void* param, uint32_t size, VisionCamPort_e port);
+    status_e startAutoFocus         (void* param, uint32_t size, VisionCamPort_e port);
+    status_e startManualFocus       (void* param, uint32_t size, VisionCamPort_e port);
+#ifndef EXPORTED_3A
+    status_e setWBalColorGains      (void* param, uint32_t size, VisionCamPort_e port);
+#endif // EXPORTED_3A
+#ifndef EXPORTED_3A
+    status_e setGammaTableColorGains(void* param, uint32_t size, VisionCamPort_e port);
+#endif // EXPORTED_3A
+
+    status_e setFormatRotation      (void* param, uint32_t size, VisionCamPort_e port);
+    status_e setPreviewRotation     (void* param, uint32_t size, VisionCamPort_e port);
+
+#if defined (EXPORTED_3A)
+    status_e startCollectingMaual3AParams   (void* param, uint32_t size, VisionCamPort_e port);
+    status_e setManual3AParam               (void* param, uint32_t size, VisionCamPort_e port);
+    status_e applyCollectedManual3AParams   (void* param, uint32_t size, VisionCamPort_e port);
+    status_e resetManual3AParams    (void* param, uint32_t size, VisionCamPort_e port);
+#endif // EXPORTED_3A
 
 public:
     /** @fn status_e waitForFocus()
@@ -952,8 +980,11 @@ private:
         ePending_Max
     };
 
-    typedef status_e (OMXVisionCam::*startAutofocusFuncPtr)(VisionCamFocusMode focusMode);
-    VisionCamExecutionService <OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>*mPendingConfigs;
+//    typedef status_e (OMXVisionCam::*startAutofocusFuncPtr)(VisionCamFocusMode focusMode);
+//    VisionCamExecutionService <OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>*PendingConfigs;
+
+    typedef status_e (OMXVisionCam::*pendingConfigsFunPtr_t)(uint32_t /*focusMode*/);
+    VisionCamExecutionService <OMXVisionCam, OMXVisionCam::pendingConfigsFunPtr_t>*mPendingConfigs;
 
 
     void FirstFrameFunc(void * data);

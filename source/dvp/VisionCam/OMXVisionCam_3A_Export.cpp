@@ -296,7 +296,8 @@ status_e VisionCam_3A_Export::set( SettingType_e paramType, void*  paramValue, s
 
     if( VCAM_3A_Start <= paramType &&  paramType < e3A_ManualSetting_MAX )
     {
-        VisionCamExecutionService<VisionCam_3A_Export, VisionCam_3A_Export::setFuncPtrType>::execFuncPrt_t fun = execSRVC->getFunc(paramType);
+//        VisionCamExecutionService<VisionCam_3A_Export, VisionCam_3A_Export::setFuncPtrType>::execFuncPrt_t fun = execSRVC->getFunc(paramType);
+        VisionCam_3A_Export::setFuncPtrType fun = execSRVC->getFunc(paramType);
         if( fun )
         {
             ret = (this->*(fun))(paramValue);
@@ -314,7 +315,7 @@ status_e VisionCam_3A_Export::set( SettingType_e paramType, void*  paramValue, s
     else
     {
         DVP_PRINT(DVP_ZONE_CAM, "3A user export set(): received invalid parameter.\n" );
-        DVP_PRINT(DVP_ZONE_CAM, "Requested parameter with index %d ( 0x%x ); possible are between %d ( 0x%x ) and %d ( 0x%x )\n",
+        DVP_PRINT(DVP_ZONE_CAM, "Requested parameter with index %d ( 0x%x ) is invalid; possible are between %d ( 0x%x ) and %d ( 0x%x )\n",
                   paramType, paramType,
                   VCAM_3A_Start, VCAM_3A_Start,
                   (e3A_ManualSetting_ALL - 1), (e3A_ManualSetting_ALL - 1) );
