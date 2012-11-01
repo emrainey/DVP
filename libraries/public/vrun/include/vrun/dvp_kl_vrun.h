@@ -424,7 +424,7 @@ enum {
     /*!
      * Converts FOURCC_UYVY or FOURCC_VYUY to FOURCC_Y800 image (luma extraction)\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_YVYU or FOURCC_YUY2
+     * \param [input]  Image color type supported: FOURCC_UYVY or FOURCC_VYUY
      * \param [output] Image color type supported: FOURCC_Y800
      */
     DVP_KN_VRUN_XYXY_TO_Y800,

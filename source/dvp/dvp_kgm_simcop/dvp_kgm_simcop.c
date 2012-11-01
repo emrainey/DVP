@@ -241,6 +241,8 @@ static queue_t *retqueue;
 static semaphore_t coreLock;
 static DVP_Perf_t perf;
 static DVP_RPC_Translation_t translations;
+static fourcc_t colorY800[] = {FOURCC_Y800};
+static fourcc_t colorY16[] = {FOURCC_Y16};
 
 static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 startNode, DVP_U32 numNodes)
 {
@@ -968,11 +970,417 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                                                    DVP_U32 numNodes)
 {
     DVP_U32 n;
+    DVP_U32 verified = 0;
     for (n = startNode; n < startNode + numNodes; n++)
     {
+        // assume it will pass then set errors if detected.
         pNodes[n].header.error = DVP_SUCCESS;
+
+        // check each supported kernel
+        switch (pNodes[n].header.kernel)
+        {
+            case DVP_KN_NOOP:
+#ifdef DVP_USE_DEI
+            case DVP_KN_DEI_DEINTERLACER_INIT:
+            case DVP_KN_DEI_DEINTERLACER_DEINIT:
+#endif
+            {
+                break;
+            }
+#ifdef DVP_USE_VRUN
+            case DVP_KN_DILATE_CROSS:
+            case DVP_KN_DILATE_SQUARE:
+            case DVP_KN_DILATE_MASK:
+            case DVP_KN_ERODE_CROSS:
+            case DVP_KN_ERODE_MASK:
+            case DVP_KN_ERODE_SQUARE:
+            case DVP_KN_VRUN_DILATE_CROSS:
+            case DVP_KN_VRUN_DILATE_SQUARE:
+            case DVP_KN_VRUN_DILATE_MASK:
+            case DVP_KN_VRUN_ERODE_CROSS:
+            case DVP_KN_VRUN_ERODE_MASK:
+            case DVP_KN_VRUN_ERODE_SQUARE:
+            {
+                DVP_Morphology_t *pMorph = dvp_knode_to(&pNodes[n], DVP_Morphology_t);
+                if (DVP_Image_Validate(&pMorph->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pMorph->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    pMorph->input.width != pMorph->output.width ||
+                    pMorph->input.height != pMorph->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+
+                if (pNodes[n].header.kernel == DVP_KN_ERODE_MASK ||
+                    pNodes[n].header.kernel == DVP_KN_DILATE_MASK ||
+                    pNodes[n].header.kernel == DVP_KN_VRUN_ERODE_MASK ||
+                    pNodes[n].header.kernel == DVP_KN_VRUN_DILATE_MASK)
+                {
+                    if (DVP_Image_Validate(&pMorph->mask, 4, 1, 1, 1, colorY800, 1) == DVP_FALSE)
+                        pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                }
+                break;
+            }
+            case DVP_KN_IIR_HORZ:
+            case DVP_KN_IIR_VERT:
+            case DVP_KN_VRUN_IIR_HORZ:
+            case DVP_KN_VRUN_IIR_VERT:
+            {
+                DVP_IIR_t *pIIR = dvp_knode_to(&pNodes[n], DVP_IIR_t);
+                if (DVP_Image_Validate(&pIIR->input, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIIR->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIIR->scratch, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    pIIR->input.width != pIIR->output.width ||
+                    pIIR->input.height != pIIR->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_THR_GT2MAX_8:
+            case DVP_KN_THR_GT2THR_8:
+            case DVP_KN_THR_LE2MIN_8:
+            case DVP_KN_THR_LE2THR_8:
+            case DVP_KN_VRUN_THR_GT2MAX_8:
+            case DVP_KN_VRUN_THR_GT2THR_8:
+            case DVP_KN_VRUN_THR_LE2MIN_8:
+            case DVP_KN_VRUN_THR_LE2THR_8:
+            {
+                DVP_Threshold_t *pThresh = dvp_knode_to(&pNodes[n], DVP_Threshold_t);
+                if (DVP_Image_Validate(&pThresh->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pThresh->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    pThresh->input.width != pThresh->output.width ||
+                    pThresh->input.height != pThresh->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_THR_GT2MAX_16:
+            case DVP_KN_THR_GT2THR_16:
+            case DVP_KN_THR_LE2MIN_16:
+            case DVP_KN_THR_LE2THR_16:
+            case DVP_KN_VRUN_THR_GT2MAX_16:
+            case DVP_KN_VRUN_THR_GT2THR_16:
+            case DVP_KN_VRUN_THR_LE2MIN_16:
+            case DVP_KN_VRUN_THR_LE2THR_16:
+            {
+                DVP_Threshold_t *pThresh = dvp_knode_to(&pNodes[n], DVP_Threshold_t);
+                if (DVP_Image_Validate(&pThresh->input, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pThresh->output, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    pThresh->input.width != pThresh->output.width ||
+                    pThresh->input.height != pThresh->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+
+            case DVP_KN_NONMAXSUPPRESS_3x3_S16:
+            case DVP_KN_NONMAXSUPPRESS_5x5_S16:
+            case DVP_KN_NONMAXSUPPRESS_7x7_S16:
+            case DVP_KN_VRUN_NONMAXSUPPRESS_3x3_S16:
+            case DVP_KN_VRUN_NONMAXSUPPRESS_5x5_S16:
+            case DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16:
+            {
+                DVP_Threshold_t *pThresh = dvp_knode_to(&pNodes[n], DVP_Threshold_t);
+                if (DVP_Image_Validate(&pThresh->input, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pThresh->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE)// ||
+//                    pThresh->input.width != pThresh->output.width ||      // TODO: width&height matching
+//                    pThresh->input.height != pThresh->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+
+                // Check for maximum widths in the case of SIMCOP
+                if (pNodes[n].header.kernel == DVP_KN_NONMAXSUPPRESS_7x7_S16 ||
+                    pNodes[n].header.kernel == DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16) {
+                    if (pThresh->input.width > 768)
+                        pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                } else {
+                    if (pThresh->input.width > 992)
+                        pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                }
+
+//                if(pNodes[n].header.kernel == DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16) {
+//                    int i;
+//                    unsigned char *Pixptr = pThresh->output.pData[0];
+//                    for(i = 0; i<pThresh->output.bufHeight*pThresh->output.bufWidth; i++)
+//                        Pixptr[i]=255;
+//                }
+                break;
+            }
+            case DVP_KN_CANNY_IMAGE_SMOOTHING:
+            case DVP_KN_CONV_3x3:
+            case DVP_KN_CONV_5x5:
+            case DVP_KN_CONV_7x7:
+            case DVP_KN_VRUN_CANNY_IMAGE_SMOOTHING:
+            case DVP_KN_VRUN_CONV_3x3:
+            case DVP_KN_VRUN_CONV_5x5:
+            case DVP_KN_VRUN_CONV_7x7:
+            case DVP_KN_VRUN_CONV_MxN:
+            {
+                DVP_ImageConvolution_t *pImg = dvp_knode_to(&pNodes[n], DVP_ImageConvolution_t);
+                if (DVP_Image_Validate(&pImg->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->mask, 4, 1, 1, 1, colorY800, 1) == DVP_FALSE ||
+                    pImg->input.width != pImg->output.width ||
+                    pImg->input.height != pImg->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VRUN_SAD_8x8:
+            case DVP_KN_VRUN_SAD_16x16:
+            case DVP_KN_VRUN_SAD_3x3:
+            case DVP_KN_VRUN_SAD_5x5:
+            case DVP_KN_VRUN_SAD_7x7:
+            {
+                DVP_SAD_t *pImg = dvp_knode_to(&pNodes[n], DVP_SAD_t);
+                if (DVP_Image_Validate(&pImg->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->refImg, 16, 8, 8, 2, colorY800, 1) == DVP_FALSE ||
+                    pImg->input.width != pImg->output.width ||
+                    pImg->input.height != pImg->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_CANNY_2D_GRADIENT:
+            case DVP_KN_VRUN_CANNY_2D_GRADIENT:
+            {
+                DVP_Canny2dGradient_t *pGrad = dvp_knode_to(&pNodes[n], DVP_Canny2dGradient_t);
+                if (DVP_Image_Validate(&pGrad->input, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pGrad->outGradX, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pGrad->outGradY, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pGrad->outMag, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    pGrad->input.width != pGrad->outGradX.width ||
+                    pGrad->input.height != pGrad->outGradX.height ||
+                    pGrad->input.width != pGrad->outGradY.width ||
+                    pGrad->input.height != pGrad->outGradY.height ||
+                    pGrad->input.width != pGrad->outMag.width ||
+                    pGrad->input.height != pGrad->outMag.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_CANNY_NONMAX_SUPPRESSION:
+            case DVP_KN_VRUN_CANNY_NONMAX_SUPPRESSION:
+            {
+                DVP_CannyNonMaxSuppression_t *pCnonmax = dvp_knode_to(&pNodes[n], DVP_CannyNonMaxSuppression_t);
+                if (DVP_Image_Validate(&pCnonmax->inMag, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pCnonmax->inGradX, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pCnonmax->inGradY, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pCnonmax->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    pCnonmax->output.width != pCnonmax->inMag.width ||
+                    pCnonmax->output.height != pCnonmax->inMag.height ||
+                    pCnonmax->output.width != pCnonmax->inGradX.width ||
+                    pCnonmax->output.height != pCnonmax->inGradX.height ||
+                    pCnonmax->output.width != pCnonmax->inGradY.width ||
+                    pCnonmax->output.height != pCnonmax->inGradY.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_CANNY_HYST_THRESHHOLD:
+            case DVP_KN_VRUN_CANNY_HYST_THRESHHOLD:
+            {
+                DVP_CannyHystThresholding_t *pDth = dvp_knode_to(&pNodes[n], DVP_CannyHystThresholding_t);
+                if (DVP_Image_Validate(&pDth->inMag, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pDth->inEdgeMap, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pDth->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    pDth->output.width != pDth->inMag.width ||
+                    pDth->output.height != pDth->inMag.height ||
+                    pDth->output.width != pDth->inEdgeMap.width ||
+                    pDth->output.height != pDth->inEdgeMap.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_SOBEL_3x3_8s:
+            case DVP_KN_SOBEL_3x3_8:
+            case DVP_KN_SOBEL_5x5_8s:
+            case DVP_KN_SOBEL_5x5_8:
+            case DVP_KN_SOBEL_7x7_8s:
+            case DVP_KN_SOBEL_7x7_8:
+            case DVP_KN_VRUN_SOBEL_3x3_8s:
+            case DVP_KN_VRUN_SOBEL_3x3_8:
+            case DVP_KN_VRUN_SOBEL_5x5_8s:
+            case DVP_KN_VRUN_SOBEL_5x5_8:
+            case DVP_KN_VRUN_SOBEL_7x7_8s:
+            case DVP_KN_VRUN_SOBEL_7x7_8:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_SOBEL_3x3_16s:
+            case DVP_KN_SOBEL_3x3_16:
+            case DVP_KN_SOBEL_5x5_16s:
+            case DVP_KN_SOBEL_5x5_16:
+            case DVP_KN_SOBEL_7x7_16s:
+            case DVP_KN_SOBEL_7x7_16:
+            case DVP_KN_VRUN_SOBEL_3x3_16s:
+            case DVP_KN_VRUN_SOBEL_3x3_16:
+            case DVP_KN_VRUN_SOBEL_5x5_16s:
+            case DVP_KN_VRUN_SOBEL_5x5_16:
+            case DVP_KN_VRUN_SOBEL_7x7_16s:
+            case DVP_KN_VRUN_SOBEL_7x7_16:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_XYXY_TO_Y800:
+            case DVP_KN_VRUN_XYXY_TO_Y800:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                fourcc_t colorUYVY[] = {FOURCC_UYVY, FOURCC_VYUY};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorUYVY, 2) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_INTEGRAL_IMAGE_8:
+            case DVP_KN_VRUN_INTEGRAL_IMAGE_8:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                fourcc_t colorOut[] = {FOURCC_Y32};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 1) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+
+                if (pIO->input.width > 2049 ||
+                    pIO->input.height > 819)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_UYVY_TO_YUV444p:
+            case DVP_KN_VRUN_UYVY_TO_YUV444p:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                fourcc_t colorIn[] = {FOURCC_UYVY};
+                fourcc_t colorOut[] = {FOURCC_YV24, FOURCC_YU24};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 2) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_UYVY_TO_RGBp:
+            case DVP_KN_VRUN_UYVY_TO_RGBp:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                fourcc_t colorIn[] = {FOURCC_UYVY};
+                fourcc_t colorOut[] = {FOURCC_RGBP};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 1) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_UYVY_TO_YUV420p:
+            case DVP_KN_VRUN_UYVY_TO_YUV420p:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                fourcc_t colorIn[] = {FOURCC_UYVY};
+                fourcc_t colorOut[] = {FOURCC_IYUV, FOURCC_YV12};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 2) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_NV12_TO_YUV444p:
+            case DVP_KN_VRUN_NV12_TO_YUV444p:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                fourcc_t colorIn[] = {FOURCC_NV12};
+                fourcc_t colorOut[] = {FOURCC_YV24, FOURCC_YU24};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 2) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_YUV444p_TO_RGBp:
+            case DVP_KN_VRUN_YUV444p_TO_RGBp:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                fourcc_t colorIn[] = {FOURCC_YU24, FOURCC_YV24};
+                fourcc_t colorOut[] = {FOURCC_RGBP};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 2) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 1) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_LDC_AFFINE_TRANSFORM:
+            case DVP_KN_LDC_DISTORTION_CORRECTION:
+            case DVP_KN_LDC_DISTORTION_AND_AFFINE:
+            {
+                DVP_Ldc_t *pIO = dvp_knode_to(&pNodes[n], DVP_Ldc_t);
+                fourcc_t colorLDC[] = {FOURCC_UYVY, FOURCC_NV12};
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 16, 2, colorLDC, 2) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 16, 2, colorLDC, 2) == DVP_FALSE)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+
+                if (pNodes[n].header.kernel != DVP_KN_LDC_AFFINE_TRANSFORM &&
+                    DVP_Buffer_Validate(&pIO->ldcLut) == DVP_FALSE)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                 break;
+            }
+            case DVP_KN_VRUN_HARRIS_CORNERS:
+            {
+                DVP_HarrisCorners_t *pIO = dvp_knode_to(&pNodes[n], DVP_HarrisCorners_t);
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->tempBuf1, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->tempBuf2, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->tempBuf3, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->tempBuf4, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    pIO->input.width != pIO->output.width ||
+                    pIO->input.height != pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VRUN_HARRIS_SCORE_7x7:
+            {
+                DVP_Harris_t *pIO = dvp_knode_to(&pNodes[n], DVP_Harris_t);
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->harrisScore, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VRUN_BLOCK_MAXIMA:
+            {
+                DVP_BlockMaxima_t *pIO  = dvp_knode_to(&pNodes[n], DVP_BlockMaxima_t);
+                if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->blockMaximaX, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->blockMaximaY, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->blockMaximaMAX, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VRUN_NMS_STEP1:
+            {
+                DVP_NMSStep1_t *pIO  = dvp_knode_to(&pNodes[n], DVP_NMSStep1_t);
+                if (DVP_Image_Validate(&pIO->nmsStep1X, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->nmsStep1Y, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->nmsStep1Dst, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+#endif
+            default:
+                pNodes[n].header.error = DVP_ERROR_NOT_IMPLEMENTED;
+                break;
+        }
+        if (pNodes[n].header.error == DVP_SUCCESS)
+            verified++;
     }
-    return numNodes;
+    return verified;
 }
 
 #if defined(SYSBIOS_SL)

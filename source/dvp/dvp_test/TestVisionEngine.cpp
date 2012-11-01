@@ -1759,10 +1759,12 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
     DVP_S08 maskAvg[7] = {1,2,3,4,3,2,1};
     DVP_MemType_e camType = DVP_MTYPE_DEFAULT;
     DVP_MemType_e smallType = DVP_MTYPE_MPUCACHED_VIRTUAL;
+    DVP_MemType_e opType = DVP_MTYPE_DEFAULT;
 
 #if defined(DVP_USE_TILER) || defined(DVP_USE_ION) || defined(DVP_USE_BO)
     camType = DVP_MTYPE_MPUNONCACHED_2DTILED;
     smallType = DVP_MTYPE_MPUNONCACHED_1DTILED;
+    opType = DVP_MTYPE_DEFAULT;
 #endif
     if (m_hDVP)
     {
@@ -1793,7 +1795,7 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             DVP_Image_Init(&m_images[20], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[21], 3, 3, FOURCC_Y800);
             /** NonMax**/
-            DVP_Image_Init(&m_images[22], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[22], m_width, m_height, FOURCC_Y16);
             DVP_Image_Init(&m_images[23], m_width, m_height+2, FOURCC_Y800);
             DVP_Image_Init(&m_images[24], m_width, m_height+4, FOURCC_Y800);
             DVP_Image_Init(&m_images[25], m_width, m_height+6, FOURCC_Y800);
@@ -1806,12 +1808,12 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             /** Canny**/
             DVP_Image_Init(&m_images[32], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[33], 7, 7, FOURCC_Y800);
-            DVP_Image_Init(&m_images[34], m_width, m_height, FOURCC_UYVY);
-            DVP_Image_Init(&m_images[35], m_width, m_height, FOURCC_UYVY);
-            DVP_Image_Init(&m_images[36], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[34], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[35], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[36], m_width, m_height, FOURCC_Y16);
             DVP_Image_Init(&m_images[37], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[38], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[39], m_width, m_height, FOURCC_RGBA);
+            DVP_Image_Init(&m_images[39], m_width, m_height, FOURCC_Y32);
             DVP_Image_Init(&m_images[40], m_width, m_height, FOURCC_Y800); //resv1
             /** New **/
             DVP_Image_Init(&m_images[41], m_width, m_height, FOURCC_Y800);
@@ -1851,90 +1853,90 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             DVP_Image_Init(&m_images[74], m_width, m_height, FOURCC_Y16);
             /** Misc**/
             if (!DVP_Image_Alloc(m_hDVP, &m_images[0],   camType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[1],  DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[2],  DVP_MTYPE_DEFAULT) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[3],  DVP_MTYPE_DEFAULT) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[4],  DVP_MTYPE_DEFAULT) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[5],  DVP_MTYPE_DEFAULT) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[6],  DVP_MTYPE_DEFAULT) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[7],  DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[1],  opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[2],  opType) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[3],  opType) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[4],  opType) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[5],  opType) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[6],  opType) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[7],  opType) || //resv1
                 /** Misc **/
 #if defined(DVP_USE_ION) || defined(DVP_USE_TILER) || defined(DVP_USE_BO)
                 !DVP_Image_Alloc(m_hDVP, &m_images[8],  DVP_MTYPE_MPUNONCACHED_2DTILED) ||
 #else
-                !DVP_Image_Alloc(m_hDVP, &m_images[8],  DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[8],  opType) ||
 #endif
-                !DVP_Image_Alloc(m_hDVP, &m_images[9],  DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[10], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[11], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[12], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[13], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[9],  opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[10], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[11], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[12], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[13], opType) ||
                 /** Morph**/
-                !DVP_Image_Alloc(m_hDVP, &m_images[14], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[15], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[16], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[17], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[18], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[19], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[20], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[14], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[15], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[16], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[17], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[18], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[19], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[20], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[21], smallType) ||      // Mask can be in virtual space since it is copied
                 /** NonMax**/
-                !DVP_Image_Alloc(m_hDVP, &m_images[22], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[23], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[24], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[25], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[26], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[27], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[28], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[22], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[23], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[24], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[25], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[26], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[27], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[28], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[29], smallType) ||       // Mask can be in virtual space since it is copied
                 !DVP_Image_Alloc(m_hDVP, &m_images[30], smallType) ||       // Mask can be in virtual space since it is copied
                 !DVP_Image_Alloc(m_hDVP, &m_images[31], smallType) ||       // Mask can be in virtual space since it is copied
                 /** Canny**/
-                !DVP_Image_Alloc(m_hDVP, &m_images[32], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[32], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[33], smallType) ||       // Mask can be in virtual space since it is copied
-                !DVP_Image_Alloc(m_hDVP, &m_images[34], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[35], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[36], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[37], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[38], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[39], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[40], DVP_MTYPE_DEFAULT) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[34], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[35], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[36], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[37], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[38], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[39], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[40], opType) || //resv1
                 /** New Requests**/
-                !DVP_Image_Alloc(m_hDVP, &m_images[41], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[42], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[41], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[42], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[43], smallType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[44], smallType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[45], DVP_MTYPE_DEFAULT) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[46], DVP_MTYPE_DEFAULT) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[47], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[48], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[49], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[50], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[51], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[52], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[53], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[45], opType) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[46], opType) || //resv1
+                !DVP_Image_Alloc(m_hDVP, &m_images[47], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[48], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[49], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[50], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[51], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[52], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[53], opType) ||
                 /** Imglib **/
-                !DVP_Image_Alloc(m_hDVP, &m_images[54], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[55], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[56], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[57], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[58], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[59], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[60], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[61], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[62], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[63], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[64], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[65], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[66], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[67], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[68], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[69], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[70], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[71], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[72], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[73], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[74], DVP_MTYPE_DEFAULT))
+                !DVP_Image_Alloc(m_hDVP, &m_images[54], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[55], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[56], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[57], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[58], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[59], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[60], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[61], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[62], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[63], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[64], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[65], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[66], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[67], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[68], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[69], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[70], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[71], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[72], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[73], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[74], opType))
                 return STATUS_NOT_ENOUGH_MEMORY;
         }
         else
@@ -1947,8 +1949,8 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = m_images[0];
             dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = m_images[1];
 
-            m_pNodes[1].header.kernel = DVP_KN_NOOP; // From common kernels
-            m_pNodes[2].header.kernel = DVP_KN_NOOP; // From common kernels
+            m_pNodes[1].header.kernel = DVP_KN_NOOP;
+            m_pNodes[2].header.kernel = DVP_KN_NOOP;
 
             /*********
 
@@ -2028,30 +2030,21 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             dvp_knode_to(&m_pNodes[16], DVP_Threshold_t)->output = m_images[23];
             dvp_knode_to(&m_pNodes[16], DVP_Threshold_t)->thresh = 100;
             if(dvp_knode_to(&m_pNodes[16], DVP_Threshold_t)->input.width > 992)
-            {
-                m_pNodes[16].header.kernel = DVP_KN_NONMAXSUPPRESS_3x3_S16;
-                m_pNodes[16].header.affinity = DVP_CORE_CPU;
-            }
+                m_pNodes[16].header.kernel = DVP_KN_NOOP;
 
             m_pNodes[17].header.kernel = DVP_KN_VRUN_NONMAXSUPPRESS_5x5_S16;
             dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->input = m_images[22];
             dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->output = m_images[24];
             dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->thresh = 100;
             if(dvp_knode_to(&m_pNodes[17], DVP_Threshold_t)->input.width > 992)
-            {
-                m_pNodes[17].header.kernel = DVP_KN_NONMAXSUPPRESS_5x5_S16;
-                m_pNodes[17].header.affinity = DVP_CORE_CPU;
-            }
+                m_pNodes[17].header.kernel = DVP_KN_NOOP;
 
             m_pNodes[18].header.kernel = DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16;
             dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->input = m_images[22];
             dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->output = m_images[25];
             dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->thresh = 100;
             if(dvp_knode_to(&m_pNodes[18], DVP_Threshold_t)->input.width > 768)
-            {
-                m_pNodes[18].header.kernel = DVP_KN_NONMAXSUPPRESS_7x7_S16;
-                m_pNodes[18].header.affinity = DVP_CORE_CPU;
-            }
+                m_pNodes[18].header.kernel = DVP_KN_NOOP;
 
             m_pNodes[19].header.kernel = DVP_KN_VRUN_CONV_3x3;
             dvp_knode_to(&m_pNodes[19], DVP_ImageConvolution_t)->input = m_images[8];
@@ -2107,10 +2100,7 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->input = m_images[8];
             dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->output = m_images[39];
             if(dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->input.width> 2049 || dvp_knode_to(&m_pNodes[26], DVP_Transform_t)->input.height> 819 )
-            {
-                m_pNodes[26].header.kernel = DVP_KN_INTEGRAL_IMAGE_8;
-                m_pNodes[26].header.affinity = DVP_CORE_CPU;
-            }
+                m_pNodes[26].header.kernel = DVP_KN_NOOP;
 
             DVP_Image_Fill(&m_images[33], (DVP_S08*)gaussian_7x7, 7*7*sizeof(DVP_S08)); // Copying the mask
 
@@ -2270,7 +2260,6 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
 #if 0
             TBD:
                 DVP_KN_VRUN_NV12_TO_YUV444p
-                DVP_KN_LDC_AFFINE_TRANSFORM
                 DVP_KN_VRUN_HARRIS_CORNERS
                 DVP_KN_VRUN_HARRIS_SCORE_7x7
                 DVP_KN_VRUN_BLOCK_MAXIMA
@@ -2447,7 +2436,7 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             DVP_Image_Init(&m_images[20], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[21], 3, 3, FOURCC_Y800);
             /** NonMax**/
-            DVP_Image_Init(&m_images[22], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[22], m_width, m_height, FOURCC_Y16);
             DVP_Image_Init(&m_images[23], m_width, m_height+2, FOURCC_Y800);
             DVP_Image_Init(&m_images[24], m_width, m_height+4, FOURCC_Y800);
             DVP_Image_Init(&m_images[25], m_width, m_height+6, FOURCC_Y800);
@@ -2460,12 +2449,12 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             /** Canny**/
             DVP_Image_Init(&m_images[32], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[33], 7, 7, FOURCC_Y800);
-            DVP_Image_Init(&m_images[34], m_width, m_height, FOURCC_UYVY);
-            DVP_Image_Init(&m_images[35], m_width, m_height, FOURCC_UYVY);
-            DVP_Image_Init(&m_images[36], m_width, m_height, FOURCC_UYVY);
+            DVP_Image_Init(&m_images[34], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[35], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[36], m_width, m_height, FOURCC_Y16);
             DVP_Image_Init(&m_images[37], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[38], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[39], m_width, m_height, FOURCC_RGBA);
+            DVP_Image_Init(&m_images[39], m_width, m_height, FOURCC_Y32);
             DVP_Image_Init(&m_images[40], m_width, m_height, FOURCC_Y800);
             /** New **/
             DVP_Image_Init(&m_images[41], m_width, m_height, FOURCC_Y800);
