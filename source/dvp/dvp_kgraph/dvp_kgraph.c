@@ -207,6 +207,7 @@ DVP_BOOL DVP_KernelGraph_Verify(DVP_Handle handle, DVP_KernelGraph_t *pGraph)
             {
                 numNodes += pGraph->sections[s].numNodes;
                 numNodesVerified += DVP_KernelGraphBoss_Verify(dvp, &pGraph->sections[s]);
+                DVP_PRINT(DVP_ZONE_KGAPI, "%u nodes pass verify on section %u\n", numNodesVerified, s);
             }
 
             if (numNodes == numNodesVerified)
@@ -238,9 +239,13 @@ DVP_U32 DVP_KernelGraph_Process(DVP_Handle handle, DVP_KernelGraph_t *pGraph, vo
 
     if (pGraph->verified == DVP_FALSE)
     {
+        DVP_PRINT(DVP_ZONE_KGAPI, "Graph has not been verified!\n");
         dvp_graph_unlock(&dvp->graphLock);
         if (DVP_KernelGraph_Verify(handle, pGraph) == DVP_FALSE)
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "Graph failed verification!\n");
             return 0;
+        }
         dvp_graph_lock(&dvp->graphLock);
     }
 

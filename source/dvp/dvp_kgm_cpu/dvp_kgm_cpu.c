@@ -4710,12 +4710,14 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
 
             default:
                 // only set unimplemented when all thr kernels have been added.
-                //pNodes[n].header.error = DVP_ERROR_NOT_IMPLEMENTED;
-                verified++;
+                //pSubNodes[n].header.error = DVP_ERROR_NOT_IMPLEMENTED;
                 break;
         }
         if (pSubNodes[n].header.error == DVP_SUCCESS)
+        {
+            DVP_PRINT(DVP_ZONE_KGM, "Node %u passed verification! (%u)\n", n, verified);
             verified++;
+        }
     }
     return verified;
 }

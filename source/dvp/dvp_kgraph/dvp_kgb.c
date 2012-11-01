@@ -643,7 +643,7 @@ DVP_U32 DVP_KernelGraphBoss_Verify(DVP_t *dvp,  DVP_KernelGraphSection_t *sectio
 
     if (faults == 0)
     {
-        DVP_PRINT(DVP_ZONE_KGB, "KGB: Verifying Graph!\n");
+        DVP_PRINT(DVP_ZONE_KGB, "KGB: Verifying Graph Section with %u nodes!\n", numNodes);
         for (n = 0; n < numNodes; /* no inc */)
         {
             DVP_U32 targetMgrIndex = pNodes[n].header.mgrIndex;
@@ -665,6 +665,8 @@ DVP_U32 DVP_KernelGraphBoss_Verify(DVP_t *dvp,  DVP_KernelGraphSection_t *sectio
             numNodeVerified = dvp->managers[pNodes[n].header.mgrIndex].calls.verify(pNodes,n,subgraphNumNodes);
             verified += numNodeVerified;
             n += subgraphNumNodes;
+            DVP_PRINT(DVP_ZONE_KGB, "KGB: Verified %u nodes on %s core\n", numNodeVerified, dvp->managers[pNodes[n].header.mgrIndex].name);
+
         }
         return verified;
     }

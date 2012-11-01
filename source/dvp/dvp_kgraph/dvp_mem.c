@@ -58,13 +58,19 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
 {
     DVP_U32 p;
     if (pImage == NULL)
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Image is null\n");
         return DVP_FALSE;
+    }
 
     if (bufAlign == 0 ||
         strideMultiple == 0 ||
         widthMultiple == 0 ||
         heigthMultiple == 0)
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Aligns or Multiples are zero\n");
         return DVP_FALSE;
+    }
 
     if (pImage->planes == 0 ||
         pImage->width == 0 ||
@@ -77,12 +83,18 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
         pImage->numBytes == 0 ||
         pImage->x_stride == 0 ||
         pImage->y_stride == 0)
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Image attribute was zero\n");
         return DVP_FALSE;
+    }
 
     if ((pImage->y_stride % strideMultiple) ||
         (pImage->width % widthMultiple) ||
         (pImage->height % heigthMultiple))
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Image attribute did not meet aligns or multiples\n");
         return DVP_FALSE;
+    }
 
     for (p = 0; p < pImage->planes; p++)
     {
@@ -93,22 +105,34 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
 
         // is the pointer NULL for either?
         if (pImage->pBuffer[p] == NULL || pImage->pData[p] == NULL)
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "Image Plane Pointer is null\n");
             return DVP_FALSE;
+        }
 
         // if the pointer not aligned?
         if ((size_t)pImage->pData[p] % bufAlign)
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "Image Plane Pointer is not aligned\n");
             return DVP_FALSE;
+        }
 
         // check to make sure the pointer is within the image somewhere
         if (!(pLo <= pImage->pData[p] && pImage->pData[p] < pHi))
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "Image Plane Pointer out of bounds\n");
             return DVP_FALSE;
+        }
 
         // if the image is strided, check to make sure it's not in the badlands.
         if (abs(pImage->y_stride) > line && pImage->bufWidth == pImage->width)
         {
             size_t offset = (size_t)(pImage->pData[p] - pImage->pBuffer[p]);
             if ((offset % abs(pImage->y_stride)) > line)
+            {
+                DVP_PRINT(DVP_ZONE_ERROR, "Image Plane Pointer is in badlands.\n");
                 return DVP_FALSE;
+            }
         }
     }
 
@@ -120,8 +144,12 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
             if (colors[c] == pImage->color)
                 colorMatch = DVP_TRUE;
         if (colorMatch == DVP_FALSE)
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "Image did not match colors\n");
             return DVP_FALSE;
+        }
     }
+    DVP_PRINT(DVP_ZONE_MEM, "Image %p validated!\n", pImage);
     return DVP_TRUE;
 }
 
