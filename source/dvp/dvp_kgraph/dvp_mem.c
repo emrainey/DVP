@@ -48,10 +48,22 @@ DVP_PTR dvp_calloc(DVP_Handle handle, DVP_U32 numElem, DVP_U32 sizeElem)
     return ptrs[0];
 }
 
-DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage)
+DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
+                            DVP_U32 bufAlign,
+                            DVP_U32 strideMultiple,
+                            DVP_U32 widthMultiple,
+                            DVP_U32 heigthMultiple,
+                            fourcc_t *colors,
+                            DVP_U32 numColors)
 {
     DVP_U32 p;
     if (pImage == NULL)
+        return DVP_FALSE;
+
+    if (bufAlign == 0 ||
+        strideMultiple == 0 ||
+        widthMultiple == 0 ||
+        heigthMultiple == 0)
         return DVP_FALSE;
 
     if (pImage->planes == 0 ||
@@ -67,9 +79,47 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage)
         pImage->y_stride == 0)
         return DVP_FALSE;
 
+    if ((pImage->y_stride % strideMultiple) ||
+        (pImage->width % widthMultiple) ||
+        (pImage->height % heigthMultiple))
+        return DVP_FALSE;
+
     for (p = 0; p < pImage->planes; p++)
     {
+        size_t range = abs(pImage->y_stride) * pImage->bufHeight;
+        size_t line = pImage->width * pImage->x_stride;
+        DVP_U08 *pLo = pImage->pBuffer[p];
+        DVP_U08 *pHi = pImage->pBuffer[p] + range;
+
+        // is the pointer NULL for either?
         if (pImage->pBuffer[p] == NULL || pImage->pData[p] == NULL)
+            return DVP_FALSE;
+
+        // if the pointer not aligned?
+        if ((size_t)pImage->pData[p] % bufAlign)
+            return DVP_FALSE;
+
+        // check to make sure the pointer is within the image somewhere
+        if (!(pLo <= pImage->pData[p] && pImage->pData[p] < pHi))
+            return DVP_FALSE;
+
+        // if the image is strided, check to make sure it's not in the badlands.
+        if (abs(pImage->y_stride) > line && pImage->bufWidth == pImage->width)
+        {
+            size_t offset = (size_t)(pImage->pData[p] - pImage->pBuffer[p]);
+            if ((offset % abs(pImage->y_stride)) > line)
+                return DVP_FALSE;
+        }
+    }
+
+    if (numColors > 0 && colors != NULL)
+    {
+        DVP_U32 c;
+        DVP_BOOL colorMatch = DVP_FALSE;
+        for (c = 0; c < numColors; c++)
+            if (colors[c] == pImage->color)
+                colorMatch = DVP_TRUE;
+        if (colorMatch == DVP_FALSE)
             return DVP_FALSE;
     }
     return DVP_TRUE;

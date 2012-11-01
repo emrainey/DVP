@@ -4222,14 +4222,18 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_YUV_Y800_TO_XYXY:
             case DVP_KN_YUV_YXYX_TO_Y800:
 #endif
+#ifdef DVP_USE_VLIB
+            case DVP_KN_VLIB_INIT_MEAN_LUMA_S16:
+            case DVP_KN_VLIB_INIT_MEAN_LUMA_S32:
+#endif
 #ifdef DVP_USE_IMGLIB
             case DVP_KN_IMG_YUV422p_TO_RGB565:
 #endif
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 //DVP_PRINT(DVP_ZONE_KGM, "Verifying Transform Type!\n");
-                if (DVP_Image_Validate(&pT->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pT->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
@@ -4248,8 +4252,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 //DVP_PRINT(DVP_ZONE_KGM, "Verifying Transform Type!\n");
-                if (DVP_Image_Validate(&pT->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pT->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
                     pT->input.color == pT->output.color ||
@@ -4270,8 +4274,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 //DVP_PRINT(DVP_ZONE_KGM, "Verifying Transform Type!\n");
-                if (DVP_Image_Validate(&pT->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pT->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
                     pT->input.color == pT->output.color ||
@@ -4282,8 +4286,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_THRESHOLD:
             {
                 DVP_Transform_t *pIO = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
-                if (DVP_Image_Validate(&pIO->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pIO->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pIO->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pIO->input.planes != pIO->output.planes ||
                     pIO->input.height != pIO->output.height ||
                     pIO->input.width != pIO->output.width ||
@@ -4297,8 +4301,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             {
                 DVP_U32 j, p, y = 0;
                 DVP_Transform_t *pIO = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
-                if (DVP_Image_Validate(&pIO->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pIO->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pIO->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pIO->input.planes != pIO->output.planes ||
                     pIO->input.height != pIO->output.height ||
                     pIO->input.width != pIO->output.width)
@@ -4309,7 +4313,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMAGE_DEBUG:
             {
                 DVP_ImageDebug_t* pImg = dvp_knode_to(&pSubNodes[n],DVP_ImageDebug_t);
-                if (DVP_Image_Validate(&pImg->image) == DVP_FALSE)
+                if (DVP_Image_Validate(&pImg->image, 1, 1, 1, 1, NULL, 0) == DVP_FALSE)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4348,8 +4352,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
 #endif
             {
                 DVP_Morphology_t *pD = dvp_knode_to(&pSubNodes[n], DVP_Morphology_t);
-                if (DVP_Image_Validate(&pD->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pD->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pD->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pD->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pD->input.width != pD->output.width ||
                     pD->input.height != pD->output.height ||
                     pD->input.color != FOURCC_Y800 ||
@@ -4363,10 +4367,10 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
 #endif
             {
                 DVP_Canny2dGradient_t *pD = dvp_knode_to(&pSubNodes[n], DVP_Canny2dGradient_t);
-                if (DVP_Image_Validate(&pD->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pD->outGradX) == DVP_FALSE ||
-                    DVP_Image_Validate(&pD->outGradY) == DVP_FALSE ||
-                    DVP_Image_Validate(&pD->outMag) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pD->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pD->outGradX, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pD->outGradY, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pD->outMag, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pD->input.width != pD->outGradX.width ||
                     pD->input.width != pD->outGradY.width ||
                     pD->input.width != pD->outMag.width ||
@@ -4408,8 +4412,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_CANNY_IMAGE_SMOOTHING:
             {
                 DVP_ImageConvolution_t *pImg = dvp_knode_to(&pSubNodes[n], DVP_ImageConvolution_t);
-                if (DVP_Image_Validate(&pImg->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pImg->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pImg->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pImg->input.width != pImg->output.width ||
                     pImg->input.height != pImg->output.height ||
                     pImg->input.color != pImg->output.color ||
@@ -4424,8 +4428,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMG_CONV_11x11_I16s_C16:
             {
                 DVP_ImageConvolution_t *pImg = dvp_knode_to(&pSubNodes[n], DVP_ImageConvolution_t);
-                if (DVP_Image_Validate(&pImg->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pImg->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pImg->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pImg->input.width != pImg->output.width ||
                     pImg->input.height != pImg->output.height ||
                     pImg->input.color != pImg->output.color ||
@@ -4439,8 +4443,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMG_CONV_7x7_I8_C16:
             {
                 DVP_ImageConvolution_with_buffer_t *pImgb = dvp_knode_to(&pSubNodes[n], DVP_ImageConvolution_with_buffer_t);
-                if (DVP_Image_Validate(&pImgb->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pImgb->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pImgb->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImgb->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pImgb->input.width != pImgb->output.width ||
                     pImgb->input.height != pImgb->output.height ||
                     pImgb->input.color != pImgb->output.color ||
@@ -4454,8 +4458,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMG_CORR_3x3:
             {
                 DVP_ImageCorrelation_t *pImg = dvp_knode_to(&pSubNodes[n], DVP_ImageCorrelation_t);
-                if (DVP_Image_Validate(&pImg->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pImg->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pImg->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pImg->input.width != pImg->output.width ||
                     pImg->input.height != pImg->output.height ||
                     pImg->input.color != FOURCC_Y800 ||
@@ -4471,8 +4475,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMG_CORR_11x11_I16s_C16s:
             {
                 DVP_ImageCorrelation_t *pImg = dvp_knode_to(&pSubNodes[n], DVP_ImageCorrelation_t);
-                if (DVP_Image_Validate(&pImg->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pImg->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pImg->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pImg->input.width != pImg->output.width ||
                     pImg->input.height != pImg->output.height ||
                     pImg->input.color != FOURCC_Y16 ||
@@ -4487,8 +4491,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMG_CORR_11x11_I8_C16s:
             {
                 DVP_ImageCorrelation_t *pImg = dvp_knode_to(&pSubNodes[n], DVP_ImageCorrelation_t);
-                if (DVP_Image_Validate(&pImg->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pImg->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pImg->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pImg->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pImg->input.width != pImg->output.width ||
                     pImg->input.height != pImg->output.height ||
                     pImg->input.color != FOURCC_Y800 ||
@@ -4510,8 +4514,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
 #endif
             {
                 DVP_IIR_t *iir = dvp_knode_to(&pSubNodes[n], DVP_IIR_t);
-                if (DVP_Image_Validate(&iir->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&iir->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&iir->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&iir->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     /*! \todo add checking for bounds */
                     iir->weight == 0)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
@@ -4523,8 +4527,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
 #endif
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
-                if (DVP_Image_Validate(&pT->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pT->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
                     pT->input.color != FOURCC_Y800 ||
@@ -4536,8 +4540,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_VLIB_INTEGRAL_IMAGE_16:
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
-                if (DVP_Image_Validate(&pT->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pT->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
                     pT->input.color != FOURCC_Y16 ||
@@ -4557,8 +4561,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             {
                 DVP_Threshold_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Threshold_t);
                 /*! \todo any threshold value is ok? */
-                if (DVP_Image_Validate(&pT->input) == DVP_FALSE ||
-                    DVP_Image_Validate(&pT->output) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
                     pT->input.color != FOURCC_Y16 ||
@@ -4566,6 +4570,138 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
+#ifdef DVP_USE_VLIB
+            case DVP_KN_VLIB_NORMALFLOW_16:
+            {
+                DVP_NormalFlow_t *pN = dvp_knode_to(&pSubNodes[n], DVP_NormalFlow_t);
+                if (DVP_Image_Validate(&pN->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pN->x, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pN->y, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pN->u, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pN->v, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pN->lut, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pN->mag, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    pN->input.color != FOURCC_Y16 ||
+                    pN->x.color != FOURCC_Y16 ||
+                    pN->y.color != FOURCC_Y16 ||
+                    pN->u.color != FOURCC_Y16 ||
+                    pN->v.color != FOURCC_Y16 ||
+                    pN->lut.color != FOURCC_Y16 ||
+                    pN->mag.color != FOURCC_Y16)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            /// @todo case DVP_KN_VLIB_KALMAN_2x4:
+            /// @todo case DVP_KN_VLIB_KALMAN_4x6:
+            case DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_16:
+            {
+                DVP_Simplex_t *pSmx = dvp_knode_to(&pSubNodes[n], DVP_Simplex_t);
+                break;
+            }
+            case DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_3D:
+            {
+                DVP_Simplex_t *pSmx = dvp_knode_to(&pSubNodes[n], DVP_Simplex_t);
+                break;
+            }
+            /// @todo case DVP_KN_VLIB_LEGENDRE_MOMENTS:
+            case DVP_KN_VLIB_INIT_HISTOGRAM_8:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+            case DVP_KN_VLIB_HISTOGRAM_8:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+            case DVP_KN_VLIB_WEIGHTED_HISTOGRAM_8:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+            case DVP_KN_VLIB_INIT_HISTOGRAM_16:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+            case DVP_KN_VLIB_HISTOGRAM_16:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+            case DVP_KN_VLIB_WEIGHTED_HISTOGRAM_16:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+            case DVP_KN_VLIB_HISTOGRAM_ND_16:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+            case DVP_KN_VLIB_NONMAXSUPPRESS_U32:
+            {
+                DVP_Nonmax_NxN_t *nonmax32 = dvp_knode_to(&pSubNodes[n], DVP_Nonmax_NxN_t);
+                break;
+            }
+
+#if 0 // @todo Must test and enable these features
+            case DVP_KN_VLIB_HISTOGRAM_ND_16:
+            {
+                DVP_Histogram_t *pH = dvp_knode_to(&pSubNodes[n], DVP_Histogram_t);
+                break;
+            }
+#endif
+            case DVP_KN_VLIB_BHATTACHAYA_DISTANCE:
+            {
+                DVP_Distance_t *pD = dvp_knode_to(&pSubNodes[n], DVP_Distance_t);
+                break;
+            }
+            case DVP_KN_VLIB_L1DISTANCE:
+            {
+                DVP_Distance_t *pD = dvp_knode_to(&pSubNodes[n], DVP_Distance_t);
+                break;
+            }
+            case DVP_KN_VLIB_TRACK_FEATURES_LUCAS_7x7:
+            {
+                DVP_TrackFeatures_t *pTF = dvp_knode_to(&pSubNodes[n], DVP_TrackFeatures_t);
+                break;
+            }
+#if defined(VLIB_DISPARITY_FIXED)
+            // these disparity calculations seem to be broken, we'll reenable once they are fixed.
+            case DVP_KN_VLIB_DISPARITY_SAD8:
+            {
+                DVP_Disparity_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Disparity_t);
+                break;
+            }
+            case DVP_KN_VLIB_DISPARITY_SAD16:
+            {
+                DVP_Disparity_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Disparity_t);
+                break;
+            }
+#endif // VLIB_DISPARITY_FIXED
+#endif /// DVP_USE_VLIB
+
+#ifdef DVP_USE_VLIB
+            case DVP_KN_VLIB_UYVY_TO_HSLp:
+            case DVP_KN_VLIB_UYVY_TO_LABp:
+#endif /// DVP_USE_VLIB
+#ifdef DVP_USE_IMGLIB
+            case DVP_KN_IMG_YC_DEMUX_BE16_8:
+            case DVP_KN_IMG_YC_DEMUX_LE16_8:
+#endif
+            {
+                DVP_Int2Pl_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Int2Pl_t);
+                break;
+            }
+
+#if defined(DVP_USE_ORB)
+            case DVP_KN_ORB:
+            {
+                DVP_Orb_t * orbData = dvp_knode_to(&pSubNodes[n], DVP_Orb_t);
+                break;
+            }
+#endif//DVP_USE_ORB
 
             /*! \todo add each kernel supported in the CPU manager to this list */
 

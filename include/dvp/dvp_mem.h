@@ -177,11 +177,33 @@ DVP_U32 DVP_Image_Size(DVP_Image_t *pImage);
 /*!
  * \brief Validates the values of the various members of the Image structure.
  * \param [in] pImage The pointer to the Image structure.
+ * \param [in] bufAlign The pointer alignment value in bytes.
+ * Typically 4 for most architectures, but can be 1 if the type is bytes.
+ * \param [in] strideMultiple The minimum multiple of the stride in bytes.
+ * Typically 1 byte.
+ * \param [in] widthMultiple The minimum multiple of the width in pixels.
+ * Typically 1 pixel, but can be 2, 4, 16, etc for SIMD architectures.
+ * \param [in] heightMulitple The minimum multiple of the height in pixels.
+ * Typically 1 line of pixels, but can be 2, 4, etc for SIMD architectures.
+ * \param [in] colors The array of acceptable color formats. At least one must match.
+ * \param [in] numColors The number of items in the colors array.
  * \retval DVP_TRUE all member variables are valid.
  * \retval DVP_FALSE some member variable is invalid.
  * \ingroup group_images
+\code
+
+    fourcc_t valid_colors[] = {FOURCC_Y800};
+    DVP_Image_Validate(&image, 1, 1, 8, 1, valid_colors, dimof(valid_colors));
+
+\endcode
  */
-DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage);
+DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
+                            DVP_U32 bufAlign,
+                            DVP_U32 strideMultiple,
+                            DVP_U32 widthMultiple,
+                            DVP_U32 heigthMultiple,
+                            fourcc_t *colors,
+                            DVP_U32 numColors);
 
 /*!
  * \brief Allocates and maps a flat buffer to all remote cores.
