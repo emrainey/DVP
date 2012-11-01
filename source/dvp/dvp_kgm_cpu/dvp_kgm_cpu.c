@@ -4253,7 +4253,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
                     pT->input.color == pT->output.color ||
-                    pT->input.color == FOURCC_Y800)
+                    pT->input.color != FOURCC_Y800)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4275,7 +4275,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
                     pT->input.color == pT->output.color ||
-                    pT->input.color == FOURCC_Y16)
+                    pT->input.color != FOURCC_Y16)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4288,7 +4288,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     pIO->input.height != pIO->output.height ||
                     pIO->input.width != pIO->output.width ||
                     pIO->input.x_stride != pIO->output.x_stride ||
-                    pIO->input.color == FOURCC_Y800)
+                    pIO->input.color != FOURCC_Y800)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4527,8 +4527,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     DVP_Image_Validate(&pT->output) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
-                    pT->input.color == FOURCC_Y800 ||
-                    pT->output.color == FOURCC_Y32)
+                    pT->input.color != FOURCC_Y800 ||
+                    pT->output.color != FOURCC_Y32)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4540,8 +4540,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     DVP_Image_Validate(&pT->output) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
-                    pT->input.color == FOURCC_Y16 ||
-                    pT->output.color == FOURCC_Y32)
+                    pT->input.color != FOURCC_Y16 ||
+                    pT->output.color != FOURCC_Y32)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4561,8 +4561,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     DVP_Image_Validate(&pT->output) == DVP_FALSE ||
                     pT->input.width != pT->output.width ||
                     pT->input.height != pT->output.height ||
-                    pT->input.color == FOURCC_Y16 ||
-                    pT->output.color == FOURCC_Y800)
+                    pT->input.color != FOURCC_Y16 ||
+                    pT->output.color != FOURCC_Y800)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4575,6 +4575,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             default:
                 // only set unimplemented when all thr kernels have been added.
                 //pNodes[n].header.error = DVP_ERROR_NOT_IMPLEMENTED;
+                verified++;
                 break;
         }
         if (pSubNodes[n].header.error == DVP_SUCCESS)
