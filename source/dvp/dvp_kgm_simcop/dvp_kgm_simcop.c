@@ -1004,8 +1004,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 DVP_Morphology_t *pMorph = dvp_knode_to(&pNodes[n], DVP_Morphology_t);
                 if (DVP_Image_Validate(&pMorph->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pMorph->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
-                    pMorph->input.width != pMorph->output.width ||
-                    pMorph->input.height != pMorph->output.height)
+                    pMorph->input.width  > pMorph->output.width ||
+                    pMorph->input.height > pMorph->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
 
                 if (pNodes[n].header.kernel == DVP_KN_ERODE_MASK ||
@@ -1027,8 +1027,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 if (DVP_Image_Validate(&pIIR->input, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIIR->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIIR->scratch, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
-                    pIIR->input.width != pIIR->output.width ||
-                    pIIR->input.height != pIIR->output.height)
+                    pIIR->input.width  > pIIR->output.width ||
+                    pIIR->input.height > pIIR->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1044,8 +1044,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 DVP_Threshold_t *pThresh = dvp_knode_to(&pNodes[n], DVP_Threshold_t);
                 if (DVP_Image_Validate(&pThresh->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pThresh->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
-                    pThresh->input.width != pThresh->output.width ||
-                    pThresh->input.height != pThresh->output.height)
+                    pThresh->input.width  > pThresh->output.width ||
+                    pThresh->input.height > pThresh->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1061,8 +1061,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 DVP_Threshold_t *pThresh = dvp_knode_to(&pNodes[n], DVP_Threshold_t);
                 if (DVP_Image_Validate(&pThresh->input, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pThresh->output, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
-                    pThresh->input.width != pThresh->output.width ||
-                    pThresh->input.height != pThresh->output.height)
+                    pThresh->input.width  > pThresh->output.width ||
+                    pThresh->input.height > pThresh->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1076,9 +1076,9 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
             {
                 DVP_Threshold_t *pThresh = dvp_knode_to(&pNodes[n], DVP_Threshold_t);
                 if (DVP_Image_Validate(&pThresh->input, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
-                    DVP_Image_Validate(&pThresh->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE)// ||
-//                    pThresh->input.width != pThresh->output.width ||      // TODO: width&height matching
-//                    pThresh->input.height != pThresh->output.height)
+                    DVP_Image_Validate(&pThresh->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
+                    pThresh->input.width  > pThresh->output.width ||
+                    pThresh->input.height > pThresh->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
 
                 // Check for maximum widths in the case of SIMCOP
@@ -1090,13 +1090,6 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                     if (pThresh->input.width > 992)
                         pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 }
-
-//                if(pNodes[n].header.kernel == DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16) {
-//                    int i;
-//                    unsigned char *Pixptr = pThresh->output.pData[0];
-//                    for(i = 0; i<pThresh->output.bufHeight*pThresh->output.bufWidth; i++)
-//                        Pixptr[i]=255;
-//                }
                 break;
             }
             case DVP_KN_CANNY_IMAGE_SMOOTHING:
@@ -1113,8 +1106,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 if (DVP_Image_Validate(&pImg->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pImg->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pImg->mask, 4, 1, 1, 1, colorY800, 1) == DVP_FALSE ||
-                    pImg->input.width != pImg->output.width ||
-                    pImg->input.height != pImg->output.height)
+                    pImg->input.width  > pImg->output.width ||
+                    pImg->input.height > pImg->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1128,8 +1121,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 if (DVP_Image_Validate(&pImg->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pImg->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pImg->refImg, 16, 8, 8, 2, colorY800, 1) == DVP_FALSE ||
-                    pImg->input.width != pImg->output.width ||
-                    pImg->input.height != pImg->output.height)
+                    pImg->input.width  > pImg->output.width ||
+                    pImg->input.height > pImg->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1141,12 +1134,12 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                     DVP_Image_Validate(&pGrad->outGradX, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pGrad->outGradY, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pGrad->outMag, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
-                    pGrad->input.width != pGrad->outGradX.width ||
-                    pGrad->input.height != pGrad->outGradX.height ||
-                    pGrad->input.width != pGrad->outGradY.width ||
-                    pGrad->input.height != pGrad->outGradY.height ||
-                    pGrad->input.width != pGrad->outMag.width ||
-                    pGrad->input.height != pGrad->outMag.height)
+                    pGrad->input.width  > pGrad->outGradX.width ||
+                    pGrad->input.height > pGrad->outGradX.height ||
+                    pGrad->input.width  > pGrad->outGradY.width ||
+                    pGrad->input.height > pGrad->outGradY.height ||
+                    pGrad->input.width  > pGrad->outMag.width ||
+                    pGrad->input.height > pGrad->outMag.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1158,12 +1151,12 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                     DVP_Image_Validate(&pCnonmax->inGradX, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pCnonmax->inGradY, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pCnonmax->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
-                    pCnonmax->output.width != pCnonmax->inMag.width ||
-                    pCnonmax->output.height != pCnonmax->inMag.height ||
-                    pCnonmax->output.width != pCnonmax->inGradX.width ||
-                    pCnonmax->output.height != pCnonmax->inGradX.height ||
-                    pCnonmax->output.width != pCnonmax->inGradY.width ||
-                    pCnonmax->output.height != pCnonmax->inGradY.height)
+                    pCnonmax->output.width  < pCnonmax->inMag.width ||
+                    pCnonmax->output.height < pCnonmax->inMag.height ||
+                    pCnonmax->output.width  < pCnonmax->inGradX.width ||
+                    pCnonmax->output.height < pCnonmax->inGradX.height ||
+                    pCnonmax->output.width  < pCnonmax->inGradY.width ||
+                    pCnonmax->output.height < pCnonmax->inGradY.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1174,10 +1167,10 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 if (DVP_Image_Validate(&pDth->inMag, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pDth->inEdgeMap, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pDth->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
-                    pDth->output.width != pDth->inMag.width ||
-                    pDth->output.height != pDth->inMag.height ||
-                    pDth->output.width != pDth->inEdgeMap.width ||
-                    pDth->output.height != pDth->inEdgeMap.height)
+                    pDth->output.width  < pDth->inMag.width ||
+                    pDth->output.height < pDth->inMag.height ||
+                    pDth->output.width  < pDth->inEdgeMap.width ||
+                    pDth->output.height < pDth->inEdgeMap.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1197,8 +1190,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1218,8 +1211,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorY16, 1) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1230,8 +1223,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorUYVY[] = {FOURCC_UYVY, FOURCC_VYUY};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorUYVY, 2) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1242,8 +1235,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorOut[] = {FOURCC_Y32};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 1) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
 
                 if (pIO->input.width > 2049 ||
@@ -1259,8 +1252,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorOut[] = {FOURCC_YV24, FOURCC_YU24};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 2) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1272,8 +1265,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorOut[] = {FOURCC_RGBP};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 1) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1285,8 +1278,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorOut[] = {FOURCC_IYUV, FOURCC_YV12};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 2) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1298,8 +1291,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorOut[] = {FOURCC_YV24, FOURCC_YU24};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 2) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1311,8 +1304,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorOut[] = {FOURCC_RGBP};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 2) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 1) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -1340,8 +1333,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                     DVP_Image_Validate(&pIO->tempBuf3, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->tempBuf4, 16, 16, 16, 2, colorY16, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 16, 2, colorY800, 1) == DVP_FALSE ||
-                    pIO->input.width != pIO->output.width ||
-                    pIO->input.height != pIO->output.height)
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }

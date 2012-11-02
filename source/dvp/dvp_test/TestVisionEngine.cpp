@@ -1793,9 +1793,9 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             DVP_Image_Init(&m_images[21], 3, 3, FOURCC_Y800);
             /** NonMax**/
             DVP_Image_Init(&m_images[22], m_width, m_height, FOURCC_Y16);
-            DVP_Image_Init(&m_images[23], m_width, m_height+2, FOURCC_Y800);
-            DVP_Image_Init(&m_images[24], m_width, m_height+4, FOURCC_Y800);
-            DVP_Image_Init(&m_images[25], m_width, m_height+6, FOURCC_Y800);
+            DVP_Image_Init(&m_images[23], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[24], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[25], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[26], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[27], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[28], m_width, m_height, FOURCC_Y800);
@@ -2440,9 +2440,9 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             DVP_Image_Init(&m_images[21], 3, 3, FOURCC_Y800);
             /** NonMax**/
             DVP_Image_Init(&m_images[22], m_width, m_height, FOURCC_Y16);
-            DVP_Image_Init(&m_images[23], m_width, m_height+2, FOURCC_Y800);
-            DVP_Image_Init(&m_images[24], m_width, m_height+4, FOURCC_Y800);
-            DVP_Image_Init(&m_images[25], m_width, m_height+6, FOURCC_Y800);
+            DVP_Image_Init(&m_images[23], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[24], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[25], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[26], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[27], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[28], m_width, m_height, FOURCC_Y800);
