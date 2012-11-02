@@ -1768,16 +1768,13 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
 #endif
     if (m_hDVP)
     {
-        if (AllocateImageStructs(75))
+        if (AllocateImageStructs(66))
         {
             DVP_Image_Init(&m_images[0], m_width, m_height, FOURCC_UYVY);
             DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_YV24);
-            DVP_Image_Init(&m_images[2], m_width, m_height, FOURCC_Y800); //resv1
-            DVP_Image_Init(&m_images[3], m_width, m_height, FOURCC_Y800); //resv1
-            DVP_Image_Init(&m_images[4], m_width, m_height, FOURCC_Y800); //resv1
-            DVP_Image_Init(&m_images[5], m_width, m_height, FOURCC_Y800); //resv1
-            DVP_Image_Init(&m_images[6], m_width, m_height, FOURCC_Y800); //resv1
-            DVP_Image_Init(&m_images[7], m_width, m_height, FOURCC_Y800); //resv1
+
+            // images 2-7 moved to end of list
+
             /** Misc**/
             DVP_Image_Init(&m_images[8], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[9], m_width, m_height, FOURCC_RGBP);
@@ -1814,14 +1811,17 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             DVP_Image_Init(&m_images[37], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[38], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[39], m_width, m_height, FOURCC_Y32);
-            DVP_Image_Init(&m_images[40], m_width, m_height, FOURCC_Y800); //resv1
+
+            // image 40 moved to end of list
+
             /** New **/
             DVP_Image_Init(&m_images[41], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[42], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[43], 7, 1, FOURCC_Y800);
             DVP_Image_Init(&m_images[44], 1, 7, FOURCC_Y800);
-            DVP_Image_Init(&m_images[45], m_width, m_height, FOURCC_Y800); //resv1
-            DVP_Image_Init(&m_images[46], m_width, m_height, FOURCC_Y800); //resv1
+
+            // images 45-46 moved to end of list
+
             DVP_Image_Init(&m_images[47], 16, 16, FOURCC_Y800);            //sad ref image
             DVP_Image_Init(&m_images[48], m_width, m_height, FOURCC_Y800); //sad 8x8
             DVP_Image_Init(&m_images[49], m_width, m_height, FOURCC_Y800); //sad 16x16
@@ -1842,24 +1842,22 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
             DVP_Image_Init(&m_images[63], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[64], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[65], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[66], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[67], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[68], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[69], m_width, m_height, FOURCC_Y16);
-            DVP_Image_Init(&m_images[70], m_width, m_height, FOURCC_Y16);
-            DVP_Image_Init(&m_images[71], m_width, m_height, FOURCC_Y16);
-            DVP_Image_Init(&m_images[72], m_width, m_height, FOURCC_Y16);
-            DVP_Image_Init(&m_images[73], m_width, m_height, FOURCC_Y16);
-            DVP_Image_Init(&m_images[74], m_width, m_height, FOURCC_Y16);
+
+            DVP_Image_Init(&m_images[2], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[3], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[4], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[5], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[6], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[7], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[40], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[45], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[46], m_width, m_height, FOURCC_Y16);
             /** Misc**/
-            if (!DVP_Image_Alloc(m_hDVP, &m_images[0],   camType) ||
+            if (!DVP_Image_Alloc(m_hDVP, &m_images[0],  camType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[1],  opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[2],  opType) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[3],  opType) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[4],  opType) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[5],  opType) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[6],  opType) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[7],  opType) || //resv1
+
+                // images 2-7 moved to end of list
+
                 /** Misc **/
 #if defined(DVP_USE_ION) || defined(DVP_USE_TILER) || defined(DVP_USE_BO)
                 !DVP_Image_Alloc(m_hDVP, &m_images[8],  DVP_MTYPE_MPUNONCACHED_2DTILED) ||
@@ -1900,14 +1898,17 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
                 !DVP_Image_Alloc(m_hDVP, &m_images[37], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[38], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[39], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[40], opType) || //resv1
+
+                // image 40 moved to end of list
+
                 /** New Requests**/
                 !DVP_Image_Alloc(m_hDVP, &m_images[41], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[42], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[43], smallType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[44], smallType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[45], opType) || //resv1
-                !DVP_Image_Alloc(m_hDVP, &m_images[46], opType) || //resv1
+
+                // images 45-46 moved to end of list
+
                 !DVP_Image_Alloc(m_hDVP, &m_images[47], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[48], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[49], opType) ||
@@ -1928,15 +1929,16 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
                 !DVP_Image_Alloc(m_hDVP, &m_images[63], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[64], opType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[65], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[66], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[67], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[68], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[69], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[70], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[71], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[72], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[73], opType) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[74], opType))
+
+                !DVP_Image_Alloc(m_hDVP, &m_images[2], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[3], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[4], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[5], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[6], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[7], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[40], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[45], opType) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[46], opType))
                 return STATUS_NOT_ENOUGH_MEMORY;
         }
         else
@@ -2223,39 +2225,39 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
 
             m_pNodes[47].header.kernel = DVP_KN_VRUN_SOBEL_5x5_8;
             dvp_knode_to(&m_pNodes[47], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
-            dvp_knode_to(&m_pNodes[47], DVP_Transform_t)->output = m_images[66];
+            dvp_knode_to(&m_pNodes[47], DVP_Transform_t)->output = m_images[2];
 
             m_pNodes[48].header.kernel = DVP_KN_VRUN_SOBEL_7x7_8s;
             dvp_knode_to(&m_pNodes[48], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
-            dvp_knode_to(&m_pNodes[48], DVP_Transform_t)->output = m_images[67];
+            dvp_knode_to(&m_pNodes[48], DVP_Transform_t)->output = m_images[3];
 
             m_pNodes[49].header.kernel = DVP_KN_VRUN_SOBEL_7x7_8;
             dvp_knode_to(&m_pNodes[49], DVP_Transform_t)->input = m_images[8];       // Use 8bit luma
-            dvp_knode_to(&m_pNodes[49], DVP_Transform_t)->output = m_images[68];
+            dvp_knode_to(&m_pNodes[49], DVP_Transform_t)->output = m_images[4];
 
             m_pNodes[50].header.kernel = DVP_KN_VRUN_SOBEL_3x3_16s;
             dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->output = m_images[69];
+            dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->output = m_images[5];
 
             m_pNodes[51].header.kernel = DVP_KN_VRUN_SOBEL_3x3_16;
             dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->output = m_images[70];
+            dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->output = m_images[6];
 
             m_pNodes[52].header.kernel = DVP_KN_VRUN_SOBEL_5x5_16s;
             dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->output = m_images[71];
+            dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->output = m_images[7];
 
             m_pNodes[53].header.kernel = DVP_KN_VRUN_SOBEL_5x5_16;
             dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->output = m_images[72];
+            dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->output = m_images[40];
 
             m_pNodes[54].header.kernel = DVP_KN_VRUN_SOBEL_7x7_16s;
             dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->output = m_images[73];
+            dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->output = m_images[45];
 
             m_pNodes[55].header.kernel = DVP_KN_VRUN_SOBEL_7x7_16;
             dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->output = m_images[74];
+            dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->output = m_images[46];
 
 #if 0
             TBD:
@@ -2275,17 +2277,14 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
         status = CameraInit(this, m_images[0].color);
         if (status == STATUS_SUCCESS)
         {
-            if (m_imgdbg_enabled && AllocateImageDebug(67))
+            if (m_imgdbg_enabled && AllocateImageDebug(58))
             {
                 /** Misc**/
                 ImageDebug_Init(&m_imgdbg[0],  &m_images[0],  m_imgdbg_path, "00_input");
                 ImageDebug_Init(&m_imgdbg[1],  &m_images[1],  m_imgdbg_path, "01_YUV444");
-                ImageDebug_Init(&m_imgdbg[2],  &m_images[2],  m_imgdbg_path, "02_resv1");
-                ImageDebug_Init(&m_imgdbg[3],  &m_images[3],  m_imgdbg_path, "03_resv1");
-                ImageDebug_Init(&m_imgdbg[4],  &m_images[4],  m_imgdbg_path, "04_resv1");
-                ImageDebug_Init(&m_imgdbg[5],  &m_images[5],  m_imgdbg_path, "05_resv1");
-                ImageDebug_Init(&m_imgdbg[6],  &m_images[6],  m_imgdbg_path, "06_resv1");
-                ImageDebug_Init(&m_imgdbg[7],  &m_images[7],  m_imgdbg_path, "07_resv1");
+
+                // images 2-7 moved to end of list
+
                 /** **/
                 ImageDebug_Init(&m_imgdbg[8],  &m_images[8],  m_imgdbg_path, "08_luma");
                 ImageDebug_Init(&m_imgdbg[9],  &m_images[9],  m_imgdbg_path, "09_RGBpl");
@@ -2316,12 +2315,15 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
                 ImageDebug_Init(&m_imgdbg[31], &m_images[37], m_imgdbg_path, "31_cannyNonma");
                 ImageDebug_Init(&m_imgdbg[32], &m_images[38], m_imgdbg_path, "32_dThresh");
                 ImageDebug_Init(&m_imgdbg[33], &m_images[39], m_imgdbg_path, "33_intImg");
-                ImageDebug_Init(&m_imgdbg[34], &m_images[40], m_imgdbg_path, "34_resv1");
                 /** New Requests**/
+
+                // image 40 moved to end of list
+
                 ImageDebug_Init(&m_imgdbg[35], &m_images[41], m_imgdbg_path, "35_fir7X1");
                 ImageDebug_Init(&m_imgdbg[36], &m_images[42], m_imgdbg_path, "36_fir1X7");
-                ImageDebug_Init(&m_imgdbg[37], &m_images[45], m_imgdbg_path, "37_resv1");
-                ImageDebug_Init(&m_imgdbg[38], &m_images[46], m_imgdbg_path, "38_resv1");
+
+                // images 45-46 moved to end of list
+
                 ImageDebug_Init(&m_imgdbg[39], &m_images[47], m_imgdbg_path, "39_refImg");
                 ImageDebug_Init(&m_imgdbg[40], &m_images[48], m_imgdbg_path, "40_SAD_8X8");
                 ImageDebug_Init(&m_imgdbg[41], &m_images[49], m_imgdbg_path, "41_SAD_16X16");
@@ -2342,15 +2344,16 @@ status_e TestVisionEngine::Test_VrunGraphSetup()
                 ImageDebug_Init(&m_imgdbg[55], &m_images[63], m_imgdbg_path, "55_sobel8_3X3_s");
                 ImageDebug_Init(&m_imgdbg[56], &m_images[64], m_imgdbg_path, "56_sobel8_3X3");
                 ImageDebug_Init(&m_imgdbg[57], &m_images[65], m_imgdbg_path, "57_sobel8_5X5_s");
-                ImageDebug_Init(&m_imgdbg[58], &m_images[66], m_imgdbg_path, "58_sobel8_5X5");
-                ImageDebug_Init(&m_imgdbg[59], &m_images[67], m_imgdbg_path, "59_sobel8_7X7_s");
-                ImageDebug_Init(&m_imgdbg[60], &m_images[68], m_imgdbg_path, "60_sobel8_7X7");
-                ImageDebug_Init(&m_imgdbg[61], &m_images[69], m_imgdbg_path, "61_sobel16_3X3_s");
-                ImageDebug_Init(&m_imgdbg[62], &m_images[70], m_imgdbg_path, "62_sobel16_3X3");
-                ImageDebug_Init(&m_imgdbg[63], &m_images[71], m_imgdbg_path, "63_sobel16_5X5_s");
-                ImageDebug_Init(&m_imgdbg[64], &m_images[72], m_imgdbg_path, "64_sobel16_5X5");
-                ImageDebug_Init(&m_imgdbg[65], &m_images[74], m_imgdbg_path, "65_sobel16_7X7_s");
-                ImageDebug_Init(&m_imgdbg[66], &m_images[73], m_imgdbg_path, "66_sobel16_7X7");
+
+                ImageDebug_Init(&m_imgdbg[2], &m_images[2], m_imgdbg_path, "58_sobel8_5X5");
+                ImageDebug_Init(&m_imgdbg[3], &m_images[3], m_imgdbg_path, "59_sobel8_7X7_s");
+                ImageDebug_Init(&m_imgdbg[4], &m_images[4], m_imgdbg_path, "60_sobel8_7X7");
+                ImageDebug_Init(&m_imgdbg[5], &m_images[5], m_imgdbg_path, "61_sobel16_3X3_s");
+                ImageDebug_Init(&m_imgdbg[6], &m_images[6], m_imgdbg_path, "62_sobel16_3X3");
+                ImageDebug_Init(&m_imgdbg[7], &m_images[7], m_imgdbg_path, "63_sobel16_5X5_s");
+                ImageDebug_Init(&m_imgdbg[34], &m_images[40], m_imgdbg_path, "64_sobel16_5X5");
+                ImageDebug_Init(&m_imgdbg[37], &m_images[46], m_imgdbg_path, "65_sobel16_7X7_s");
+                ImageDebug_Init(&m_imgdbg[38], &m_images[45], m_imgdbg_path, "66_sobel16_7X7");
                 ImageDebug_Open(m_imgdbg, m_numImgDbg);
             }
             // clear the performance
