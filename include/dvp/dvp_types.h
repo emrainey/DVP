@@ -923,7 +923,7 @@ typedef enum _dvp_knode_e {
      * Converts a 8 bit to 16 bit per pixel or 16 bit to 8 bit per pixel planar image\n
      * Configuration Structure: DVP_Transform_t
      * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_UYVY
+     * \param [output] Image color type supported: FOURCC_Y16
      */
     DVP_KN_XSTRIDE_CONVERT,
 
