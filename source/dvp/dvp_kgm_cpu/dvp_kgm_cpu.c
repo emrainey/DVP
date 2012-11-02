@@ -4327,11 +4327,12 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_XSTRIDE_SHIFT:
             {
                 DVP_Transform_t *pIO = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
-                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16};
-                if (DVP_Image_Validate(&pIO->input, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
-                    DVP_Image_Validate(&pIO->output, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                if (DVP_Image_Validate(&pIO->input, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 1, 1, 1, 1, NULL, 0) == DVP_FALSE ||
                     pIO->input.height > pIO->output.height ||
-                    pIO->input.width > pIO->output.width)
+                    pIO->input.width > pIO->output.width ||
+                    pIO->input.x_stride == pIO->output.x_stride ||
+                    pIO->input.x_stride > 2)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
