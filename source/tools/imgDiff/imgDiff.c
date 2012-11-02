@@ -121,6 +121,8 @@ parse_format(char *format, int *bpp, int *planes)
         *bpp = 4;
     else if(strcmp(format, "16b") == 0)
         *bpp = 2;
+    else if(strcmp(format, "32b") == 0)
+        *bpp = 4;
 
     return;
 }
