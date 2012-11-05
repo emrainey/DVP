@@ -459,6 +459,21 @@ static DVP_U32 numLocalKernels = dimof(local_kernels);
 
 void gamma_apply(DVP_Image_t *input, DVP_Image_t *output, DVP_U08* gammaLut);
 
+static DVP_BOOL DVP_Transform_Check(DVP_KernelNode_t *pNode, fourcc_t *from, DVP_U32 fromLen, fourcc_t *to, DVP_U32 toLen)
+{
+    DVP_Transform_t *pT = dvp_knode_to(pNode, DVP_Transform_t);
+    if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, from, fromLen) == DVP_FALSE ||
+        DVP_Image_Validate(&pT->output, 1, 1, 1, 1, to, toLen) == DVP_FALSE ||
+        pT->input.width > pT->output.width ||
+        pT->input.height > pT->output.width)
+        return DVP_FALSE;
+    return DVP_TRUE;
+}
+
+//******************************************************************************
+// MODULE EXPORTS
+//******************************************************************************
+
 MODULE_EXPORT DVP_U32 DVP_GetSupportedKernels(DVP_CoreFunction_t **pFuncs)
 {
     if (pFuncs != NULL)
@@ -4177,34 +4192,180 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_ECHO:
             // BASE
             case DVP_KN_XYXY_TO_Y800:
+            {
+                fourcc_t valid_colors[] = {FOURCC_UYVY, FOURCC_VYUY, FOURCC_Y800};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_YXYX_TO_Y800:
+#if defined(DVP_USE_VLIB)
+            case DVP_KN_VLIB_YXYX_TO_Y800:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_YUY2, FOURCC_YVYU, FOURCC_Y800};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_Y800_TO_XYXY:
+            {
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_UYVY, FOURCC_VYUY};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 2) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_UYVY_TO_RGBp:
+#if defined(DVP_USE_VLIB)
+            case DVP_KN_VLIB_UYVY_TO_RGBp:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_UYVY, FOURCC_RGBP};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_UYVY_TO_BGR:
-            case DVP_KN_UYVY_TO_HSLp:
-            case DVP_KN_UYVY_TO_LABp:
+            {
+                fourcc_t valid_colors[] = {FOURCC_UYVY, FOURCC_BGR};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_UYVY_TO_YUV420p:
+#if defined(DVP_USE_VLIB)
+            case DVP_KN_VLIB_UYVY_TO_YUV420p:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_UYVY, FOURCC_IYUV, FOURCC_YV12};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 2) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_UYVY_TO_YUV422p:
+#if defined(DVP_USE_VLIB)
+            case DVP_KN_VLIB_UYVY_TO_YUV422p:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_UYVY, FOURCC_YU16, FOURCC_YV16};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 2) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_UYVY_TO_YUV444p:
+#if defined(DVP_USE_VLIB)
+            case DVP_KN_VLIB_UYVY_TO_YUV444p:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_UYVY, FOURCC_YU24, FOURCC_YV24};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 2) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_YUV420p_TO_RGBp:
-            case DVP_KN_YUV420p_TO_UYVY:
-            case DVP_KN_YUV422p_TO_RGB565:
-            case DVP_KN_YUV422p_TO_UYVY:
-            case DVP_KN_YUV444p_TO_RGBp:
-            case DVP_KN_YUV444p_TO_UYVY:
-            case DVP_KN_NV12_TO_UYVY:
-            case DVP_KN_NV12_TO_YUV444p:
-            case DVP_KN_BGR3_TO_UYVY:
-            case DVP_KN_BGR3_TO_IYUV:
-            case DVP_KN_BGR3_TO_NV12:
-#ifdef DVP_USE_YUV
-            // YUV
-            case DVP_KN_YUV_ARGB_TO_UYVY:
-            case DVP_KN_YUV_BGR_TO_IYUV:
-            case DVP_KN_YUV_BGR_TO_UYVY:
-            case DVP_KN_YUV_IYUV_TO_BGR:
-            case DVP_KN_YUV_IYUV_TO_RGB565:
+#if defined(DVP_USE_YUV)
             case DVP_KN_YUV_IYUV_TO_RGBp:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_IYUV, FOURCC_YV12, FOURCC_RGBP};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_YUV420p_TO_UYVY:
+            {
+                fourcc_t valid_colors[] = {FOURCC_IYUV, FOURCC_YV12, FOURCC_UYVY};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_YUV422p_TO_UYVY:
+#if defined(DVP_USE_VLIB)
+            case DVP_KN_VLIB_YUV422p_TO_UYVY:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_YU16, FOURCC_YV16, FOURCC_UYVY};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_YUV444p_TO_RGBp:
+            {
+                fourcc_t valid_colors[] = {FOURCC_YU24, FOURCC_YV24, FOURCC_RGBP};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_YUV444p_TO_UYVY:
+            {
+                fourcc_t valid_colors[] = {FOURCC_IYUV, FOURCC_YV12, FOURCC_UYVY};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_NV12_TO_UYVY:
+            {
+                fourcc_t valid_colors[] = {FOURCC_NV12, FOURCC_UYVY};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_NV12_TO_YUV444p:
+            {
+                fourcc_t valid_colors[] = {FOURCC_NV12, FOURCC_YU24, FOURCC_YV24};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 2) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_BGR3_TO_UYVY:
+#if defined(DVP_USE_YUV)
+            case DVP_KN_YUV_BGR_TO_UYVY:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_BGR, FOURCC_UYVY};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_BGR3_TO_IYUV:
+#if defined(DVP_USE_YUV)
+            case DVP_KN_YUV_BGR_TO_IYUV:
+#endif
+            {
+                fourcc_t valid_colors[] = {FOURCC_BGR, FOURCC_IYUV};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_BGR3_TO_NV12:
+            {
+                fourcc_t valid_colors[] = {FOURCC_BGR, FOURCC_NV12};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+#ifdef DVP_USE_YUV
+            case DVP_KN_YUV_ARGB_TO_UYVY:
+            {
+                fourcc_t valid_colors[] = {FOURCC_ARGB, FOURCC_UYVY};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_YUV_IYUV_TO_BGR:
+            {
+                fourcc_t valid_colors[] = {FOURCC_IYUV, FOURCC_YV12, FOURCC_BGR};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_YUV_IYUV_TO_RGB565:
+            {
+                fourcc_t valid_colors[] = {FOURCC_IYUV, FOURCC_YV12, FOURCC_RGB565};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             // case DVP_KN_YUV_NV12_TO_YU24_HALF_SCALE:
             // case DVP_KN_YUV_UYVY_HALF_SCALE:
             // case DVP_KN_YUV_UYVY_QTR_SCALE:
@@ -4224,7 +4385,6 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
 #ifdef DVP_USE_VLIB
             case DVP_KN_VLIB_INIT_MEAN_LUMA_S16:
             case DVP_KN_VLIB_INIT_MEAN_LUMA_S32:
-            case DVP_KN_VLIB_YUV422p_TO_UYVY:
 #endif
 #ifdef DVP_USE_IMGLIB
             case DVP_KN_IMG_YUV422p_TO_RGB565:
@@ -4254,6 +4414,9 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMG_MEDIAN_3x3_8:
             case DVP_KN_IMG_PERIMETER_8:
 #endif
+#ifdef DVP_USE_VLIB
+            case DVP_KN_VLIB_IMAGE_PYRAMID_8:
+#endif
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 fourcc_t valid_colors[] = {FOURCC_Y800};
@@ -4278,6 +4441,9 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_IMG_FDCT_8x8:
             case DVP_KN_IMG_IDCT_8x8_12Q4:
 #endif
+#ifdef DVP_USE_VLIB
+            case DVP_KN_VLIB_IMAGE_PYRAMID_16:
+#endif
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 fourcc_t valid_colors[] = {FOURCC_Y16};
@@ -4300,7 +4466,14 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
+#endif
+#if defined(DVP_USE_VLIB)
+            case DVP_KN_VLIB_EXTRACT_BACK_8_16:
+#endif
+#if defined(DVP_USE_IMGLIB)
             case DVP_KN_IMG_PIX_SAT:
+#endif
+#if defined(DVP_USE_IMGLIB) || defined(DVP_USE_VLIB)
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 fourcc_t valid_colors[] = {FOURCC_Y16, FOURCC_Y800};
@@ -4821,6 +4994,236 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                 break;
             }
 #endif // VLIB_DISPARITY_FIXED
+            case DVP_KN_VLIB_EWR_MEAN_S16:
+            {
+                DVP_EMean_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_EMean_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    pParam->mask.width != pParam->data.width/8)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_EWR_MEAN_S32:
+            {
+                DVP_EMean_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_EMean_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    pParam->mask.width != pParam->data.width/8)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_EWR_VAR_S16:
+            {
+                DVP_EMean_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_EMean_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->var, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    pParam->mask.width != pParam->data.width/8)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_EWR_VAR_S32:
+            {
+                DVP_EMean_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_EMean_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->var, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    pParam->mask.width != pParam->data.width/8)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_UWR_MEAN_S16:
+            {
+                DVP_UMean_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_UMean_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->old_mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->old_mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->old_data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->new_mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->new_mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->new_data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    pParam->old_mask.width != pParam->old_data.width/8 ||
+                    pParam->new_mask.width != pParam->new_data.width/8)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_UWR_VAR_S16:
+            {
+                DVP_UMean_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_UMean_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->old_var, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->old_mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->old_mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->old_data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->new_var, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE  ||
+                    DVP_Image_Validate(&pParam->new_mean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->new_mask, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->new_data, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    pParam->old_mask.width != pParam->old_data.width/8 ||
+                    pParam->new_mask.width != pParam->new_data.width/8)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_SUB_BACK_S16:
+            {
+                DVP_SubBackground_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_SubBackground_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16, FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->output32packed, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->newestData, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->currentMean, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->currentVar, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_SUB_BACK_S32:
+            {
+                DVP_SubBackground_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_SubBackground_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16, FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->output32packed, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->newestData, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->currentMean, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->currentVar, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_MOG_S16:
+            {
+                DVP_Mog_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_Mog_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16, FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->image, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->wts, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->means, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->vars, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->scratch, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->compIndex, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->fgmask, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_MOG_S32:
+            {
+                DVP_Mog_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_Mog_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_Y16, FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->image, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->wts, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->means, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->vars, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->scratch, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->compIndex, 1, 1, 1, 1, &valid_colors[0], 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->fgmask, 1, 1, 1, 1, &valid_colors[2], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_PACK_MASK_32:
+            {
+                fourcc_t valid_colors[] = {FOURCC_Y800, FOURCC_BIN1};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_UNPACK_MASK_32:
+            {
+                fourcc_t valid_colors[] = {FOURCC_BIN1, FOURCC_Y800};
+                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_CCL:
+            {
+                DVP_CCL_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_CCL_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800};
+                if (DVP_Image_Validate(&pParam->input, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->output, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    pParam->input.width > pParam->output.width ||
+                    pParam->input.height > pParam->output.height ||
+                    (pParam->connected8Flag != DVP_CCL_4_CONNECTED &&
+                     pParam->connected8Flag != DVP_CCL_8_CONNECTED))
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_HOUGH_LINE_FROM_LIST:
+            {
+                DVP_HoughLine_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_HoughLine_t);
+                fourcc_t valid_colors[] = {FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->pOutHoughSpace, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pParam->pEdgeMapList) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pParam->pSIN) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pParam->pCOS) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pParam->ping) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pParam->pong) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pParam->pang) == DVP_FALSE ||
+                    DVP_Buffer_Validate(&pParam->peng) == DVP_FALSE)
+                    /*! \todo check more values from varaibles */
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_HARRIS_SCORE_7x7:
+            {
+                DVP_HarrisDSP_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_HarrisDSP_t);
+                fourcc_t valid_colors[] = {FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->inGradX, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->inGradY, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->harrisScore, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_HARRIS_SCORE_7x7_U32:
+            {
+                DVP_HarrisDSP_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_HarrisDSP_t);
+                fourcc_t valid_colors[] = {FOURCC_Y16, FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->inGradX, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->inGradY, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->harrisScore, 1, 1, 1, 1, &valid_colors[1], 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_INIT_VAR_CONST_S16:
+            {
+                DVP_ConstVar_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_ConstVar_t);
+                fourcc_t valid_colors[] = {FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->var, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_INIT_VAR_CONST_S32:
+            {
+                DVP_ConstVar_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_ConstVar_t);
+                fourcc_t valid_colors[] = {FOURCC_Y32};
+                if (DVP_Image_Validate(&pParam->var, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8:
+            case DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16:
+            {
+                DVP_Gradient_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_Gradient_t);
+                fourcc_t valid_colors[] = {FOURCC_Y16};
+                if (DVP_Image_Validate(&pParam->input, 1, 1, 1, 1, valid_colors, dimof(valid_colors)) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->output, 1, 1, 1, 1, valid_colors, dimof(valid_colors)) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->scratch, 1, 1, 1, 1, valid_colors, dimof(valid_colors)) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+            case DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8:
+            case DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8:
+            {
+                DVP_Gradient_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_Gradient_t);
+                fourcc_t valid_colors[] = {FOURCC_Y800};
+                if (DVP_Image_Validate(&pParam->input, 1, 1, 1, 1, valid_colors, dimof(valid_colors)) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->output, 1, 1, 1, 1, valid_colors, dimof(valid_colors)) == DVP_FALSE ||
+                    DVP_Image_Validate(&pParam->scratch, 1, 1, 1, 1, valid_colors, dimof(valid_colors)) == DVP_FALSE)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
+
 #endif /// DVP_USE_VLIB
 
 #ifdef DVP_USE_IMGLIB
@@ -4950,7 +5353,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             }
             case DVP_KN_IMG_QUANTIZE_16:
             {
-                DVP_ImageQuantization_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_SAD_t);
+                DVP_ImageQuantization_t *pParam = dvp_knode_to(&pSubNodes[n], DVP_ImageQuantization_t);
                 fourcc_t valid_colors[] = {FOURCC_Y16};
                 if (DVP_Image_Validate(&pParam->input, 1, 1, 1, 1, valid_colors, dimof(valid_colors)) == DVP_FALSE)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
