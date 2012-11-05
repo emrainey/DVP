@@ -158,6 +158,46 @@ void DVP_Image_Dup(DVP_Image_t *dst, DVP_Image_t *src)
     memcpy(dst, src, sizeof(DVP_Image_t));
 }
 
+DVP_U32 DVP_Image_LineSize(DVP_Image_t *pImage, DVP_U32 plane)
+{
+    DVP_U32 lineSize = 0;
+    if (pImage != NULL && plane < pImage->planes)
+    {
+        // assume it's normal, this could be overstated.
+        lineSize = pImage->x_stride * pImage->bufWidth;
+        if (plane > 0)
+        {
+            // for subsampled secondary planes...
+            switch(pImage->color)
+            {
+                case FOURCC_NV12:
+                case FOURCC_NV21:
+                    // lineSize == lineSize // due to macropixel * w/2
+                    break;
+                case FOURCC_YU16:
+                case FOURCC_YV16:
+                    // lineSize == lineSize // due to macropixel * w/2
+                    break;
+                case FOURCC_IYUV:
+                case FOURCC_YV12:
+                    if (lineSize == (DVP_U32)abs(pImage->y_stride)) // non-TILED
+                        lineSize /= 2;
+                    break;
+                case FOURCC_YUV9:
+                case FOURCC_YVU9:
+                    if (lineSize == (DVP_U32)abs(pImage->y_stride)) // non-TILED
+                        lineSize /= 4;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (pImage->color == FOURCC_BIN1)
+            lineSize = pImage->width / 8;
+    }
+    return lineSize;
+}
+
 DVP_U32 DVP_Image_PlaneSize(DVP_Image_t *pImage, DVP_U32 plane)
 {
     DVP_U32 lineSize = 0;
@@ -166,7 +206,7 @@ DVP_U32 DVP_Image_PlaneSize(DVP_Image_t *pImage, DVP_U32 plane)
     if (pImage == NULL)
         return 0;
 
-    lineSize = pImage->x_stride * pImage->bufWidth;
+    lineSize = DVP_Image_LineSize(pImage, plane);
     planeSize = pImage->y_stride * pImage->bufHeight; // potentially overestimated
 
     if (plane > 0)
@@ -175,24 +215,18 @@ DVP_U32 DVP_Image_PlaneSize(DVP_Image_t *pImage, DVP_U32 plane)
         {
             case FOURCC_NV12:
             case FOURCC_NV21:
-                // lineSize == lineSize // due to macropixel * w/2
                 planeSize = lineSize * pImage->bufHeight/2;
                 break;
             case FOURCC_YU16:
             case FOURCC_YV16:
-                // lineSize == lineSize // due to macropixel * w/2
                 planeSize = lineSize * pImage->bufHeight;
                 break;
             case FOURCC_YV12:
             case FOURCC_IYUV:
-                if (lineSize == (DVP_U32)abs(pImage->y_stride)) // non-TILED
-                    lineSize /= 2;
                 planeSize = lineSize * pImage->bufHeight/2;
                 break;
             case FOURCC_YUV9:
             case FOURCC_YVU9:
-                if (lineSize == (DVP_U32)abs(pImage->y_stride)) // non-TILED
-                    lineSize /= 4;
                 planeSize = lineSize * pImage->bufHeight/4;
                 break;
             default:
