@@ -1352,10 +1352,30 @@ typedef struct _dvp_kernelgraph_t {
     DVP_BOOL                  verified;     /*!< This indicates that the graph has been verified. */
 } DVP_KernelGraph_t;
 
+/*! \brief The structure defines how a set of data is shifted as it moves through
+ * a graph. The user must call \ref DVP_KernelGraph_ImageShiftAccum on each
+ * node which they use to modifiy an image to accumulate the entire shift.
+ * \ingroup group_images
+ */
+typedef struct _dvp_image_shift_t {
+    DVP_S32 centerShiftHorz;    /*!< Indicates the horizontal shift on the center of the image */
+    DVP_S32 centerShiftVert;    /*!< Indicates the vertical shift on the center of the image */
+    DVP_S32 topBorder;          /*!< Indicates the change in the top border */
+    DVP_S32 rightBorder;        /*!< Indicates the change in the right border */
+    DVP_S32 bottomBorder;       /*!< Indicates the change in the bottom border */
+    DVP_S32 leftBorder;         /*!< Indicates the change in the left border */
+} dvp_image_shift_t;
+
 /*! \brief The maximum kernel name length.
  * \ingroup group_kernels
  */
 #define DVP_KERNEL_MAX (128)
+
+/*! \brief A typedef of the function pointer to an image shift calculator
+ * \param [in] node The pointer to the node to use as an input to the calculator.
+ * \param [in] shift The image shift accumulator structure.
+ */
+typedef void (*dvp_image_shift_f)(DVP_KernelNode_t *node, dvp_image_shift_t *shift);
 
 /*!
  * \brief Defines which kernels a manager supports.
@@ -1366,7 +1386,9 @@ typedef struct _dvp_kernelgraph_t {
 typedef struct _dvp_core_function_t {
     char                        name[DVP_KERNEL_MAX];   /*!< The name of the kernel, used in debugging */
     DVP_KernelNode_e            kernel;                 /*!< The enumerated name of the kernel */
-    DVP_U32                     load;                   /*!< \hidden The load value of this kernel */
+    DVP_U32                     load;                   /*!< The load value of this kernel */
+    dvp_image_shift_t          *shift;                  /*!< The pointer, if needed, to use to calculate image shifts for this kernel */
+    dvp_image_shift_f           shift_func;             /*!< The pointer to a function to compute the image shift. */
 } DVP_CoreFunction_t;
 
 /*!

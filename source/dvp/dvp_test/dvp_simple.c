@@ -159,12 +159,14 @@ int main(int argc, char *argv[])
                 dimof(psections),
                 orders,
                 DVP_PERF_INIT,
+                DVP_FALSE,
             };
             DVP_KernelGraph_t sgraph = {
                 ssections,
                 dimof(ssections),
                 orders,
                 DVP_PERF_INIT,
+                DVP_FALSE,
             };
             DVP_KernelGraph_t *graph = NULL;
             DVP_Transform_t *io = NULL;

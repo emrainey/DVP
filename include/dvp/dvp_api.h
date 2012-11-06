@@ -268,6 +268,19 @@ void DVP_QuerySystem(DVP_Handle handle, const DVP_CoreInfo_t info[DVP_CORE_MAX])
  */
 void DVP_QueryKernel(DVP_Handle handle, DVP_KernelNode_e kernel, DVP_BOOL present[DVP_CORE_MAX]);
 
+/*!
+ * \brief Allow the user to acculumate an image shift structure over a node. This
+ * can be used to determine how an image filter will move the data within the
+ * output image relative to the input data.
+ * \param [in] handle The handle to DVP returned from \ref DVP_KernelGraph_Init.
+ * \param [in] node The pointer to the node data structure.
+ * \param [in] shift The pointer to the image shift structure. Values in the
+ * shift will not be modified at all before accumulation.
+ * \pre \ref DVP_KernelGraph_Verify
+ * \ingroup group_graphs
+ */
+void DVP_KernelGraph_ImageShiftAccum(DVP_Handle handle, DVP_KernelNode_t *node, dvp_image_shift_t *shift);
+
 #ifdef __cplusplus
 }
 #endif

@@ -52,278 +52,278 @@
 
 static DVP_CoreFunction_t remote_kernels[] = {
 #ifdef DVP_USE_IPC
-    {"c64t No operation",               DVP_KN_NOOP,                        0},
+    {"c64t No operation",               DVP_KN_NOOP,                        0, NULL, NULL},
 #ifdef DVP_USE_VLIB
     // name                             kernel                              priority,   load
-    {"c64t EWRMeanS16",                 DVP_KN_VLIB_EWR_MEAN_S16,           0},
-    {"c64t EWRVarS16",                  DVP_KN_VLIB_EWR_VAR_S16,            0},
-    {"c64t EWRMeanS32",                 DVP_KN_VLIB_EWR_MEAN_S32,           0},
-    {"c64t EWRVarS32",                  DVP_KN_VLIB_EWR_VAR_S32,            0},
-    {"c64t UWRMeanS16",                 DVP_KN_VLIB_UWR_MEAN_S16,           0},
-    {"c64t UWRVarS16",                  DVP_KN_VLIB_UWR_VAR_S16,            0},
-    {"c64t BackSubS16",                 DVP_KN_VLIB_SUB_BACK_S16,           0},
-    {"c64t BackSubS32",                 DVP_KN_VLIB_SUB_BACK_S32,           0},
+    {"c64t EWRMeanS16",                 DVP_KN_VLIB_EWR_MEAN_S16,           0, NULL, NULL},
+    {"c64t EWRVarS16",                  DVP_KN_VLIB_EWR_VAR_S16,            0, NULL, NULL},
+    {"c64t EWRMeanS32",                 DVP_KN_VLIB_EWR_MEAN_S32,           0, NULL, NULL},
+    {"c64t EWRVarS32",                  DVP_KN_VLIB_EWR_VAR_S32,            0, NULL, NULL},
+    {"c64t UWRMeanS16",                 DVP_KN_VLIB_UWR_MEAN_S16,           0, NULL, NULL},
+    {"c64t UWRVarS16",                  DVP_KN_VLIB_UWR_VAR_S16,            0, NULL, NULL},
+    {"c64t BackSubS16",                 DVP_KN_VLIB_SUB_BACK_S16,           0, NULL, NULL},
+    {"c64t BackSubS32",                 DVP_KN_VLIB_SUB_BACK_S32,           0, NULL, NULL},
 
-    {"c64t MixofGaussS16",              DVP_KN_VLIB_MOG_S16,                0},
-    {"c64t MixofGaussS32",              DVP_KN_VLIB_MOG_S32,                0},
+    {"c64t MixofGaussS16",              DVP_KN_VLIB_MOG_S16,                0, NULL, NULL},
+    {"c64t MixofGaussS32",              DVP_KN_VLIB_MOG_S32,                0, NULL, NULL},
 
-    {"c64t ExtractBack16",              DVP_KN_VLIB_EXTRACT_BACK_8_16,      0},
+    {"c64t ExtractBack16",              DVP_KN_VLIB_EXTRACT_BACK_8_16,      0, NULL, NULL},
 
-    {"c64t PackMask32",                 DVP_KN_VLIB_PACK_MASK_32,           0},
-    {"c64t UnPackMask32",               DVP_KN_VLIB_UNPACK_MASK_32,         0},
+    {"c64t PackMask32",                 DVP_KN_VLIB_PACK_MASK_32,           0, NULL, NULL},
+    {"c64t UnPackMask32",               DVP_KN_VLIB_UNPACK_MASK_32,         0, NULL, NULL},
 
     // Generic Morph
-    {"c64t DilateCross",                DVP_KN_DILATE_CROSS,                0},
-    {"c64t DilateMask",                 DVP_KN_DILATE_MASK,                 0},
-    {"c64t DilateSquare",               DVP_KN_DILATE_SQUARE,               0},
-    {"c64t ErodeCross",                 DVP_KN_ERODE_CROSS,                 0},
-    {"c64t ErodeMask",                  DVP_KN_ERODE_MASK,                  0},
-    {"c64t ErodeSquare",                DVP_KN_ERODE_SQUARE,                0},
+    {"c64t DilateCross",                DVP_KN_DILATE_CROSS,                0, NULL, NULL},
+    {"c64t DilateMask",                 DVP_KN_DILATE_MASK,                 0, NULL, NULL},
+    {"c64t DilateSquare",               DVP_KN_DILATE_SQUARE,               0, NULL, NULL},
+    {"c64t ErodeCross",                 DVP_KN_ERODE_CROSS,                 0, NULL, NULL},
+    {"c64t ErodeMask",                  DVP_KN_ERODE_MASK,                  0, NULL, NULL},
+    {"c64t ErodeSquare",                DVP_KN_ERODE_SQUARE,                0, NULL, NULL},
 
-    {"c64t DilateCross",                DVP_KN_VLIB_DILATE_CROSS,           0},
-    {"c64t DilateMask",                 DVP_KN_VLIB_DILATE_MASK,            0},
-    {"c64t DilateSquare",               DVP_KN_VLIB_DILATE_SQUARE,          0},
-    {"c64t ErodeCross",                 DVP_KN_VLIB_ERODE_CROSS,            0},
-    {"c64t ErodeMask",                  DVP_KN_VLIB_ERODE_MASK,             0},
-    {"c64t ErodeSquare",                DVP_KN_VLIB_ERODE_SQUARE,           0},
-    {"c64t Erode1Pixel",                DVP_KN_VLIB_ERODE_SINGLEPIXEL,      0},
+    {"c64t DilateCross",                DVP_KN_VLIB_DILATE_CROSS,           0, NULL, NULL},
+    {"c64t DilateMask",                 DVP_KN_VLIB_DILATE_MASK,            0, NULL, NULL},
+    {"c64t DilateSquare",               DVP_KN_VLIB_DILATE_SQUARE,          0, NULL, NULL},
+    {"c64t ErodeCross",                 DVP_KN_VLIB_ERODE_CROSS,            0, NULL, NULL},
+    {"c64t ErodeMask",                  DVP_KN_VLIB_ERODE_MASK,             0, NULL, NULL},
+    {"c64t ErodeSquare",                DVP_KN_VLIB_ERODE_SQUARE,           0, NULL, NULL},
+    {"c64t Erode1Pixel",                DVP_KN_VLIB_ERODE_SINGLEPIXEL,      0, NULL, NULL},
 
-    {"c64t ConnectedComponent",         DVP_KN_VLIB_CCL,                    0},
+    {"c64t ConnectedComponent",         DVP_KN_VLIB_CCL,                    0, NULL, NULL},
 
-    {"c64t Canny2DGradient",            DVP_KN_CANNY_2D_GRADIENT,           0},
-    {"c64t CannyNonmaxSupress",         DVP_KN_CANNY_NONMAX_SUPPRESSION,    0},
-//    {"c64t CannyHystThresh",            DVP_KN_CANNY_HYST_THRESHHOLD,       0},
+    {"c64t Canny2DGradient",            DVP_KN_CANNY_2D_GRADIENT,           0, NULL, NULL},
+    {"c64t CannyNonmaxSupress",         DVP_KN_CANNY_NONMAX_SUPPRESSION,    0, NULL, NULL},
+//    {"c64t CannyHystThresh",            DVP_KN_CANNY_HYST_THRESHHOLD,       0, NULL, NULL},
 
-    {"c64t Canny2DGradient",            DVP_KN_VLIB_CANNY_2D_GRADIENT,      0},
-    {"c64t CannyNonmaxSupress",         DVP_KN_VLIB_CANNY_NONMAX_SUPPRESSION, 0},
-//    {"c64t CannyHystThresh",            DVP_KN_VLIB_CANNY_HYST_THRESHHOLD,  0},
-    {"c64t HystThresh",                 DVP_KN_VLIB_HYST_THRESHOLD,         0},
+    {"c64t Canny2DGradient",            DVP_KN_VLIB_CANNY_2D_GRADIENT,      0, NULL, NULL},
+    {"c64t CannyNonmaxSupress",         DVP_KN_VLIB_CANNY_NONMAX_SUPPRESSION, 0, NULL, NULL},
+//    {"c64t CannyHystThresh",            DVP_KN_VLIB_CANNY_HYST_THRESHHOLD,  0, NULL, NULL},
+    {"c64t HystThresh",                 DVP_KN_VLIB_HYST_THRESHOLD,         0, NULL, NULL},
 
-    {"c64t ImgPyramid8",                DVP_KN_VLIB_IMAGE_PYRAMID_8,        0},
-    {"c64t ImgPyramid16",               DVP_KN_VLIB_IMAGE_PYRAMID_16,       0},
+    {"c64t ImgPyramid8",                DVP_KN_VLIB_IMAGE_PYRAMID_8,        0, NULL, NULL},
+    {"c64t ImgPyramid16",               DVP_KN_VLIB_IMAGE_PYRAMID_16,       0, NULL, NULL},
 
-    {"c64t Gauss5x5Pyramid8",           DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8,  0},
-    {"c64t Gauss5x5Pyramid16",          DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16, 0},
+    {"c64t Gauss5x5Pyramid8",           DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8,  0, NULL, NULL},
+    {"c64t Gauss5x5Pyramid16",          DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16, 0, NULL, NULL},
 
-    {"c64t GradientH5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8, 0},
-    {"c64t GradientV5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8, 0},
+    {"c64t GradientH5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8, 0, NULL, NULL},
+    {"c64t GradientV5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8, 0, NULL, NULL},
 
-    {"c64t HarrisScore7x7",             DVP_KN_VLIB_HARRIS_SCORE_7x7,       0},
-    {"c64t Track Features Lucas 7x7",   DVP_KN_VLIB_TRACK_FEATURES_LUCAS_7x7, 0},
+    {"c64t HarrisScore7x7",             DVP_KN_VLIB_HARRIS_SCORE_7x7,       0, NULL, NULL},
+    {"c64t Track Features Lucas 7x7",   DVP_KN_VLIB_TRACK_FEATURES_LUCAS_7x7, 0, NULL, NULL},
 
-    {"c64t IIRHorz",                    DVP_KN_IIR_HORZ,                    0},
-    {"c64t IIRHorz",                    DVP_KN_VLIB_IIR_HORZ,               0},
-    {"c64t IIRHorz16",                  DVP_KN_VLIB_IIR_HORZ_16,            0},
-    {"c64t IIRVert",                    DVP_KN_IIR_VERT,                    0},
-    {"c64t IIRVert",                    DVP_KN_VLIB_IIR_VERT,               0},
-    {"c64t IIRVert16",                  DVP_KN_VLIB_IIR_VERT_16,            0},
-    {"c64t IntegralImg8",               DVP_KN_INTEGRAL_IMAGE_8,            0},
-    {"c64t IntegralImg8",               DVP_KN_VLIB_INTEGRAL_IMAGE_8,       0},
+    {"c64t IIRHorz",                    DVP_KN_IIR_HORZ,                    0, NULL, NULL},
+    {"c64t IIRHorz",                    DVP_KN_VLIB_IIR_HORZ,               0, NULL, NULL},
+    {"c64t IIRHorz16",                  DVP_KN_VLIB_IIR_HORZ_16,            0, NULL, NULL},
+    {"c64t IIRVert",                    DVP_KN_IIR_VERT,                    0, NULL, NULL},
+    {"c64t IIRVert",                    DVP_KN_VLIB_IIR_VERT,               0, NULL, NULL},
+    {"c64t IIRVert16",                  DVP_KN_VLIB_IIR_VERT_16,            0, NULL, NULL},
+    {"c64t IntegralImg8",               DVP_KN_INTEGRAL_IMAGE_8,            0, NULL, NULL},
+    {"c64t IntegralImg8",               DVP_KN_VLIB_INTEGRAL_IMAGE_8,       0, NULL, NULL},
 
-    {"c64t IntegralImg16",              DVP_KN_VLIB_INTEGRAL_IMAGE_16,      0},
+    {"c64t IntegralImg16",              DVP_KN_VLIB_INTEGRAL_IMAGE_16,      0, NULL, NULL},
 
-    {"c64t HoughLine",                  DVP_KN_VLIB_HOUGH_LINE_FROM_LIST,   0},
+    {"c64t HoughLine",                  DVP_KN_VLIB_HOUGH_LINE_FROM_LIST,   0, NULL, NULL},
 
-    {"c64t Nonmaxsupress3x316",         DVP_KN_NONMAXSUPPRESS_3x3_S16,      0},
-    {"c64t Nonmaxsupress5x516",         DVP_KN_NONMAXSUPPRESS_5x5_S16,      0},
-    {"c64t Nonmaxsupress7x716",         DVP_KN_NONMAXSUPPRESS_7x7_S16,      0},
+    {"c64t Nonmaxsupress3x316",         DVP_KN_NONMAXSUPPRESS_3x3_S16,      0, NULL, NULL},
+    {"c64t Nonmaxsupress5x516",         DVP_KN_NONMAXSUPPRESS_5x5_S16,      0, NULL, NULL},
+    {"c64t Nonmaxsupress7x716",         DVP_KN_NONMAXSUPPRESS_7x7_S16,      0, NULL, NULL},
 
-    {"c64t Nonmaxsupress3x316",         DVP_KN_VLIB_NONMAXSUPPRESS_3x3_S16, 0},
-    {"c64t Nonmaxsupress5x516",         DVP_KN_VLIB_NONMAXSUPPRESS_5x5_S16, 0},
-    {"c64t Nonmaxsupress7x716",         DVP_KN_VLIB_NONMAXSUPPRESS_7x7_S16, 0},
+    {"c64t Nonmaxsupress3x316",         DVP_KN_VLIB_NONMAXSUPPRESS_3x3_S16, 0, NULL, NULL},
+    {"c64t Nonmaxsupress5x516",         DVP_KN_VLIB_NONMAXSUPPRESS_5x5_S16, 0, NULL, NULL},
+    {"c64t Nonmaxsupress7x716",         DVP_KN_VLIB_NONMAXSUPPRESS_7x7_S16, 0, NULL, NULL},
 
-    {"c64t NormalFlow",                 DVP_KN_VLIB_NORMALFLOW_16,          0},
-    {"c64t Kalman2x4",                  DVP_KN_VLIB_KALMAN_2x4,             0},
-    {"c64t Kalman4x6",                  DVP_KN_VLIB_KALMAN_4x6,             0},
-    {"c64t Nelder-MeadSimplex16",       DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_16, 0},
-    {"c64t Nelder-MeanSimplex3D",       DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_3D, 0},
-    {"c64t LegendreMoments",            DVP_KN_VLIB_LEGENDRE_MOMENTS,       0},
-    {"c64t InitHistgram8",              DVP_KN_VLIB_INIT_HISTOGRAM_8,       0},
-    {"c64t Histogram8",                 DVP_KN_VLIB_HISTOGRAM_8,            0},
-    {"c64t WeightedHistogram8",         DVP_KN_VLIB_WEIGHTED_HISTOGRAM_8,   0},
-    {"c64t InitHistogram16",            DVP_KN_VLIB_INIT_HISTOGRAM_16,      0},
-    {"c64t Histogram16",                DVP_KN_VLIB_HISTOGRAM_16,           0},
-    {"c64t WeightedHistogram16",        DVP_KN_VLIB_WEIGHTED_HISTOGRAM_16,  0},
-    {"c64t HistogramnD16",              DVP_KN_VLIB_HISTOGRAM_ND_16,        0},
-    {"c64t BhattacharyyaDistance",      DVP_KN_VLIB_BHATTACHAYA_DISTANCE,   0},
-    {"c64t L1Distance",                 DVP_KN_VLIB_L1DISTANCE,             0},
+    {"c64t NormalFlow",                 DVP_KN_VLIB_NORMALFLOW_16,          0, NULL, NULL},
+    {"c64t Kalman2x4",                  DVP_KN_VLIB_KALMAN_2x4,             0, NULL, NULL},
+    {"c64t Kalman4x6",                  DVP_KN_VLIB_KALMAN_4x6,             0, NULL, NULL},
+    {"c64t Nelder-MeadSimplex16",       DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_16, 0, NULL, NULL},
+    {"c64t Nelder-MeanSimplex3D",       DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_3D, 0, NULL, NULL},
+    {"c64t LegendreMoments",            DVP_KN_VLIB_LEGENDRE_MOMENTS,       0, NULL, NULL},
+    {"c64t InitHistgram8",              DVP_KN_VLIB_INIT_HISTOGRAM_8,       0, NULL, NULL},
+    {"c64t Histogram8",                 DVP_KN_VLIB_HISTOGRAM_8,            0, NULL, NULL},
+    {"c64t WeightedHistogram8",         DVP_KN_VLIB_WEIGHTED_HISTOGRAM_8,   0, NULL, NULL},
+    {"c64t InitHistogram16",            DVP_KN_VLIB_INIT_HISTOGRAM_16,      0, NULL, NULL},
+    {"c64t Histogram16",                DVP_KN_VLIB_HISTOGRAM_16,           0, NULL, NULL},
+    {"c64t WeightedHistogram16",        DVP_KN_VLIB_WEIGHTED_HISTOGRAM_16,  0, NULL, NULL},
+    {"c64t HistogramnD16",              DVP_KN_VLIB_HISTOGRAM_ND_16,        0, NULL, NULL},
+    {"c64t BhattacharyyaDistance",      DVP_KN_VLIB_BHATTACHAYA_DISTANCE,   0, NULL, NULL},
+    {"c64t L1Distance",                 DVP_KN_VLIB_L1DISTANCE,             0, NULL, NULL},
 
-    {"c64t xYxY to LUMA",               DVP_KN_XYXY_TO_Y800,                0},
-    {"c64t UYVY to YUV420p",            DVP_KN_UYVY_TO_YUV420p,             0},
-    {"c64t UYVY to YUV422p",            DVP_KN_UYVY_TO_YUV422p,             0},
-    {"c64t UYVY to RGBp",               DVP_KN_UYVY_TO_RGBp,                0},
-    {"c64t UYVY to HSLp",               DVP_KN_UYVY_TO_HSLp,                0},
-    {"c64t UYVY to LABp",               DVP_KN_UYVY_TO_LABp,                0},
-    {"c64t YUV422p to UYVY",            DVP_KN_YUV422p_TO_UYVY,             0},
-    {"c64t NV12 to UYVY444p",           DVP_KN_NV12_TO_YUV444p,             0},
+    {"c64t xYxY to LUMA",               DVP_KN_XYXY_TO_Y800,                0, NULL, NULL},
+    {"c64t UYVY to YUV420p",            DVP_KN_UYVY_TO_YUV420p,             0, NULL, NULL},
+    {"c64t UYVY to YUV422p",            DVP_KN_UYVY_TO_YUV422p,             0, NULL, NULL},
+    {"c64t UYVY to RGBp",               DVP_KN_UYVY_TO_RGBp,                0, NULL, NULL},
+    {"c64t UYVY to HSLp",               DVP_KN_UYVY_TO_HSLp,                0, NULL, NULL},
+    {"c64t UYVY to LABp",               DVP_KN_UYVY_TO_LABp,                0, NULL, NULL},
+    {"c64t YUV422p to UYVY",            DVP_KN_YUV422p_TO_UYVY,             0, NULL, NULL},
+    {"c64t NV12 to UYVY444p",           DVP_KN_NV12_TO_YUV444p,             0, NULL, NULL},
 
-    {"c64t xYxY to LUMA",               DVP_KN_VLIB_XYXY_TO_Y800,           0},
-    {"c64t UYVY to YUV420p",            DVP_KN_VLIB_UYVY_TO_YUV420p,        0},
-    {"c64t UYVY to YUV422p",            DVP_KN_VLIB_UYVY_TO_YUV422p,        0},
-    {"c64t UYVY to RGBp",               DVP_KN_VLIB_UYVY_TO_RGBp,           0},
-    {"c64t UYVY to HSLp",               DVP_KN_VLIB_UYVY_TO_HSLp,           0},
-    {"c64t UYVY to LABp",               DVP_KN_VLIB_UYVY_TO_LABp,           0},
-    {"c64t YUV422p to UYVY",            DVP_KN_VLIB_YUV422p_TO_UYVY,        0},
+    {"c64t xYxY to LUMA",               DVP_KN_VLIB_XYXY_TO_Y800,           0, NULL, NULL},
+    {"c64t UYVY to YUV420p",            DVP_KN_VLIB_UYVY_TO_YUV420p,        0, NULL, NULL},
+    {"c64t UYVY to YUV422p",            DVP_KN_VLIB_UYVY_TO_YUV422p,        0, NULL, NULL},
+    {"c64t UYVY to RGBp",               DVP_KN_VLIB_UYVY_TO_RGBp,           0, NULL, NULL},
+    {"c64t UYVY to HSLp",               DVP_KN_VLIB_UYVY_TO_HSLp,           0, NULL, NULL},
+    {"c64t UYVY to LABp",               DVP_KN_VLIB_UYVY_TO_LABp,           0, NULL, NULL},
+    {"c64t YUV422p to UYVY",            DVP_KN_VLIB_YUV422p_TO_UYVY,        0, NULL, NULL},
 
-    {"c64t Disparity8",                 DVP_KN_VLIB_DISPARITY_SAD8,         0},
-    {"c64t Disparity16",                DVP_KN_VLIB_DISPARITY_SAD16,        0},
-    {"c64t MeanLuma16",                 DVP_KN_VLIB_INIT_MEAN_LUMA_S16,     0},
-    {"c64t MeanLuma32",                 DVP_KN_VLIB_INIT_MEAN_LUMA_S32,     0},
-    {"c64t VarConst16",                 DVP_KN_VLIB_INIT_VAR_CONST_S16,     0},
-    {"c64t VarConst32",                 DVP_KN_VLIB_INIT_VAR_CONST_S32,     0},
-    {"c64t Legendre Moments Init",      DVP_KN_VLIB_LEGENDRE_MOMENTS_INIT,  0},
-    {"c64t HarrisScore7x7 32bit",       DVP_KN_VLIB_HARRIS_SCORE_7x7_U32,   0},
-    {"c64t Nonmaxsupress 32bit",        DVP_KN_VLIB_NONMAXSUPPRESS_U32,     0},
+    {"c64t Disparity8",                 DVP_KN_VLIB_DISPARITY_SAD8,         0, NULL, NULL},
+    {"c64t Disparity16",                DVP_KN_VLIB_DISPARITY_SAD16,        0, NULL, NULL},
+    {"c64t MeanLuma16",                 DVP_KN_VLIB_INIT_MEAN_LUMA_S16,     0, NULL, NULL},
+    {"c64t MeanLuma32",                 DVP_KN_VLIB_INIT_MEAN_LUMA_S32,     0, NULL, NULL},
+    {"c64t VarConst16",                 DVP_KN_VLIB_INIT_VAR_CONST_S16,     0, NULL, NULL},
+    {"c64t VarConst32",                 DVP_KN_VLIB_INIT_VAR_CONST_S32,     0, NULL, NULL},
+    {"c64t Legendre Moments Init",      DVP_KN_VLIB_LEGENDRE_MOMENTS_INIT,  0, NULL, NULL},
+    {"c64t HarrisScore7x7 32bit",       DVP_KN_VLIB_HARRIS_SCORE_7x7_U32,   0, NULL, NULL},
+    {"c64t Nonmaxsupress 32bit",        DVP_KN_VLIB_NONMAXSUPPRESS_U32,     0, NULL, NULL},
 #endif
 #ifdef DVP_USE_IMGLIB
-    {"c64t YUV420p to RGB565",          DVP_KN_YUV422p_TO_RGB565,           0},
-    {"c64t YUV420p to RGB565",          DVP_KN_IMG_YUV422p_TO_RGB565,       0},
+    {"c64t YUV420p to RGB565",          DVP_KN_YUV422p_TO_RGB565,           0, NULL, NULL},
+    {"c64t YUV420p to RGB565",          DVP_KN_IMG_YUV422p_TO_RGB565,       0, NULL, NULL},
 
-    {"c64t Img Conv 3x3",               DVP_KN_CONV_3x3,                    0},
-    {"c64t Img Conv 5x5",               DVP_KN_CONV_5x5,                    0},
-    {"c64t Img Conv 7x7",               DVP_KN_CONV_7x7,                    0},
+    {"c64t Img Conv 3x3",               DVP_KN_CONV_3x3,                    0, NULL, NULL},
+    {"c64t Img Conv 5x5",               DVP_KN_CONV_5x5,                    0, NULL, NULL},
+    {"c64t Img Conv 7x7",               DVP_KN_CONV_7x7,                    0, NULL, NULL},
 
-    {"c64t Img Conv 3x3",               DVP_KN_IMG_CONV_3x3,                0},
-    {"c64t Img Conv 5x5",               DVP_KN_IMG_CONV_5x5,                0},
-    {"c64t Img Conv 7x7",               DVP_KN_IMG_CONV_7x7,                0},
-    {"c64t Img Conv 11x11",             DVP_KN_IMG_CONV_11x11,              0},
-    {"c64t Img Conv 5x5 i8 c16s",       DVP_KN_IMG_CONV_5x5_I8_C16,         0},
-    {"c64t Img Conv 7x7 i8 c16s",       DVP_KN_IMG_CONV_7x7_I8_C16,         0},
-    {"c64t Img Conv 3x3 i16s c16s",     DVP_KN_IMG_CONV_3x3_I16s_C16,       0},
-    {"c64t Img Conv 5x5 i16 c16s",      DVP_KN_IMG_CONV_5x5_I16s_C16,       0},
-    {"c64t Img Conv 7x7 i16 c16s",      DVP_KN_IMG_CONV_7x7_I16s_C16,       0},
-    {"c64t Img Conv 11x11 i16s c16s",   DVP_KN_IMG_CONV_11x11_I16s_C16,     0},
+    {"c64t Img Conv 3x3",               DVP_KN_IMG_CONV_3x3,                0, NULL, NULL},
+    {"c64t Img Conv 5x5",               DVP_KN_IMG_CONV_5x5,                0, NULL, NULL},
+    {"c64t Img Conv 7x7",               DVP_KN_IMG_CONV_7x7,                0, NULL, NULL},
+    {"c64t Img Conv 11x11",             DVP_KN_IMG_CONV_11x11,              0, NULL, NULL},
+    {"c64t Img Conv 5x5 i8 c16s",       DVP_KN_IMG_CONV_5x5_I8_C16,         0, NULL, NULL},
+    {"c64t Img Conv 7x7 i8 c16s",       DVP_KN_IMG_CONV_7x7_I8_C16,         0, NULL, NULL},
+    {"c64t Img Conv 3x3 i16s c16s",     DVP_KN_IMG_CONV_3x3_I16s_C16,       0, NULL, NULL},
+    {"c64t Img Conv 5x5 i16 c16s",      DVP_KN_IMG_CONV_5x5_I16s_C16,       0, NULL, NULL},
+    {"c64t Img Conv 7x7 i16 c16s",      DVP_KN_IMG_CONV_7x7_I16s_C16,       0, NULL, NULL},
+    {"c64t Img Conv 11x11 i16s c16s",   DVP_KN_IMG_CONV_11x11_I16s_C16,     0, NULL, NULL},
 
-    {"c64t Img Thr gt2max8",            DVP_KN_THR_GT2MAX_8,                0},
-    {"c64t Img Thr gt2max16",           DVP_KN_THR_GT2MAX_16,               0},
-    {"c64t Img Thr gt2thr8",            DVP_KN_THR_GT2THR_8,                0},
-    {"c64t Img Thr gt2thr16",           DVP_KN_THR_GT2THR_16,               0},
-    {"c64t Img Thr le2min8",            DVP_KN_THR_LE2MIN_8,                0},
-    {"c64t Img Thr le2min16",           DVP_KN_THR_LE2MIN_16,               0},
-    {"c64t Img Thr le2thr8",            DVP_KN_THR_LE2THR_8,                0},
-    {"c64t Img Thr le2thr16",           DVP_KN_THR_LE2THR_16,               0},
-    {"c64t Img sobel 3x3_8",            DVP_KN_SOBEL_3x3_8,                 0},
+    {"c64t Img Thr gt2max8",            DVP_KN_THR_GT2MAX_8,                0, NULL, NULL},
+    {"c64t Img Thr gt2max16",           DVP_KN_THR_GT2MAX_16,               0, NULL, NULL},
+    {"c64t Img Thr gt2thr8",            DVP_KN_THR_GT2THR_8,                0, NULL, NULL},
+    {"c64t Img Thr gt2thr16",           DVP_KN_THR_GT2THR_16,               0, NULL, NULL},
+    {"c64t Img Thr le2min8",            DVP_KN_THR_LE2MIN_8,                0, NULL, NULL},
+    {"c64t Img Thr le2min16",           DVP_KN_THR_LE2MIN_16,               0, NULL, NULL},
+    {"c64t Img Thr le2thr8",            DVP_KN_THR_LE2THR_8,                0, NULL, NULL},
+    {"c64t Img Thr le2thr16",           DVP_KN_THR_LE2THR_16,               0, NULL, NULL},
+    {"c64t Img sobel 3x3_8",            DVP_KN_SOBEL_3x3_8,                 0, NULL, NULL},
 
-    {"c64t Img Thr gt2max8",            DVP_KN_IMG_THR_GT2MAX_8,            0},
-    {"c64t Img Thr gt2max16",           DVP_KN_IMG_THR_GT2MAX_16,           0},
-    {"c64t Img Thr gt2thr8",            DVP_KN_IMG_THR_GT2THR_8,            0},
-    {"c64t Img Thr gt2thr16",           DVP_KN_IMG_THR_GT2THR_16,           0},
-    {"c64t Img Thr le2min8",            DVP_KN_IMG_THR_LE2MIN_8,            0},
-    {"c64t Img Thr le2min16",           DVP_KN_IMG_THR_LE2MIN_16,           0},
-    {"c64t Img Thr le2thr8",            DVP_KN_IMG_THR_LE2THR_8,            0},
-    {"c64t Img Thr le2thr16",           DVP_KN_IMG_THR_LE2THR_16,           0},
-    {"c64t Img sobel 3x3_8",            DVP_KN_IMG_SOBEL_3x3_8,             0},
-    {"c64t Img sobel 3x3_16s",          DVP_KN_IMG_SOBEL_3x3_16s,           0},
-    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_5x5_16s,           0},
-    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_7x7_16s,           0},
-    {"c64t CannyImgSmooth",             DVP_KN_CANNY_IMAGE_SMOOTHING,       0},
-    {"c64t Img Clipping 16",            DVP_KN_IMG_CLIPPING_16,             0},
-    {"c64t Img Boundary8",              DVP_KN_IMG_BOUNDARY_8,              0},
-    {"c64t Img Boundary16s",            DVP_KN_IMG_BOUNDARY_16s,            0},
-    {"c64t Img Correlation 3x3",        DVP_KN_IMG_CORR_3x3,                0},
-    {"c64t Img Correlation 3x3 I8 C16s",  DVP_KN_IMG_CORR_3x3_I8_C16s,      0},
-    {"c64t Img Correlation 3x3 I16s C16s",  DVP_KN_IMG_CORR_3x3_I16s_C16s,  0},
-    {"c64t Img Correlation 5x5 I16s C16s",  DVP_KN_IMG_CORR_5x5_I16s_C16s,  0},
-    {"c64t Img Correlation 11x11 I8 C16s",  DVP_KN_IMG_CORR_11x11_I8_C16s,  0},
-    {"c64t Img Correlation 11x11 I16s C16s",  DVP_KN_IMG_CORR_11x11_I16s_C16s, 0},
-    {"c64t Img Correlation Gen I16 C16s",  DVP_KN_IMG_CORR_GEN_I16s_C16s,   0},
-    {"c64t Img Correlation Gen Iq",     DVP_KN_IMG_CORR_GEN_IQ,             0},
-    {"c64t Img Histogram8",             DVP_KN_IMG_HISTOGRAM_8,             0},
-    {"c64t Img Histogram16",            DVP_KN_IMG_HISTOGRAM_16,            0},
-    {"c64t Img Median 3x3 8",           DVP_KN_IMG_MEDIAN_3x3_8,            0},
-    {"c64t Img Median 3x3 16s",          DVP_KN_IMG_MEDIAN_3x3_16s,         0},
-    {"c64t Img Perimeter 8",            DVP_KN_IMG_PERIMETER_8,             0},
-    {"c64t Img Perimeter 16",           DVP_KN_IMG_PERIMETER_16,            0},
-    {"c64t Img Demux LE 8",             DVP_KN_IMG_YC_DEMUX_LE16_8,         0},
-    {"c64t Img Demux BE 8",             DVP_KN_IMG_YC_DEMUX_BE16_8,         0},
-    {"c64t Img Pix Sat ",               DVP_KN_IMG_PIX_SAT,                 0},
-    {"c64t Img Pix Expand ",            DVP_KN_IMG_PIX_EXPAND,              0},
-    {"c64t Img SAD 3x3",                DVP_KN_IMG_SAD_3x3,                 0},
-    {"c64t Img SAD 5x5",                DVP_KN_IMG_SAD_5x5,                 0},
-    {"c64t Img SAD 7x7",                DVP_KN_IMG_SAD_7x7,                 0},
-    {"c64t Img SAD 8x8",                DVP_KN_IMG_SAD_8x8,                 0},
-    {"c64t Img SAD 16x16",              DVP_KN_IMG_SAD_16x16,               0},
-    {"c64t Img ErrDiff 8",              DVP_KN_IMG_ERRDIFF_BIN_8,           0},
-    {"c64t Img ErrDiff 16",             DVP_KN_IMG_ERRDIFF_BIN_16,          0},
-    {"c64t Img FDCT 8x8",               DVP_KN_IMG_FDCT_8x8,                0},
-    {"c64t Img IFDCT 8x8",              DVP_KN_IMG_IDCT_8x8_12Q4,           0},
-    {"c64t Img MAD 8x8",                DVP_KN_IMG_MAD_8x8,                 0},
-    {"c64t Img MAD 16x16",              DVP_KN_IMG_MAD_16x16,               0},
-    {"c64t Img Quantization 16",        DVP_KN_IMG_QUANTIZE_16,             0},
-    {"c64t Img Wavelet Horz",           DVP_KN_IMG_WAVE_HORZ,               0},
+    {"c64t Img Thr gt2max8",            DVP_KN_IMG_THR_GT2MAX_8,            0, NULL, NULL},
+    {"c64t Img Thr gt2max16",           DVP_KN_IMG_THR_GT2MAX_16,           0, NULL, NULL},
+    {"c64t Img Thr gt2thr8",            DVP_KN_IMG_THR_GT2THR_8,            0, NULL, NULL},
+    {"c64t Img Thr gt2thr16",           DVP_KN_IMG_THR_GT2THR_16,           0, NULL, NULL},
+    {"c64t Img Thr le2min8",            DVP_KN_IMG_THR_LE2MIN_8,            0, NULL, NULL},
+    {"c64t Img Thr le2min16",           DVP_KN_IMG_THR_LE2MIN_16,           0, NULL, NULL},
+    {"c64t Img Thr le2thr8",            DVP_KN_IMG_THR_LE2THR_8,            0, NULL, NULL},
+    {"c64t Img Thr le2thr16",           DVP_KN_IMG_THR_LE2THR_16,           0, NULL, NULL},
+    {"c64t Img sobel 3x3_8",            DVP_KN_IMG_SOBEL_3x3_8,             0, NULL, NULL},
+    {"c64t Img sobel 3x3_16s",          DVP_KN_IMG_SOBEL_3x3_16s,           0, NULL, NULL},
+    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_5x5_16s,           0, NULL, NULL},
+    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_7x7_16s,           0, NULL, NULL},
+    {"c64t CannyImgSmooth",             DVP_KN_CANNY_IMAGE_SMOOTHING,       0, NULL, NULL},
+    {"c64t Img Clipping 16",            DVP_KN_IMG_CLIPPING_16,             0, NULL, NULL},
+    {"c64t Img Boundary8",              DVP_KN_IMG_BOUNDARY_8,              0, NULL, NULL},
+    {"c64t Img Boundary16s",            DVP_KN_IMG_BOUNDARY_16s,            0, NULL, NULL},
+    {"c64t Img Correlation 3x3",        DVP_KN_IMG_CORR_3x3,                0, NULL, NULL},
+    {"c64t Img Correlation 3x3 I8 C16s",  DVP_KN_IMG_CORR_3x3_I8_C16s,      0, NULL, NULL},
+    {"c64t Img Correlation 3x3 I16s C16s",  DVP_KN_IMG_CORR_3x3_I16s_C16s,  0, NULL, NULL},
+    {"c64t Img Correlation 5x5 I16s C16s",  DVP_KN_IMG_CORR_5x5_I16s_C16s,  0, NULL, NULL},
+    {"c64t Img Correlation 11x11 I8 C16s",  DVP_KN_IMG_CORR_11x11_I8_C16s,  0, NULL, NULL},
+    {"c64t Img Correlation 11x11 I16s C16s",  DVP_KN_IMG_CORR_11x11_I16s_C16s, 0, NULL, NULL},
+    {"c64t Img Correlation Gen I16 C16s",  DVP_KN_IMG_CORR_GEN_I16s_C16s,   0, NULL, NULL},
+    {"c64t Img Correlation Gen Iq",     DVP_KN_IMG_CORR_GEN_IQ,             0, NULL, NULL},
+    {"c64t Img Histogram8",             DVP_KN_IMG_HISTOGRAM_8,             0, NULL, NULL},
+    {"c64t Img Histogram16",            DVP_KN_IMG_HISTOGRAM_16,            0, NULL, NULL},
+    {"c64t Img Median 3x3 8",           DVP_KN_IMG_MEDIAN_3x3_8,            0, NULL, NULL},
+    {"c64t Img Median 3x3 16s",          DVP_KN_IMG_MEDIAN_3x3_16s,         0, NULL, NULL},
+    {"c64t Img Perimeter 8",            DVP_KN_IMG_PERIMETER_8,             0, NULL, NULL},
+    {"c64t Img Perimeter 16",           DVP_KN_IMG_PERIMETER_16,            0, NULL, NULL},
+    {"c64t Img Demux LE 8",             DVP_KN_IMG_YC_DEMUX_LE16_8,         0, NULL, NULL},
+    {"c64t Img Demux BE 8",             DVP_KN_IMG_YC_DEMUX_BE16_8,         0, NULL, NULL},
+    {"c64t Img Pix Sat ",               DVP_KN_IMG_PIX_SAT,                 0, NULL, NULL},
+    {"c64t Img Pix Expand ",            DVP_KN_IMG_PIX_EXPAND,              0, NULL, NULL},
+    {"c64t Img SAD 3x3",                DVP_KN_IMG_SAD_3x3,                 0, NULL, NULL},
+    {"c64t Img SAD 5x5",                DVP_KN_IMG_SAD_5x5,                 0, NULL, NULL},
+    {"c64t Img SAD 7x7",                DVP_KN_IMG_SAD_7x7,                 0, NULL, NULL},
+    {"c64t Img SAD 8x8",                DVP_KN_IMG_SAD_8x8,                 0, NULL, NULL},
+    {"c64t Img SAD 16x16",              DVP_KN_IMG_SAD_16x16,               0, NULL, NULL},
+    {"c64t Img ErrDiff 8",              DVP_KN_IMG_ERRDIFF_BIN_8,           0, NULL, NULL},
+    {"c64t Img ErrDiff 16",             DVP_KN_IMG_ERRDIFF_BIN_16,          0, NULL, NULL},
+    {"c64t Img FDCT 8x8",               DVP_KN_IMG_FDCT_8x8,                0, NULL, NULL},
+    {"c64t Img IFDCT 8x8",              DVP_KN_IMG_IDCT_8x8_12Q4,           0, NULL, NULL},
+    {"c64t Img MAD 8x8",                DVP_KN_IMG_MAD_8x8,                 0, NULL, NULL},
+    {"c64t Img MAD 16x16",              DVP_KN_IMG_MAD_16x16,               0, NULL, NULL},
+    {"c64t Img Quantization 16",        DVP_KN_IMG_QUANTIZE_16,             0, NULL, NULL},
+    {"c64t Img Wavelet Horz",           DVP_KN_IMG_WAVE_HORZ,               0, NULL, NULL},
 
 #endif
 #ifdef DVP_USE_DSPLIB
-    {"c64t DSP Add 16 ",                DVP_KN_DSP_ADD16,                   0},
-    {"c64t DSP Add 32 ",                DVP_KN_DSP_ADD32,                   0},
-    {"c64t DSP Autocorrelation ",       DVP_KN_DSP_AUTOCORR16,              0},
-    {"c64t DSP Bit exp ",               DVP_KN_DSP_BITEXP32,                0},
-    {"c64t DSP Block swap 16 ",         DVP_KN_DSP_BLKESWAP16,              0},
-    {"c64t DSP Block swap 32 ",         DVP_KN_DSP_BLKESWAP32,              0},
-    {"c64t DSP Block swap 64 ",         DVP_KN_DSP_BLKESWAP64,              0},
-    {"c64t DSP Block move ",            DVP_KN_DSP_BLKMOVE,                 0},
-    {"c64t DSP Dot product square ",    DVP_KN_DSP_DOTPRODSQR,              0},
-    {"c64t DSP Dot product ",           DVP_KN_DSP_DOTPROD,                 0},
-    {"c64t DSP FFT 16x16 ",             DVP_KN_DSP_FFT_16x16,               0},
-    {"c64t DSP FFT 16x16R ",            DVP_KN_DSP_FFT_16x16R,              0},
-    {"c64t DSP FFT 16x16IMRE ",         DVP_KN_DSP_FFT_16x16_IMRE,          0},
-    {"c64t DSP FFT 16x32 ",             DVP_KN_DSP_FFT_16x32,               0},
-    {"c64t DSP FFT 32x32 ",             DVP_KN_DSP_FFT_32x32,               0},
-    {"c64t DSP FFT 32x32s ",            DVP_KN_DSP_FFT_32x32s,              0},
+    {"c64t DSP Add 16 ",                DVP_KN_DSP_ADD16,                   0, NULL, NULL},
+    {"c64t DSP Add 32 ",                DVP_KN_DSP_ADD32,                   0, NULL, NULL},
+    {"c64t DSP Autocorrelation ",       DVP_KN_DSP_AUTOCORR16,              0, NULL, NULL},
+    {"c64t DSP Bit exp ",               DVP_KN_DSP_BITEXP32,                0, NULL, NULL},
+    {"c64t DSP Block swap 16 ",         DVP_KN_DSP_BLKESWAP16,              0, NULL, NULL},
+    {"c64t DSP Block swap 32 ",         DVP_KN_DSP_BLKESWAP32,              0, NULL, NULL},
+    {"c64t DSP Block swap 64 ",         DVP_KN_DSP_BLKESWAP64,              0, NULL, NULL},
+    {"c64t DSP Block move ",            DVP_KN_DSP_BLKMOVE,                 0, NULL, NULL},
+    {"c64t DSP Dot product square ",    DVP_KN_DSP_DOTPRODSQR,              0, NULL, NULL},
+    {"c64t DSP Dot product ",           DVP_KN_DSP_DOTPROD,                 0, NULL, NULL},
+    {"c64t DSP FFT 16x16 ",             DVP_KN_DSP_FFT_16x16,               0, NULL, NULL},
+    {"c64t DSP FFT 16x16R ",            DVP_KN_DSP_FFT_16x16R,              0, NULL, NULL},
+    {"c64t DSP FFT 16x16IMRE ",         DVP_KN_DSP_FFT_16x16_IMRE,          0, NULL, NULL},
+    {"c64t DSP FFT 16x32 ",             DVP_KN_DSP_FFT_16x32,               0, NULL, NULL},
+    {"c64t DSP FFT 32x32 ",             DVP_KN_DSP_FFT_32x32,               0, NULL, NULL},
+    {"c64t DSP FFT 32x32s ",            DVP_KN_DSP_FFT_32x32s,              0, NULL, NULL},
 
-    {"c64t DSP FIR Complex ",           DVP_KN_DSP_FIR_CPLX,                0},
-    {"c64t DSP FIR HM Radix 4 ",        DVP_KN_DSP_FIR_HM4x4,               0},
-    {"c64t DSP FIR General",            DVP_KN_DSP_FIR_GEN,                 0},
-    {"c64t DSP FIR HM17 Radix 8 ",      DVP_KN_DSP_FIR_HM17_RA8x8,          0},
-    {"c64t DSP FIR Adaptive LMS ",      DVP_KN_DSP_FIR_LMS2,                0},
-    {"c64t DSP FIR Radix 4 ",           DVP_KN_DSP_FIR_R4,                  0},
-    {"c64t DSP FIR Radix  8",           DVP_KN_DSP_FIR_R8,                  0},
-    {"c64t DSP FIR HM16 Radix 8  ",     DVP_KN_DSP_FIR_HM16_RM8A8x8,        0},
-    {"c64t DSP FIR Symmetric ",         DVP_KN_DSP_FIR_SYM,                 0},
+    {"c64t DSP FIR Complex ",           DVP_KN_DSP_FIR_CPLX,                0, NULL, NULL},
+    {"c64t DSP FIR HM Radix 4 ",        DVP_KN_DSP_FIR_HM4x4,               0, NULL, NULL},
+    {"c64t DSP FIR General",            DVP_KN_DSP_FIR_GEN,                 0, NULL, NULL},
+    {"c64t DSP FIR HM17 Radix 8 ",      DVP_KN_DSP_FIR_HM17_RA8x8,          0, NULL, NULL},
+    {"c64t DSP FIR Adaptive LMS ",      DVP_KN_DSP_FIR_LMS2,                0, NULL, NULL},
+    {"c64t DSP FIR Radix 4 ",           DVP_KN_DSP_FIR_R4,                  0, NULL, NULL},
+    {"c64t DSP FIR Radix  8",           DVP_KN_DSP_FIR_R8,                  0, NULL, NULL},
+    {"c64t DSP FIR HM16 Radix 8  ",     DVP_KN_DSP_FIR_HM16_RM8A8x8,        0, NULL, NULL},
+    {"c64t DSP FIR Symmetric ",         DVP_KN_DSP_FIR_SYM,                 0, NULL, NULL},
 
-    {"c64t DSP IFFT 16x16 ",            DVP_KN_DSP_IFFT_16x16,              0},
-    {"c64t DSP IFFT 16x16 complex",     DVP_KN_DSP_IFFT_16x16_IMRE,         0},
-    {"c64t DSP IFFT 16x32 ",            DVP_KN_DSP_IFFT_16x32,              0},
-    {"c64t DSP IFFT 32x32 ",            DVP_KN_DSP_IFFT_32x32,              0},
+    {"c64t DSP IFFT 16x16 ",            DVP_KN_DSP_IFFT_16x16,              0, NULL, NULL},
+    {"c64t DSP IFFT 16x16 complex",     DVP_KN_DSP_IFFT_16x16_IMRE,         0, NULL, NULL},
+    {"c64t DSP IFFT 16x32 ",            DVP_KN_DSP_IFFT_16x32,              0, NULL, NULL},
+    {"c64t DSP IFFT 32x32 ",            DVP_KN_DSP_IFFT_32x32,              0, NULL, NULL},
 
-    {"c64t DSP IIR ",                   DVP_KN_DSP_IIR,                     0},
-    {"c64t DSP IIR Lattice",            DVP_KN_DSP_IIR_LAT,                 0},
-    {"c64t DSP IIR Single Point ",      DVP_KN_DSP_IIR_SS,                  0},
+    {"c64t DSP IIR ",                   DVP_KN_DSP_IIR,                     0, NULL, NULL},
+    {"c64t DSP IIR Lattice",            DVP_KN_DSP_IIR_LAT,                 0, NULL, NULL},
+    {"c64t DSP IIR Single Point ",      DVP_KN_DSP_IIR_SS,                  0, NULL, NULL},
 
-    {"c64t DSP Lib MatrixMul ",         DVP_KN_DSP_MUL,                     0},
-	{"c64t DSP Lib MatrixMul Complex",  DVP_KN_DSP_MUL_CPLX, 0},
-    {"c64t DSP Lib MatrixTranspose ",   DVP_KN_DSP_MAT_TRANS,               0},
-    {"c64t DSP Lib MaxIdx ",            DVP_KN_DSP_MAXIDX,                  0},
-    {"c64t DSP Lib MaxVal ",            DVP_KN_DSP_MAXVAL,                  0},
-    {"c64t DSP Lib MinVal ",            DVP_KN_DSP_MINVAL,                  0},
-    {"c64t DSP Lib MInError ",          DVP_KN_DSP_MINERROR,                0},
-    {"c64t DSP Lib Mult32 ",            DVP_KN_DSP_MUL32,                   0},
-    {"c64t DSP Lib Negate32 ",          DVP_KN_DSP_NEG32,                   0},
-    {"c64t DSP Lib Reciprocal16 ",      DVP_KN_DSP_RECIP16,                 0},
-    {"c64t DSP Lib SumofSquares ",      DVP_KN_DSP_VECSUMSQ,                0},
-    {"c64t DSP Lib WeightedVector ",    DVP_KN_DSP_W_VEC,                   0},
+    {"c64t DSP Lib MatrixMul ",         DVP_KN_DSP_MUL,                     0, NULL, NULL},
+    {"c64t DSP Lib MatrixMul Complex",  DVP_KN_DSP_MUL_CPLX, 0, NULL, NULL},
+    {"c64t DSP Lib MatrixTranspose ",   DVP_KN_DSP_MAT_TRANS,               0, NULL, NULL},
+    {"c64t DSP Lib MaxIdx ",            DVP_KN_DSP_MAXIDX,                  0, NULL, NULL},
+    {"c64t DSP Lib MaxVal ",            DVP_KN_DSP_MAXVAL,                  0, NULL, NULL},
+    {"c64t DSP Lib MinVal ",            DVP_KN_DSP_MINVAL,                  0, NULL, NULL},
+    {"c64t DSP Lib MInError ",          DVP_KN_DSP_MINERROR,                0, NULL, NULL},
+    {"c64t DSP Lib Mult32 ",            DVP_KN_DSP_MUL32,                   0, NULL, NULL},
+    {"c64t DSP Lib Negate32 ",          DVP_KN_DSP_NEG32,                   0, NULL, NULL},
+    {"c64t DSP Lib Reciprocal16 ",      DVP_KN_DSP_RECIP16,                 0, NULL, NULL},
+    {"c64t DSP Lib SumofSquares ",      DVP_KN_DSP_VECSUMSQ,                0, NULL, NULL},
+    {"c64t DSP Lib WeightedVector ",    DVP_KN_DSP_W_VEC,                   0, NULL, NULL},
 
-    {"c64t DSP Lib FFT Twiddle16x16 ",  DVP_KN_GEN_TWIDDLE_FFT_16X16,       0},
-    {"c64t DSP Lib FFT Twiddle16x16 ",  DVP_KN_GEN_TWIDDLE_FFT_16X16_IMRE,  0},
-    {"c64t DSP Lib FFT Twiddle16x32 ",  DVP_KN_GEN_TWIDDLE_FFT_16X32,       0},
-    {"c64t DSP Lib FFT Twiddle 32x32 ", DVP_KN_GEN_TWIDDLE_FFT_32x32,       0},
-    {"c64t DSP Lib IFFT Twiddle16x16 ", DVP_KN_GEN_TWIDDLE_IFFT_16X16,      0},
-    {"c64t DSP Lib IFFT Twiddle16x16 ", DVP_KN_GEN_TWIDDLE_IFFT_16X16_IMRE, 0},
+    {"c64t DSP Lib FFT Twiddle16x16 ",  DVP_KN_GEN_TWIDDLE_FFT_16X16,       0, NULL, NULL},
+    {"c64t DSP Lib FFT Twiddle16x16 ",  DVP_KN_GEN_TWIDDLE_FFT_16X16_IMRE,  0, NULL, NULL},
+    {"c64t DSP Lib FFT Twiddle16x32 ",  DVP_KN_GEN_TWIDDLE_FFT_16X32,       0, NULL, NULL},
+    {"c64t DSP Lib FFT Twiddle 32x32 ", DVP_KN_GEN_TWIDDLE_FFT_32x32,       0, NULL, NULL},
+    {"c64t DSP Lib IFFT Twiddle16x16 ", DVP_KN_GEN_TWIDDLE_IFFT_16X16,      0, NULL, NULL},
+    {"c64t DSP Lib IFFT Twiddle16x16 ", DVP_KN_GEN_TWIDDLE_IFFT_16X16_IMRE, 0, NULL, NULL},
 #endif
 #ifdef DVP_USE_TISMO
-    {"c64t  TISMO",                     DVP_KN_TISMO_DISPARITY,             0},
+    {"c64t  TISMO",                     DVP_KN_TISMO_DISPARITY,             0, NULL, NULL},
 #endif
 #ifdef DVP_USE_RVM
-    {"c64t RVM",                        DVP_KN_RVM,                         0},
+    {"c64t RVM",                        DVP_KN_RVM,                         0, NULL, NULL},
 #endif
 #ifdef DVP_USE_ORB
-    {"c64t  KN_ORB",                    DVP_KN_ORB,                         0},
+    {"c64t  KN_ORB",                    DVP_KN_ORB,                         0, NULL, NULL},
 #endif
 #ifdef DVP_USE_DEI
-    {"c64t Deinterlacer",               DVP_KN_DEI_DEINTERLACER,            0},
+    {"c64t Deinterlacer",               DVP_KN_DEI_DEINTERLACER,            0, NULL, NULL},
 #endif
 #else //DVP_USE_IPC
-    {"c64t Echo",                       DVP_KN_ECHO,                        0},
+    {"c64t Echo",                       DVP_KN_ECHO,                        0, NULL, NULL},
 #endif
 };
 static DVP_U32 numRemoteKernels = dimof(remote_kernels);
@@ -1285,30 +1285,30 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
 
         case DVP_KN_DSP_IIR:
         {
-			DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->output1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->output1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
             break;
         }
 
         case DVP_KN_DSP_IIR_LAT:
         {
-			DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_TRUE, (DVP_PTR)pTmp, &translations);
             break;
         }
 
         case DVP_KN_DSP_IIR_SS:
         {
-			DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-			dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+            dvp_rpc_prepare_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_TRUE, (DVP_PTR)pTmp, &translations);
             break;
         }
 
@@ -2098,113 +2098,113 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
                     dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPData->output0, DVP_TRUE);
                     break;
                 }
-				case DVP_KN_DSP_AUTOCORR16:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_BITEXP32:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					break;
-				}
-				case DVP_KN_DSP_BLKESWAP16:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_BLKESWAP32:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_BLKESWAP64:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_BLKMOVE:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_DOTPRODSQR:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_DOTPROD:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_FALSE);
-					break;
-				}
-				case DVP_KN_DSP_FFT_16x16:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_FFT_16x16R:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_FFT_16x16_IMRE:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_FFT_16x32:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_FFT_32x32:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
-				case DVP_KN_DSP_FFT_32x32s:
-				{
-					DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
-					dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
-					break;
-				}
+                case DVP_KN_DSP_AUTOCORR16:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_BITEXP32:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    break;
+                }
+                case DVP_KN_DSP_BLKESWAP16:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_BLKESWAP32:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_BLKESWAP64:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_BLKMOVE:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_DOTPRODSQR:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_DOTPROD:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input1, DVP_FALSE);
+                    break;
+                }
+                case DVP_KN_DSP_FFT_16x16:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_FFT_16x16R:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_FFT_16x16_IMRE:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_FFT_16x32:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_FFT_32x32:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
+                case DVP_KN_DSP_FFT_32x32s:
+                {
+                    DVP_DSPFunc *pBuf = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->input0, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->twoway, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pBuf->output0, DVP_TRUE);
+                    break;
+                }
 
-				case DVP_KN_DSP_MUL:
-				case DVP_KN_DSP_MUL_CPLX:
+                case DVP_KN_DSP_MUL:
+                case DVP_KN_DSP_MUL_CPLX:
                 {
                     DVP_DSP_MatMul* pDSPMult = dvp_knode_to(&pNodes[n], DVP_DSP_MatMul);
                     dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMult->input0, DVP_FALSE);
@@ -2246,123 +2246,123 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
                     break;
                 }
 
-		case DVP_KN_DSP_IIR:
-		{
+        case DVP_KN_DSP_IIR:
+        {
                     DVP_DSPFunc* pDSPIIR = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
                     dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->input0, DVP_FALSE);
-		   dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->input1, DVP_FALSE);
-		   dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->twoway, DVP_FALSE);
-		   dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->output0, DVP_TRUE);
-		    dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->output1, DVP_TRUE);
+           dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->input1, DVP_FALSE);
+           dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->twoway, DVP_FALSE);
+           dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->output0, DVP_TRUE);
+            dvp_rpc_return_buffer(rpc, DVP_CORE_DSP, &pDSPIIR->output1, DVP_TRUE);
                     break;
                 }
 
-		case DVP_KN_DSP_IIR_LAT:
-		{
+        case DVP_KN_DSP_IIR_LAT:
+        {
            DVP_DSPFunc* pDSPIIR_LAT = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_LAT->input0, DVP_FALSE);
-		   dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_LAT->input1, DVP_FALSE);
-		   dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_LAT->twoway, DVP_FALSE);
-		   dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_LAT->output0, DVP_TRUE);
+           dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_LAT->input1, DVP_FALSE);
+           dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_LAT->twoway, DVP_FALSE);
+           dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_LAT->output0, DVP_TRUE);
                     break;
         }
-		case DVP_KN_DSP_IIR_SS:
-		{
+        case DVP_KN_DSP_IIR_SS:
+        {
                 DVP_DSPFunc* pDSPIIR_SS = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
                 dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_SS->input0, DVP_FALSE);
-	    		dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_SS->input1, DVP_FALSE);
+                dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIIR_SS->input1, DVP_FALSE);
                 break;
         }
-		case DVP_KN_DSP_MAT_TRANS:
+        case DVP_KN_DSP_MAT_TRANS:
         {
             DVP_DSPFunc* pDSPMatTrans = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMatTrans->input0, DVP_FALSE);
-		    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMatTrans->output0, DVP_TRUE);
+            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMatTrans->output0, DVP_TRUE);
             break;
         }
-		case DVP_KN_DSP_MAXIDX:
-		case DVP_KN_DSP_MAXVAL:
-		case DVP_KN_DSP_MINVAL:
+        case DVP_KN_DSP_MAXIDX:
+        case DVP_KN_DSP_MAXVAL:
+        case DVP_KN_DSP_MINVAL:
         {
             DVP_DSPFunc* pDSPMaxIdx = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMaxIdx->input0, DVP_FALSE);
             break;
         }
-		case DVP_KN_DSP_MINERROR:
+        case DVP_KN_DSP_MINERROR:
         {
             DVP_DSPFunc* pDSPMinError = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMinError->input0, DVP_FALSE);
-		    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMinError->input1, DVP_FALSE);
+            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMinError->input1, DVP_FALSE);
             break;
         }
-		case DVP_KN_DSP_MUL32:
+        case DVP_KN_DSP_MUL32:
         {
             DVP_DSPFunc* pDSPMult32 = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMult32->input0, DVP_FALSE);
-		    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMult32->input1, DVP_FALSE);
-			dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMult32->output0, DVP_TRUE);
+            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMult32->input1, DVP_FALSE);
+            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPMult32->output0, DVP_TRUE);
             break;
         }
-		case DVP_KN_DSP_NEG32:
+        case DVP_KN_DSP_NEG32:
         {
             DVP_DSPFunc* pDSPNeg32 = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPNeg32->input0, DVP_FALSE);
-		    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPNeg32->output0, DVP_TRUE);
+            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPNeg32->output0, DVP_TRUE);
             break;
         }
-		case DVP_KN_DSP_RECIP16:
-		{
+        case DVP_KN_DSP_RECIP16:
+        {
             DVP_DSPFunc* pDSPRecip16 = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPRecip16->input0, DVP_FALSE);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPRecip16->twoway, DVP_TRUE);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPRecip16->output0, DVP_TRUE);
             break;
         }
-		case DVP_KN_DSP_VECSUMSQ:
+        case DVP_KN_DSP_VECSUMSQ:
         {
             DVP_DSPFunc* pDSPVecSum = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPVecSum->input0, DVP_FALSE);
             break;
         }
-		case DVP_KN_DSP_W_VEC:
-		{
+        case DVP_KN_DSP_W_VEC:
+        {
             DVP_DSPFunc* pDSPW_Vec = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPW_Vec->input0, DVP_FALSE);
-		    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPW_Vec->input1, DVP_FALSE);
-		    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPW_Vec->output0, DVP_TRUE);
+            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPW_Vec->input1, DVP_FALSE);
+            dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPW_Vec->output0, DVP_TRUE);
             break;
         }
-		case DVP_KN_GEN_TWIDDLE_FFT_16X16:
+        case DVP_KN_GEN_TWIDDLE_FFT_16X16:
         {
             DVP_DSPFunc* pDSPFFT16x16Twd = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPFFT16x16Twd->input0, DVP_FALSE);
             break;
         }
-		case DVP_KN_GEN_TWIDDLE_FFT_16X16_IMRE:
+        case DVP_KN_GEN_TWIDDLE_FFT_16X16_IMRE:
         {
             DVP_DSPFunc* pDSPFFT16x16Twd = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPFFT16x16Twd->input0, DVP_FALSE);
             break;
         }
-		case DVP_KN_GEN_TWIDDLE_FFT_16X32:
+        case DVP_KN_GEN_TWIDDLE_FFT_16X32:
         {
             DVP_DSPFunc* pDSPFFT16x32Twd = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPFFT16x32Twd->input0, DVP_FALSE);
             break;
         }
-		case DVP_KN_GEN_TWIDDLE_FFT_32x32:
+        case DVP_KN_GEN_TWIDDLE_FFT_32x32:
         {
             DVP_DSPFunc* pDSPFFT32x32Twd = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPFFT32x32Twd->input0, DVP_FALSE);
             break;
         }
-		case DVP_KN_GEN_TWIDDLE_IFFT_16X16:
+        case DVP_KN_GEN_TWIDDLE_IFFT_16X16:
         {
             DVP_DSPFunc* pDSPIFFT16x16Twd = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIFFT16x16Twd->input0, DVP_FALSE);
             break;
         }
-		case DVP_KN_GEN_TWIDDLE_IFFT_16X16_IMRE:
+        case DVP_KN_GEN_TWIDDLE_IFFT_16X16_IMRE:
         {
             DVP_DSPFunc* pDSPIFFT16x16Twd = dvp_knode_to(&pNodes[n], DVP_DSPFunc);
             dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pDSPIFFT16x16Twd->input0, DVP_FALSE);

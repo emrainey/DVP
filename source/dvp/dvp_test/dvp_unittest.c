@@ -21,6 +21,10 @@
 #include <yuv/dvp_kl_yuv.h>
 #endif
 
+#if defined(DVP_USE_VRUN)
+#include <vrun/dvp_kl_vrun.h>
+#endif
+
 uint32_t iterations;
 option_t opts[] = {
     {OPTION_TYPE_INT, &iterations, sizeof(iterations), "-i", "--iter", "Iterations"},
@@ -490,6 +494,73 @@ status_e dvp_split_cc_test(void)
 }
 #endif
 
+status_e dvp_imageshift_test(void)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    if (dvp)
+    {
+        DVP_U32 numNodes = 1;
+        DVP_U32 numSections = 1;
+        dvp_image_shift_t shift;
+        DVP_KernelNode_t *nodes = DVP_KernelNode_Alloc(dvp, numNodes);
+        if (nodes)
+        {
+            DVP_KernelGraph_t *graph = DVP_KernelGraph_Alloc(dvp, numSections);
+            if (graph)
+            {
+                DVP_Error_e err = DVP_SUCCESS;
+                err = DVP_KernelGraphSection_Init(dvp, graph, 0, nodes, numNodes);
+                if (err == DVP_SUCCESS)
+                {
+                    DVP_Image_t images[3];
+                    DVP_ImageConvolution_t *pT = dvp_knode_to(&nodes[0], DVP_ImageConvolution_t);
+                    DVP_S08 mask[] = {1,2,1,
+                                      2,4,2,
+                                      1,2,1};
+
+                    DVP_Image_Init(&images[0], 640, 480, FOURCC_Y800);
+                    DVP_Image_Init(&images[1], 640, 480, FOURCC_Y800);
+                    DVP_Image_Init(&images[2], 3, 3, FOURCC_Y800);
+
+                    DVP_Image_Alloc(dvp, &images[0], DVP_MTYPE_DEFAULT);
+                    DVP_Image_Alloc(dvp, &images[1], DVP_MTYPE_DEFAULT);
+                    DVP_Image_Alloc(dvp, &images[2], DVP_MTYPE_DEFAULT);
+
+                    DVP_Image_Fill(&images[2], mask, sizeof(mask));
+
+#if defined(DVP_USE_VRUN)
+                    nodes[0].header.kernel = DVP_KN_VRUN_CONV_MxN;
+                    nodes[0].header.affinity = DVP_CORE_SIMCOP;
+#endif
+                    DVP_Image_Dup(&pT->input, &images[0]);
+                    DVP_Image_Dup(&pT->output, &images[1]);
+                    DVP_Image_Dup(&pT->mask, &images[2]);
+                    pT->shiftMask = 4;
+
+                    if (DVP_KernelGraph_Verify(dvp, graph))
+                    {
+                        memset(&shift, 0, sizeof(shift));
+                        DVP_KernelGraph_ImageShiftAccum(dvp, &nodes[0], &shift);
+
+                        DVP_PRINT(DVP_ZONE_ALWAYS, "ImageShift = {%d, %d}\n", shift.centerShiftHorz, shift.centerShiftVert);
+
+                        if (shift.centerShiftHorz == -(DVP_S32)images[2].width/2 &&
+                            shift.centerShiftVert == -(DVP_S32)images[2].height/2)
+                            status = STATUS_SUCCESS;
+                    }
+                }
+                DVP_KernelGraph_Free(dvp, graph);
+                graph = NULL;
+            }
+            DVP_KernelNode_Free(dvp, nodes, numNodes);
+            nodes = NULL;
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+    return status;
+}
+
 /*! \brief Local Unit Test Function Pointer */
 typedef status_e (*dvp_unittest_f)(void);
 
@@ -510,6 +581,7 @@ dvp_unittest_t unittests[] = {
 #if defined(DVP_USE_YUV)
     {STATUS_FAILURE, "Framework: PARALLEL CC Test", dvp_split_cc_test},
 #endif
+    {STATUS_FAILURE, "Framework: ImageShift", dvp_imageshift_test},
 };
 
 int main(int argc, char *argv[])

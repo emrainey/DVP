@@ -63,6 +63,8 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
         return DVP_FALSE;
     }
 
+    DVP_PrintImage(DVP_ZONE_MEM, pImage);
+
     if (bufAlign == 0 ||
         strideMultiple == 0 ||
         widthMultiple == 0 ||
@@ -78,7 +80,7 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
         pImage->bufHeight == 0 ||
         pImage->bufWidth == 0 ||
         pImage->color == 0 ||
-        pImage->memType < DVP_MTYPE_MPUCACHED_VIRTUAL ||
+        //pImage->memType < DVP_MTYPE_MPUCACHED_VIRTUAL ||
         pImage->memType > DVP_MTYPE_MAX ||
         pImage->numBytes == 0 ||
         pImage->x_stride == 0 ||
@@ -173,24 +175,24 @@ DVP_U32 DVP_Image_LineRange(DVP_Image_t *pImage, DVP_U32 plane)
             {
                 case FOURCC_NV12:
                 case FOURCC_NV21:
-                    if (abs(pImage->y_stride) != lineRange)
+                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
                         lineRange = abs(pImage->y_stride);
                     break;
                 case FOURCC_YU16:
                 case FOURCC_YV16:
-                    if (abs(pImage->y_stride) != lineRange)
+                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
                         lineRange = abs(pImage->y_stride);
                     break;
                 case FOURCC_IYUV:
                 case FOURCC_YV12:
-                    if (abs(pImage->y_stride) != lineRange)
+                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
                         lineRange = abs(pImage->y_stride);
                     else
                         lineRange /= 2;
                     break;
                 case FOURCC_YUV9:
                 case FOURCC_YVU9:
-                    if (abs(pImage->y_stride) != lineRange)
+                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
                         lineRange = abs(pImage->y_stride);
                     else
                         lineRange /= 4;
@@ -201,7 +203,7 @@ DVP_U32 DVP_Image_LineRange(DVP_Image_t *pImage, DVP_U32 plane)
         }
         else if (pImage->color == FOURCC_BIN1)
         {
-            if (abs(pImage->y_stride) != lineRange)
+            if (abs(pImage->y_stride) != (DVP_S32)lineRange)
                 lineRange = abs(pImage->y_stride);
             else
                 lineRange = pImage->bufWidth / 8;

@@ -557,8 +557,6 @@ DVP_U32 DVP_ConfigureNodes(DVP_t *dvp, DVP_KernelGraphSection_t *section, DVP_BO
                 {
                     if (dvp->managers[m].calls.getCore() == pNodes[n].header.affinity)
                     {
-                        // remember the index
-                        pNodes[n].header.mgrIndex = m;
                         // get the function index
                         isKernelSupported = DVP_GetManagerKernelIndex(&dvp->managers[m], pNodes[n].header.kernel, &f);
                         if (isKernelSupported == DVP_TRUE)
@@ -567,6 +565,10 @@ DVP_U32 DVP_ConfigureNodes(DVP_t *dvp, DVP_KernelGraphSection_t *section, DVP_BO
                             found = DVP_TRUE;
                             // accumulate the load value for this kernel into the section's core loads
                             section->coreLoad[pNodes[n].header.affinity] += dvp->managers[m].kernels[f].load;
+                            // remember the index
+                            pNodes[n].header.mgrIndex = m;
+                            // remember the function index too!
+                            pNodes[n].header.funcIndex = f;
                             break;
                         }
                     }
@@ -661,12 +663,10 @@ DVP_U32 DVP_KernelGraphBoss_Verify(DVP_t *dvp,  DVP_KernelGraphSection_t *sectio
             }
 #endif
             DVP_PRINT(DVP_ZONE_KGB, "KGB: Verifying %u nodes on %s core\n", subgraphNumNodes, dvp->managers[pNodes[n].header.mgrIndex].name);
-            // CALL VERIFY
             numNodeVerified = dvp->managers[pNodes[n].header.mgrIndex].calls.verify(pNodes,n,subgraphNumNodes);
+            DVP_PRINT(DVP_ZONE_KGB, "KGB: Verified %u nodes on %s core\n", numNodeVerified, dvp->managers[pNodes[n].header.mgrIndex].name);
             verified += numNodeVerified;
             n += subgraphNumNodes;
-            DVP_PRINT(DVP_ZONE_KGB, "KGB: Verified %u nodes on %s core\n", numNodeVerified, dvp->managers[pNodes[n].header.mgrIndex].name);
-
         }
         return verified;
     }

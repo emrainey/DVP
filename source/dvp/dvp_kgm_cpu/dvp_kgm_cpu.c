@@ -129,117 +129,117 @@ static DVP_CoreFunction_t local_kernels[] = {
     // FEATURE LIST
     //***************************************
 
-    {"No operation",   DVP_KN_NOOP, 0},
-    {"Threshold",      DVP_KN_THRESHOLD, 0},
-    {"XStrideConvert", DVP_KN_XSTRIDE_CONVERT, 0},
-    {"XStrideShift",   DVP_KN_XSTRIDE_SHIFT, 0},
-    {"Image Copy",     DVP_KN_ECHO, 0},
-    {"Image Debug",    DVP_KN_IMAGE_DEBUG, 0},
-    {"Buffer Debug",   DVP_KN_BUFFER_DEBUG, 0},
-    {"Gamma",          DVP_KN_GAMMA, 0},
+    {"No operation",   DVP_KN_NOOP, 0, NULL, NULL},
+    {"Threshold",      DVP_KN_THRESHOLD, 0, NULL, NULL},
+    {"XStrideConvert", DVP_KN_XSTRIDE_CONVERT, 0, NULL, NULL},
+    {"XStrideShift",   DVP_KN_XSTRIDE_SHIFT, 0, NULL, NULL},
+    {"Image Copy",     DVP_KN_ECHO, 0, NULL, NULL},
+    {"Image Debug",    DVP_KN_IMAGE_DEBUG, 0, NULL, NULL},
+    {"Buffer Debug",   DVP_KN_BUFFER_DEBUG, 0, NULL, NULL},
+    {"Gamma",          DVP_KN_GAMMA, 0, NULL, NULL},
 
 #if defined(DVP_USE_YUV)
-    {"NEON YXYX to LUMA", DVP_KN_YUV_YXYX_TO_Y800, 0},
+    {"NEON YXYX to LUMA", DVP_KN_YUV_YXYX_TO_Y800, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON YXYX to LUMA", DVP_KN_YXYX_TO_Y800, 0},
+    {"NEON YXYX to LUMA", DVP_KN_YXYX_TO_Y800, 0, NULL, NULL},
 #elif defined(DVP_USE_VLIB)
-    {"\"C\" YXYX to LUMA", DVP_KN_YXYX_TO_Y800, 0},
+    {"\"C\" YXYX to LUMA", DVP_KN_YXYX_TO_Y800, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_VLIB)
-    {"\"C\" DilateCross", DVP_KN_DILATE_CROSS, 0},
-    {"\"C\" DilateMask", DVP_KN_DILATE_MASK, 0},
-    {"\"C\" DilateSquare", DVP_KN_DILATE_SQUARE, 0},
-    {"\"C\" ErodeCross", DVP_KN_ERODE_CROSS, 0},
-    {"\"C\" ErodeMask", DVP_KN_ERODE_MASK, 0},
-    {"\"C\" ErodeSquare", DVP_KN_ERODE_SQUARE, 0},
+    {"\"C\" DilateCross", DVP_KN_DILATE_CROSS, 0, NULL, NULL},
+    {"\"C\" DilateMask", DVP_KN_DILATE_MASK, 0, NULL, NULL},
+    {"\"C\" DilateSquare", DVP_KN_DILATE_SQUARE, 0, NULL, NULL},
+    {"\"C\" ErodeCross", DVP_KN_ERODE_CROSS, 0, NULL, NULL},
+    {"\"C\" ErodeMask", DVP_KN_ERODE_MASK, 0, NULL, NULL},
+    {"\"C\" ErodeSquare", DVP_KN_ERODE_SQUARE, 0, NULL, NULL},
 
-    {"\"C\" Canny2DGradient", DVP_KN_CANNY_2D_GRADIENT, 0},
-    {"\"C\" CannyNonmaxSupress", DVP_KN_CANNY_NONMAX_SUPPRESSION, 0},
-    {"\"C\" CannyHyst.Thresh", DVP_KN_CANNY_HYST_THRESHHOLD, 0},
+    {"\"C\" Canny2DGradient", DVP_KN_CANNY_2D_GRADIENT, 0, NULL, NULL},
+    {"\"C\" CannyNonmaxSupress", DVP_KN_CANNY_NONMAX_SUPPRESSION, 0, NULL, NULL},
+    {"\"C\" CannyHyst.Thresh", DVP_KN_CANNY_HYST_THRESHHOLD, 0, NULL, NULL},
 
-    {"\"C\" IIRHorz", DVP_KN_IIR_HORZ, 0},
-    {"\"C\" IIRVert", DVP_KN_IIR_VERT, 0},
+    {"\"C\" IIRHorz", DVP_KN_IIR_HORZ, 0, NULL, NULL},
+    {"\"C\" IIRVert", DVP_KN_IIR_VERT, 0, NULL, NULL},
 
-    {"\"C\" IntegralImg8", DVP_KN_INTEGRAL_IMAGE_8, 0},
+    {"\"C\" IntegralImg8", DVP_KN_INTEGRAL_IMAGE_8, 0, NULL, NULL},
 
-    {"\"C\" Nonmaxsupress3x316", DVP_KN_NONMAXSUPPRESS_3x3_S16, 0},
-    {"\"C\" Nonmaxsupress5x516", DVP_KN_NONMAXSUPPRESS_5x5_S16, 0},
-    {"\"C\" Nonmaxsupress7x716", DVP_KN_NONMAXSUPPRESS_7x7_S16, 0},
+    {"\"C\" Nonmaxsupress3x316", DVP_KN_NONMAXSUPPRESS_3x3_S16, 0, NULL, NULL},
+    {"\"C\" Nonmaxsupress5x516", DVP_KN_NONMAXSUPPRESS_5x5_S16, 0, NULL, NULL},
+    {"\"C\" Nonmaxsupress7x716", DVP_KN_NONMAXSUPPRESS_7x7_S16, 0, NULL, NULL},
 
-    {"\"C\" YUV422p to UYVY", DVP_KN_YUV422p_TO_UYVY, 0},
-    {"\"C\" UYVY to YUV422p", DVP_KN_UYVY_TO_YUV422p, 0},
+    {"\"C\" YUV422p to UYVY", DVP_KN_YUV422p_TO_UYVY, 0, NULL, NULL},
+    {"\"C\" UYVY to YUV422p", DVP_KN_UYVY_TO_YUV422p, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_IMGLIB)
-    {"\"C\" YUV420p to RGB565", DVP_KN_YUV422p_TO_RGB565, 0},
-    {"\"C\" Sobel 3x3",    DVP_KN_SOBEL_3x3_8, 0},
-//    {"\"C\" Sobel 3x3_16s", DVP_KN_SOBEL_3x3_16s, 0}, //Removing due to mismatch with SIMCOP
-//    {"\"C\" Sobel 5x5_16s", DVP_KN_SOBEL_5x5_16s, 0},
-//    {"\"C\" Sobel 7x7_16s", DVP_KN_SOBEL_7x7_16s, 0},
-    {"\"C\" Conv 3x3",     DVP_KN_CONV_3x3, 0},
-    {"\"C\" Conv 5x5",     DVP_KN_CONV_5x5, 0},
-    {"\"C\" Conv 7x7",     DVP_KN_CONV_7x7, 0},
+    {"\"C\" YUV420p to RGB565", DVP_KN_YUV422p_TO_RGB565, 0, NULL, NULL},
+    {"\"C\" Sobel 3x3",    DVP_KN_SOBEL_3x3_8, 0, NULL, NULL},
+//    {"\"C\" Sobel 3x3_16s", DVP_KN_SOBEL_3x3_16s, 0, NULL, NULL}, //Removing due to mismatch with SIMCOP
+//    {"\"C\" Sobel 5x5_16s", DVP_KN_SOBEL_5x5_16s, 0, NULL, NULL},
+//    {"\"C\" Sobel 7x7_16s", DVP_KN_SOBEL_7x7_16s, 0, NULL, NULL},
+    {"\"C\" Conv 3x3",     DVP_KN_CONV_3x3, 0, NULL, NULL},
+    {"\"C\" Conv 5x5",     DVP_KN_CONV_5x5, 0, NULL, NULL},
+    {"\"C\" Conv 7x7",     DVP_KN_CONV_7x7, 0, NULL, NULL},
 
-    {"\"C\" CannyImgSmooth",   DVP_KN_CANNY_IMAGE_SMOOTHING, 0},
+    {"\"C\" CannyImgSmooth",   DVP_KN_CANNY_IMAGE_SMOOTHING, 0, NULL, NULL},
 
-    {"\"C\" Thr gt2max8",  DVP_KN_THR_GT2MAX_8, 0},
-    {"\"C\" Thr gt2max16", DVP_KN_THR_GT2MAX_16, 0},
-    {"\"C\" Thr gt2thr8",  DVP_KN_THR_GT2THR_8, 0},
-    {"\"C\" Thr gt2thr16", DVP_KN_THR_GT2THR_16, 0},
-    {"\"C\" Thr le2min8",  DVP_KN_THR_LE2MIN_8, 0},
-    {"\"C\" Thr le2min16", DVP_KN_THR_LE2MIN_16, 0},
-    {"\"C\" Thr le2thr8",  DVP_KN_THR_LE2THR_8, 0},
-    {"\"C\" Thr le2thr16", DVP_KN_THR_LE2THR_16, 0},
+    {"\"C\" Thr gt2max8",  DVP_KN_THR_GT2MAX_8, 0, NULL, NULL},
+    {"\"C\" Thr gt2max16", DVP_KN_THR_GT2MAX_16, 0, NULL, NULL},
+    {"\"C\" Thr gt2thr8",  DVP_KN_THR_GT2THR_8, 0, NULL, NULL},
+    {"\"C\" Thr gt2thr16", DVP_KN_THR_GT2THR_16, 0, NULL, NULL},
+    {"\"C\" Thr le2min8",  DVP_KN_THR_LE2MIN_8, 0, NULL, NULL},
+    {"\"C\" Thr le2min16", DVP_KN_THR_LE2MIN_16, 0, NULL, NULL},
+    {"\"C\" Thr le2thr8",  DVP_KN_THR_LE2THR_8, 0, NULL, NULL},
+    {"\"C\" Thr le2thr16", DVP_KN_THR_LE2THR_16, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON xYxY to LUMA",    DVP_KN_XYXY_TO_Y800, 0},
-    {"NEON UYVY to YUV420p", DVP_KN_UYVY_TO_YUV420p, 0},
-    {"NEON UYVY to YUV444p", DVP_KN_UYVY_TO_YUV444p, 0},
-    {"NEON UYVY to RGBp",    DVP_KN_UYVY_TO_RGBp, 0},
+    {"NEON xYxY to LUMA",    DVP_KN_XYXY_TO_Y800, 0, NULL, NULL},
+    {"NEON UYVY to YUV420p", DVP_KN_UYVY_TO_YUV420p, 0, NULL, NULL},
+    {"NEON UYVY to YUV444p", DVP_KN_UYVY_TO_YUV444p, 0, NULL, NULL},
+    {"NEON UYVY to RGBp",    DVP_KN_UYVY_TO_RGBp, 0, NULL, NULL},
 #elif defined(DVP_USE_VLIB)
-    {"\"C\" xYxY to LUMA",    DVP_KN_XYXY_TO_Y800, 0},
-    {"\"C\" UYVY to YUV420p", DVP_KN_UYVY_TO_YUV420p, 0},
-    {"\"C\" UYVY to YUV444p", DVP_KN_UYVY_TO_YUV444p, 0},
-    {"\"C\" UYVY to RGBp",    DVP_KN_UYVY_TO_RGBp, 0},
+    {"\"C\" xYxY to LUMA",    DVP_KN_XYXY_TO_Y800, 0, NULL, NULL},
+    {"\"C\" UYVY to YUV420p", DVP_KN_UYVY_TO_YUV420p, 0, NULL, NULL},
+    {"\"C\" UYVY to YUV444p", DVP_KN_UYVY_TO_YUV444p, 0, NULL, NULL},
+    {"\"C\" UYVY to RGBp",    DVP_KN_UYVY_TO_RGBp, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON NV12 to YUV444p Half Scale", DVP_KN_NV12_TO_YUV444p, 0},
-    {"NEON BGR3 to UYVY",    DVP_KN_BGR3_TO_UYVY, 0},
-    {"NEON BGR3 to IYUV",    DVP_KN_BGR3_TO_IYUV, 0},
+    {"NEON NV12 to YUV444p Half Scale", DVP_KN_NV12_TO_YUV444p, 0, NULL, NULL},
+    {"NEON BGR3 to UYVY",    DVP_KN_BGR3_TO_UYVY, 0, NULL, NULL},
+    {"NEON BGR3 to IYUV",    DVP_KN_BGR3_TO_IYUV, 0, NULL, NULL},
 #elif defined(DVP_USE_IMAGE)
-    {"\"C\" NV12 to YUV444p", DVP_KN_NV12_TO_YUV444p, 0},
-    {"\"C\" RGB3 to UYVY",    DVP_KN_BGR3_TO_UYVY, 0},
-    {"\"C\" BGR3 to IYUV",    DVP_KN_BGR3_TO_IYUV, 0},
+    {"\"C\" NV12 to YUV444p", DVP_KN_NV12_TO_YUV444p, 0, NULL, NULL},
+    {"\"C\" RGB3 to UYVY",    DVP_KN_BGR3_TO_UYVY, 0, NULL, NULL},
+    {"\"C\" BGR3 to IYUV",    DVP_KN_BGR3_TO_IYUV, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON LUMA to xYxY",    DVP_KN_Y800_TO_XYXY, 0},
-    {"NEON YUV420 to RGBp",  DVP_KN_YUV420p_TO_RGBp, 0},
-    {"NEON UYVY to BGR",     DVP_KN_UYVY_TO_BGR, 0},
+    {"NEON LUMA to xYxY",    DVP_KN_Y800_TO_XYXY, 0, NULL, NULL},
+    {"NEON YUV420 to RGBp",  DVP_KN_YUV420p_TO_RGBp, 0, NULL, NULL},
+    {"NEON UYVY to BGR",     DVP_KN_UYVY_TO_BGR, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_IMAGE)
-    {"\"C\" YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0},
-    {"\"C\" YUV444p to UYVY ", DVP_KN_YUV444p_TO_UYVY, 0},
-    {"\"C\" NV12 to UYVY",     DVP_KN_NV12_TO_UYVY, 0},
-    {"\"C\" RGB3 to NV12",    DVP_KN_BGR3_TO_NV12, 0},
+    {"\"C\" YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0, NULL, NULL},
+    {"\"C\" YUV444p to UYVY ", DVP_KN_YUV444p_TO_UYVY, 0, NULL, NULL},
+    {"\"C\" NV12 to UYVY",     DVP_KN_NV12_TO_UYVY, 0, NULL, NULL},
+    {"\"C\" RGB3 to NV12",    DVP_KN_BGR3_TO_NV12, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_IMGFILTER)
-    {"NEON Sobel3x3",   DVP_KN_SOBEL_8, 0},
-    {"NEON Scharr3x3",  DVP_KN_SCHARR_8, 0},
-    {"NEON Kroon3x3",   DVP_KN_KROON_8, 0},
-    {"NEON Prewitt3x3", DVP_KN_PREWITT_8, 0},
+    {"NEON Sobel3x3",   DVP_KN_SOBEL_8, 0, NULL, NULL},
+    {"NEON Scharr3x3",  DVP_KN_SCHARR_8, 0, NULL, NULL},
+    {"NEON Kroon3x3",   DVP_KN_KROON_8, 0, NULL, NULL},
+    {"NEON Prewitt3x3", DVP_KN_PREWITT_8, 0, NULL, NULL},
 #elif defined(DVP_USE_VLIB)
-    {"\"C\" Sobel3x3",   DVP_KN_SOBEL_8, 0},
-    {"\"C\" Scharr3x3",  DVP_KN_SCHARR_8, 0},
-    {"\"C\" Kroon3x3",   DVP_KN_KROON_8, 0},
-    {"\"C\" Prewitt3x3", DVP_KN_PREWITT_8, 0},
+    {"\"C\" Sobel3x3",   DVP_KN_SOBEL_8, 0, NULL, NULL},
+    {"\"C\" Scharr3x3",  DVP_KN_SCHARR_8, 0, NULL, NULL},
+    {"\"C\" Kroon3x3",   DVP_KN_KROON_8, 0, NULL, NULL},
+    {"\"C\" Prewitt3x3", DVP_KN_PREWITT_8, 0, NULL, NULL},
 #endif
 
     //***************************************
@@ -247,212 +247,212 @@ static DVP_CoreFunction_t local_kernels[] = {
     //***************************************
 
 #if defined(DVP_USE_IMGLIB)
-    {"\"C\" IMGLIB YUV420p to RGB565", DVP_KN_IMG_YUV422p_TO_RGB565, 0},
-    {"\"C\" IMGLIB Sobel 3x3",    DVP_KN_IMG_SOBEL_3x3_8, 0},
-    {"\"C\" IMGLIB sobel 3x3_16s", DVP_KN_IMG_SOBEL_3x3_16s, 0},
-    {"\"C\" IMGLIB sobel 5x5_16s", DVP_KN_IMG_SOBEL_5x5_16s, 0},
-    {"\"C\" IMGLIB sobel 7x7_16s", DVP_KN_IMG_SOBEL_7x7_16s, 0},
-    {"\"C\" IMGLIB Clipping 16",   DVP_KN_IMG_CLIPPING_16, 0},
-    {"\"C\" IMGLIB Boundary8",     DVP_KN_IMG_BOUNDARY_8, 0},
-    {"\"C\" IMGLIB Boundary16s",   DVP_KN_IMG_BOUNDARY_16s, 0},
-    {"\"C\" IMGLIB Correlation 3x3", DVP_KN_IMG_CORR_3x3, 0},
-    {"\"C\" IMGLIB Correlation 3x3 I8 C16s", DVP_KN_IMG_CORR_3x3_I8_C16s, 0},
-    {"\"C\" IMGLIB Correlation 3x3 I16s C16s", DVP_KN_IMG_CORR_3x3_I16s_C16s, 0},
-    {"\"C\" IMGLIB Correlation 5x5 I16s C16s", DVP_KN_IMG_CORR_5x5_I16s_C16s, 0},
-    {"\"C\" IMGLIB Correlation 11x11 I8 C16s", DVP_KN_IMG_CORR_11x11_I8_C16s, 0},
-    {"\"C\" IMGLIB Correlation 11x11 I16s C16s", DVP_KN_IMG_CORR_11x11_I16s_C16s, 0},
-    {"\"C\" IMGLIB Correlation Gen I16 C16s", DVP_KN_IMG_CORR_GEN_I16s_C16s, 0},
-    {"\"C\" IMGLIB Correlation Gen Iq", DVP_KN_IMG_CORR_GEN_IQ, 0},
-    {"\"C\" IMGLIB Histogram8",   DVP_KN_IMG_HISTOGRAM_8, 0},
-    {"\"C\" IMGLIB Histogram16",  DVP_KN_IMG_HISTOGRAM_16, 0},
-    {"\"C\" IMGLIB Median 3x3 8", DVP_KN_IMG_MEDIAN_3x3_8, 0},
-    {"\"C\" IMGLIB Median 3x3 16s", DVP_KN_IMG_MEDIAN_3x3_16s, 0},
-    {"\"C\" IMGLIB Demux LE 8",   DVP_KN_IMG_YC_DEMUX_LE16_8, 0},
-    {"\"C\" IMGLIB Demux BE 8",   DVP_KN_IMG_YC_DEMUX_BE16_8, 0},
-    {"\"C\" IMGLIB Pix Sat ",     DVP_KN_IMG_PIX_SAT, 0},
-    {"\"C\" IMGLIB Pix Expand ",  DVP_KN_IMG_PIX_EXPAND, 0},
-    {"\"C\" IMGLIB SAD 3x3",      DVP_KN_IMG_SAD_3x3, 0},
-    {"\"C\" IMGLIB SAD 5x5",      DVP_KN_IMG_SAD_5x5, 0},
-    {"\"C\" IMGLIB SAD 7x7",      DVP_KN_IMG_SAD_7x7, 0},
-    {"\"C\" IMGLIB SAD 8x8",      DVP_KN_IMG_SAD_8x8, 0},
-    {"\"C\" IMGLIB SAD 16x16",    DVP_KN_IMG_SAD_16x16, 0},
-    {"\"C\" IMGLIB Conv 3x3",     DVP_KN_IMG_CONV_3x3, 0},
-    {"\"C\" IMGLIB Conv 5x5",     DVP_KN_IMG_CONV_5x5, 0},
-    {"\"C\" IMGLIB Conv 7x7",     DVP_KN_IMG_CONV_7x7, 0},
-    {"\"C\" IMGLIB Conv 11x11",   DVP_KN_IMG_CONV_11x11, 0},
-    {"\"C\" IMGLIB Conv 5x5 i8 c16s", DVP_KN_IMG_CONV_5x5_I8_C16, 0},
-    {"\"C\" IMGLIB Conv 7x7 i8 c16s", DVP_KN_IMG_CONV_7x7_I8_C16, 0},
-    {"\"C\" IMGLIB Conv 3x3 i16s c16s", DVP_KN_IMG_CONV_3x3_I16s_C16, 0},
-    {"\"C\" IMGLIB Conv 5x5 i16 c16s", DVP_KN_IMG_CONV_5x5_I16s_C16, 0},
-    {"\"C\" IMGLIB Conv 7x7 i16 c16s", DVP_KN_IMG_CONV_7x7_I16s_C16, 0},
-    {"\"C\" IMGLIB Conv 11x11 i16s c16s", DVP_KN_IMG_CONV_11x11_I16s_C16, 0},
+    {"\"C\" IMGLIB YUV420p to RGB565", DVP_KN_IMG_YUV422p_TO_RGB565, 0, NULL, NULL},
+    {"\"C\" IMGLIB Sobel 3x3",    DVP_KN_IMG_SOBEL_3x3_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB sobel 3x3_16s", DVP_KN_IMG_SOBEL_3x3_16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB sobel 5x5_16s", DVP_KN_IMG_SOBEL_5x5_16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB sobel 7x7_16s", DVP_KN_IMG_SOBEL_7x7_16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Clipping 16",   DVP_KN_IMG_CLIPPING_16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Boundary8",     DVP_KN_IMG_BOUNDARY_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Boundary16s",   DVP_KN_IMG_BOUNDARY_16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation 3x3", DVP_KN_IMG_CORR_3x3, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation 3x3 I8 C16s", DVP_KN_IMG_CORR_3x3_I8_C16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation 3x3 I16s C16s", DVP_KN_IMG_CORR_3x3_I16s_C16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation 5x5 I16s C16s", DVP_KN_IMG_CORR_5x5_I16s_C16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation 11x11 I8 C16s", DVP_KN_IMG_CORR_11x11_I8_C16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation 11x11 I16s C16s", DVP_KN_IMG_CORR_11x11_I16s_C16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation Gen I16 C16s", DVP_KN_IMG_CORR_GEN_I16s_C16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Correlation Gen Iq", DVP_KN_IMG_CORR_GEN_IQ, 0, NULL, NULL},
+    {"\"C\" IMGLIB Histogram8",   DVP_KN_IMG_HISTOGRAM_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Histogram16",  DVP_KN_IMG_HISTOGRAM_16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Median 3x3 8", DVP_KN_IMG_MEDIAN_3x3_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Median 3x3 16s", DVP_KN_IMG_MEDIAN_3x3_16s, 0, NULL, NULL},
+    {"\"C\" IMGLIB Demux LE 8",   DVP_KN_IMG_YC_DEMUX_LE16_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Demux BE 8",   DVP_KN_IMG_YC_DEMUX_BE16_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Pix Sat ",     DVP_KN_IMG_PIX_SAT, 0, NULL, NULL},
+    {"\"C\" IMGLIB Pix Expand ",  DVP_KN_IMG_PIX_EXPAND, 0, NULL, NULL},
+    {"\"C\" IMGLIB SAD 3x3",      DVP_KN_IMG_SAD_3x3, 0, NULL, NULL},
+    {"\"C\" IMGLIB SAD 5x5",      DVP_KN_IMG_SAD_5x5, 0, NULL, NULL},
+    {"\"C\" IMGLIB SAD 7x7",      DVP_KN_IMG_SAD_7x7, 0, NULL, NULL},
+    {"\"C\" IMGLIB SAD 8x8",      DVP_KN_IMG_SAD_8x8, 0, NULL, NULL},
+    {"\"C\" IMGLIB SAD 16x16",    DVP_KN_IMG_SAD_16x16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 3x3",     DVP_KN_IMG_CONV_3x3, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 5x5",     DVP_KN_IMG_CONV_5x5, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 7x7",     DVP_KN_IMG_CONV_7x7, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 11x11",   DVP_KN_IMG_CONV_11x11, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 5x5 i8 c16s", DVP_KN_IMG_CONV_5x5_I8_C16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 7x7 i8 c16s", DVP_KN_IMG_CONV_7x7_I8_C16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 3x3 i16s c16s", DVP_KN_IMG_CONV_3x3_I16s_C16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 5x5 i16 c16s", DVP_KN_IMG_CONV_5x5_I16s_C16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 7x7 i16 c16s", DVP_KN_IMG_CONV_7x7_I16s_C16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Conv 11x11 i16s c16s", DVP_KN_IMG_CONV_11x11_I16s_C16, 0, NULL, NULL},
 
-    {"\"C\" IMGLIB Thr gt2max8",  DVP_KN_IMG_THR_GT2MAX_8, 0},
-    {"\"C\" IMGLIB Thr gt2max16", DVP_KN_IMG_THR_GT2MAX_16, 0},
-    {"\"C\" IMGLIB Thr gt2thr8",  DVP_KN_IMG_THR_GT2THR_8, 0},
-    {"\"C\" IMGLIB Thr gt2thr16", DVP_KN_IMG_THR_GT2THR_16, 0},
-    {"\"C\" IMGLIB Thr le2min8",  DVP_KN_IMG_THR_LE2MIN_8, 0},
-    {"\"C\" IMGLIB Thr le2min16", DVP_KN_IMG_THR_LE2MIN_16, 0},
-    {"\"C\" IMGLIB Thr le2thr8",  DVP_KN_IMG_THR_LE2THR_8, 0},
-    {"\"C\" IMGLIB Thr le2thr16", DVP_KN_IMG_THR_LE2THR_16, 0},
+    {"\"C\" IMGLIB Thr gt2max8",  DVP_KN_IMG_THR_GT2MAX_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Thr gt2max16", DVP_KN_IMG_THR_GT2MAX_16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Thr gt2thr8",  DVP_KN_IMG_THR_GT2THR_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Thr gt2thr16", DVP_KN_IMG_THR_GT2THR_16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Thr le2min8",  DVP_KN_IMG_THR_LE2MIN_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Thr le2min16", DVP_KN_IMG_THR_LE2MIN_16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Thr le2thr8",  DVP_KN_IMG_THR_LE2THR_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Thr le2thr16", DVP_KN_IMG_THR_LE2THR_16, 0, NULL, NULL},
 
-    {"\"C\" IMGLIB Perimeter8",   DVP_KN_IMG_PERIMETER_8, 0},
-    {"\"C\" IMGLIB Perimeter16",  DVP_KN_IMG_PERIMETER_16, 0},
-    {"\"C\" IMGLIB ErrDiff 8",    DVP_KN_IMG_ERRDIFF_BIN_8, 0},
-    {"\"C\" IMGLIB ErrDiff 16",   DVP_KN_IMG_ERRDIFF_BIN_16, 0},
-    {"\"C\" IMGLIB FDCT 8x8",     DVP_KN_IMG_FDCT_8x8, 0},
-    {"\"C\" IMGLIB IFDCT 8x8",    DVP_KN_IMG_IDCT_8x8_12Q4, 0},
-    {"\"C\" IMGLIB MAD 8x8",      DVP_KN_IMG_MAD_8x8, 0},
-    {"\"C\" IMGLIB MAD 16x16",    DVP_KN_IMG_MAD_16x16, 0},
-    {"\"C\" IMGLIB Quantization 16", DVP_KN_IMG_QUANTIZE_16, 0},
+    {"\"C\" IMGLIB Perimeter8",   DVP_KN_IMG_PERIMETER_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB Perimeter16",  DVP_KN_IMG_PERIMETER_16, 0, NULL, NULL},
+    {"\"C\" IMGLIB ErrDiff 8",    DVP_KN_IMG_ERRDIFF_BIN_8, 0, NULL, NULL},
+    {"\"C\" IMGLIB ErrDiff 16",   DVP_KN_IMG_ERRDIFF_BIN_16, 0, NULL, NULL},
+    {"\"C\" IMGLIB FDCT 8x8",     DVP_KN_IMG_FDCT_8x8, 0, NULL, NULL},
+    {"\"C\" IMGLIB IFDCT 8x8",    DVP_KN_IMG_IDCT_8x8_12Q4, 0, NULL, NULL},
+    {"\"C\" IMGLIB MAD 8x8",      DVP_KN_IMG_MAD_8x8, 0, NULL, NULL},
+    {"\"C\" IMGLIB MAD 16x16",    DVP_KN_IMG_MAD_16x16, 0, NULL, NULL},
+    {"\"C\" IMGLIB Quantization 16", DVP_KN_IMG_QUANTIZE_16, 0, NULL, NULL},
     /*! \todo Support Wavelet Quant in CPU. */
-    //{"\"C\" IMGLIB Wavelet Horz", DVP_KN_IMG_WAVE_HORZ, 0},
+    //{"\"C\" IMGLIB Wavelet Horz", DVP_KN_IMG_WAVE_HORZ, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_VLIB)
-    {"\"C\" VLIB UYVY to HSLp",    DVP_KN_VLIB_UYVY_TO_HSLp, 0},
-    {"\"C\" VLIB UYVY to LABp",    DVP_KN_VLIB_UYVY_TO_LABp, 0},
-    {"\"C\" VLIB YUV422p to UYVY", DVP_KN_VLIB_YUV422p_TO_UYVY, 0},
-    {"\"C\" VLIB EWRMeanS16", DVP_KN_VLIB_EWR_MEAN_S16, 0},
-    {"\"C\" VLIB EWRVarS16", DVP_KN_VLIB_EWR_VAR_S16, 0},
-    {"\"C\" VLIB EWRMeanS32", DVP_KN_VLIB_EWR_MEAN_S32, 0},
-    {"\"C\" VLIB EWRVarS32", DVP_KN_VLIB_EWR_VAR_S32, 0},
-    {"\"C\" VLIB UWRMeanS16", DVP_KN_VLIB_UWR_MEAN_S16, 0},
-    {"\"C\" VLIB UWRVarS16", DVP_KN_VLIB_UWR_VAR_S16, 0},
+    {"\"C\" VLIB UYVY to HSLp",    DVP_KN_VLIB_UYVY_TO_HSLp, 0, NULL, NULL},
+    {"\"C\" VLIB UYVY to LABp",    DVP_KN_VLIB_UYVY_TO_LABp, 0, NULL, NULL},
+    {"\"C\" VLIB YUV422p to UYVY", DVP_KN_VLIB_YUV422p_TO_UYVY, 0, NULL, NULL},
+    {"\"C\" VLIB EWRMeanS16", DVP_KN_VLIB_EWR_MEAN_S16, 0, NULL, NULL},
+    {"\"C\" VLIB EWRVarS16", DVP_KN_VLIB_EWR_VAR_S16, 0, NULL, NULL},
+    {"\"C\" VLIB EWRMeanS32", DVP_KN_VLIB_EWR_MEAN_S32, 0, NULL, NULL},
+    {"\"C\" VLIB EWRVarS32", DVP_KN_VLIB_EWR_VAR_S32, 0, NULL, NULL},
+    {"\"C\" VLIB UWRMeanS16", DVP_KN_VLIB_UWR_MEAN_S16, 0, NULL, NULL},
+    {"\"C\" VLIB UWRVarS16", DVP_KN_VLIB_UWR_VAR_S16, 0, NULL, NULL},
 
-    {"\"C\" VLIB BackSubS16", DVP_KN_VLIB_SUB_BACK_S16, 0},
-    {"\"C\" VLIB BackSubS32", DVP_KN_VLIB_SUB_BACK_S32, 0},
-    {"\"C\" VLIB MixofGaussS16", DVP_KN_VLIB_MOG_S16, 0},
-    {"\"C\" VLIB MixofGaussS32", DVP_KN_VLIB_MOG_S32, 0},
-    {"\"C\" VLIB ExtractBack16", DVP_KN_VLIB_EXTRACT_BACK_8_16, 0},
+    {"\"C\" VLIB BackSubS16", DVP_KN_VLIB_SUB_BACK_S16, 0, NULL, NULL},
+    {"\"C\" VLIB BackSubS32", DVP_KN_VLIB_SUB_BACK_S32, 0, NULL, NULL},
+    {"\"C\" VLIB MixofGaussS16", DVP_KN_VLIB_MOG_S16, 0, NULL, NULL},
+    {"\"C\" VLIB MixofGaussS32", DVP_KN_VLIB_MOG_S32, 0, NULL, NULL},
+    {"\"C\" VLIB ExtractBack16", DVP_KN_VLIB_EXTRACT_BACK_8_16, 0, NULL, NULL},
 
-    {"\"C\" VLIB PackMask32", DVP_KN_VLIB_PACK_MASK_32, 0},
-    {"\"C\" VLIB UnPackMask32", DVP_KN_VLIB_UNPACK_MASK_32, 0},
+    {"\"C\" VLIB PackMask32", DVP_KN_VLIB_PACK_MASK_32, 0, NULL, NULL},
+    {"\"C\" VLIB UnPackMask32", DVP_KN_VLIB_UNPACK_MASK_32, 0, NULL, NULL},
 
-    {"\"C\" VLIB DilateCross", DVP_KN_VLIB_DILATE_CROSS, 0},
-    {"\"C\" VLIB DilateMask", DVP_KN_VLIB_DILATE_MASK, 0},
-    {"\"C\" VLIB DilateSquare", DVP_KN_VLIB_DILATE_SQUARE, 0},
-    {"\"C\" VLIB ErodeCross", DVP_KN_VLIB_ERODE_CROSS, 0},
-    {"\"C\" VLIB ErodeMask", DVP_KN_VLIB_ERODE_MASK, 0},
-    {"\"C\" VLIB ErodeSquare", DVP_KN_VLIB_ERODE_SQUARE, 0},
+    {"\"C\" VLIB DilateCross", DVP_KN_VLIB_DILATE_CROSS, 0, NULL, NULL},
+    {"\"C\" VLIB DilateMask", DVP_KN_VLIB_DILATE_MASK, 0, NULL, NULL},
+    {"\"C\" VLIB DilateSquare", DVP_KN_VLIB_DILATE_SQUARE, 0, NULL, NULL},
+    {"\"C\" VLIB ErodeCross", DVP_KN_VLIB_ERODE_CROSS, 0, NULL, NULL},
+    {"\"C\" VLIB ErodeMask", DVP_KN_VLIB_ERODE_MASK, 0, NULL, NULL},
+    {"\"C\" VLIB ErodeSquare", DVP_KN_VLIB_ERODE_SQUARE, 0, NULL, NULL},
 
-    {"\"C\" VLIB Erode1Pixel", DVP_KN_VLIB_ERODE_SINGLEPIXEL, 0},
+    {"\"C\" VLIB Erode1Pixel", DVP_KN_VLIB_ERODE_SINGLEPIXEL, 0, NULL, NULL},
 
-    {"\"C\" VLIB ConnectedComponent", DVP_KN_VLIB_CCL, 0},
+    {"\"C\" VLIB ConnectedComponent", DVP_KN_VLIB_CCL, 0, NULL, NULL},
 
-    {"\"C\" VLIB Canny2DGradient", DVP_KN_VLIB_CANNY_2D_GRADIENT, 0},
-    {"\"C\" VLIB CannyNonmaxSupress", DVP_KN_VLIB_CANNY_NONMAX_SUPPRESSION, 0},
-    {"\"C\" VLIB CannyHyst.Thresh", DVP_KN_VLIB_CANNY_HYST_THRESHHOLD, 0},
+    {"\"C\" VLIB Canny2DGradient", DVP_KN_VLIB_CANNY_2D_GRADIENT, 0, NULL, NULL},
+    {"\"C\" VLIB CannyNonmaxSupress", DVP_KN_VLIB_CANNY_NONMAX_SUPPRESSION, 0, NULL, NULL},
+    {"\"C\" VLIB CannyHyst.Thresh", DVP_KN_VLIB_CANNY_HYST_THRESHHOLD, 0, NULL, NULL},
 
-    {"\"C\" VLIB ImgPyramid8", DVP_KN_VLIB_IMAGE_PYRAMID_8, 0},
-    {"\"C\" VLIB ImgPyramid16", DVP_KN_VLIB_IMAGE_PYRAMID_16, 0},
+    {"\"C\" VLIB ImgPyramid8", DVP_KN_VLIB_IMAGE_PYRAMID_8, 0, NULL, NULL},
+    {"\"C\" VLIB ImgPyramid16", DVP_KN_VLIB_IMAGE_PYRAMID_16, 0, NULL, NULL},
 
-    {"\"C\" VLIB Gauss5x5Pyramid8", DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8, 0},
-    {"\"C\" VLIB Gauss5x5Pyramid16", DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16, 0},
+    {"\"C\" VLIB Gauss5x5Pyramid8", DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8, 0, NULL, NULL},
+    {"\"C\" VLIB Gauss5x5Pyramid16", DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16, 0, NULL, NULL},
 
-    {"\"C\" VLIB GradientH5x5Pyramid8", DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8, 0},
-    {"\"C\" VLIB GradientV5x5Pyramid8", DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8, 0},
+    {"\"C\" VLIB GradientH5x5Pyramid8", DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8, 0, NULL, NULL},
+    {"\"C\" VLIB GradientV5x5Pyramid8", DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8, 0, NULL, NULL},
 
-    {"\"C\" VLIB HarrisScore", DVP_KN_VLIB_HARRIS_SCORE_7x7, 0},
-    {"\"C\" VLIB HarrisScore7x7_U32", DVP_KN_VLIB_HARRIS_SCORE_7x7_U32, 0},
+    {"\"C\" VLIB HarrisScore", DVP_KN_VLIB_HARRIS_SCORE_7x7, 0, NULL, NULL},
+    {"\"C\" VLIB HarrisScore7x7_U32", DVP_KN_VLIB_HARRIS_SCORE_7x7_U32, 0, NULL, NULL},
 
-    {"\"C\" VLIB IIRHorz", DVP_KN_VLIB_IIR_HORZ, 0},
-    {"\"C\" VLIB IIRHorz16", DVP_KN_VLIB_IIR_HORZ_16, 0},
-    {"\"C\" VLIB IIRVert", DVP_KN_VLIB_IIR_VERT, 0},
-    {"\"C\" VLIB IIRVert16", DVP_KN_VLIB_IIR_VERT_16, 0},
+    {"\"C\" VLIB IIRHorz", DVP_KN_VLIB_IIR_HORZ, 0, NULL, NULL},
+    {"\"C\" VLIB IIRHorz16", DVP_KN_VLIB_IIR_HORZ_16, 0, NULL, NULL},
+    {"\"C\" VLIB IIRVert", DVP_KN_VLIB_IIR_VERT, 0, NULL, NULL},
+    {"\"C\" VLIB IIRVert16", DVP_KN_VLIB_IIR_VERT_16, 0, NULL, NULL},
 
-    {"\"C\" VLIB Integral Image 8", DVP_KN_VLIB_INTEGRAL_IMAGE_8, 0},
-    {"\"C\" VLIB Integral Image 16", DVP_KN_VLIB_INTEGRAL_IMAGE_16, 0},
+    {"\"C\" VLIB Integral Image 8", DVP_KN_VLIB_INTEGRAL_IMAGE_8, 0, NULL, NULL},
+    {"\"C\" VLIB Integral Image 16", DVP_KN_VLIB_INTEGRAL_IMAGE_16, 0, NULL, NULL},
 
-    {"\"C\" VLIB HoughLine", DVP_KN_VLIB_HOUGH_LINE_FROM_LIST, 0},
-    {"\"C\" VLIB Hysterisis Threshold", DVP_KN_VLIB_HYST_THRESHOLD, 0},
+    {"\"C\" VLIB HoughLine", DVP_KN_VLIB_HOUGH_LINE_FROM_LIST, 0, NULL, NULL},
+    {"\"C\" VLIB Hysterisis Threshold", DVP_KN_VLIB_HYST_THRESHOLD, 0, NULL, NULL},
 
-    {"\"C\" VLIB Nonmaxsuppress 3x3 S16", DVP_KN_VLIB_NONMAXSUPPRESS_3x3_S16, 0},
-    {"\"C\" VLIB Nonmaxsuppress 5x5 S16", DVP_KN_VLIB_NONMAXSUPPRESS_5x5_S16, 0},
-    {"\"C\" VLIB Nonmaxsuppress 7x7 S16", DVP_KN_VLIB_NONMAXSUPPRESS_7x7_S16, 0},
-    {"\"C\" VLIB Nonmaxsuppress MxN U32", DVP_KN_VLIB_NONMAXSUPPRESS_U32, 0},
+    {"\"C\" VLIB Nonmaxsuppress 3x3 S16", DVP_KN_VLIB_NONMAXSUPPRESS_3x3_S16, 0, NULL, NULL},
+    {"\"C\" VLIB Nonmaxsuppress 5x5 S16", DVP_KN_VLIB_NONMAXSUPPRESS_5x5_S16, 0, NULL, NULL},
+    {"\"C\" VLIB Nonmaxsuppress 7x7 S16", DVP_KN_VLIB_NONMAXSUPPRESS_7x7_S16, 0, NULL, NULL},
+    {"\"C\" VLIB Nonmaxsuppress MxN U32", DVP_KN_VLIB_NONMAXSUPPRESS_U32, 0, NULL, NULL},
 
-    {"\"C\" VLIB NormalFlow 16", DVP_KN_VLIB_NORMALFLOW_16, 0},
-    //{"\"C\" VLIB Kalman2x4", DVP_KN_VLIB_KALMAN_2x4, 0},
-    //{"\"C\" VLIB Kalman4x6", DVP_KN_VLIB_KALMAN_4x6, 0},
-    {"\"C\" VLIB Nelder-MeadSimplex16", DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_16, 0},
-    {"\"C\" VLIB Nelder-MeanSimplex3D", DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_3D, 0},
-    //{"\"C\" VLIB LegendreMoments", DVP_KN_VLIB_LEGENDRE_MOMENTS, 0},
+    {"\"C\" VLIB NormalFlow 16", DVP_KN_VLIB_NORMALFLOW_16, 0, NULL, NULL},
+    //{"\"C\" VLIB Kalman2x4", DVP_KN_VLIB_KALMAN_2x4, 0, NULL, NULL},
+    //{"\"C\" VLIB Kalman4x6", DVP_KN_VLIB_KALMAN_4x6, 0, NULL, NULL},
+    {"\"C\" VLIB Nelder-MeadSimplex16", DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_16, 0, NULL, NULL},
+    {"\"C\" VLIB Nelder-MeanSimplex3D", DVP_KN_VLIB_NEDLER_MEAD_SIMPLEX_3D, 0, NULL, NULL},
+    //{"\"C\" VLIB LegendreMoments", DVP_KN_VLIB_LEGENDRE_MOMENTS, 0, NULL, NULL},
 
-    {"\"C\" VLIB InitHistgram8", DVP_KN_VLIB_INIT_HISTOGRAM_8, 0},
-    {"\"C\" VLIB Histogram8", DVP_KN_VLIB_HISTOGRAM_8, 0},
-    {"\"C\" VLIB InitHistogram16", DVP_KN_VLIB_INIT_HISTOGRAM_16, 0},
-    {"\"C\" VLIB Histogram16", DVP_KN_VLIB_HISTOGRAM_16, 0},
-    {"\"C\" VLIB WeightedHistogram8", DVP_KN_VLIB_WEIGHTED_HISTOGRAM_8, 0},
-    {"\"C\" VLIB WeightedHistogram16", DVP_KN_VLIB_WEIGHTED_HISTOGRAM_16, 0},
+    {"\"C\" VLIB InitHistgram8", DVP_KN_VLIB_INIT_HISTOGRAM_8, 0, NULL, NULL},
+    {"\"C\" VLIB Histogram8", DVP_KN_VLIB_HISTOGRAM_8, 0, NULL, NULL},
+    {"\"C\" VLIB InitHistogram16", DVP_KN_VLIB_INIT_HISTOGRAM_16, 0, NULL, NULL},
+    {"\"C\" VLIB Histogram16", DVP_KN_VLIB_HISTOGRAM_16, 0, NULL, NULL},
+    {"\"C\" VLIB WeightedHistogram8", DVP_KN_VLIB_WEIGHTED_HISTOGRAM_8, 0, NULL, NULL},
+    {"\"C\" VLIB WeightedHistogram16", DVP_KN_VLIB_WEIGHTED_HISTOGRAM_16, 0, NULL, NULL},
 
-    {"\"C\" VLIB HistogramnD16", DVP_KN_VLIB_HISTOGRAM_ND_16, 0},
-    {"\"C\" VLIB BhattacharyyaDistance", DVP_KN_VLIB_BHATTACHAYA_DISTANCE, 0},
+    {"\"C\" VLIB HistogramnD16", DVP_KN_VLIB_HISTOGRAM_ND_16, 0, NULL, NULL},
+    {"\"C\" VLIB BhattacharyyaDistance", DVP_KN_VLIB_BHATTACHAYA_DISTANCE, 0, NULL, NULL},
 
-    {"\"C\" VLIB L1Distance", DVP_KN_VLIB_L1DISTANCE, 0},
+    {"\"C\" VLIB L1Distance", DVP_KN_VLIB_L1DISTANCE, 0, NULL, NULL},
 
-    {"\"C\" VLIB Lucas Kanade Tracking", DVP_KN_VLIB_TRACK_FEATURES_LUCAS_7x7, 0},
+    {"\"C\" VLIB Lucas Kanade Tracking", DVP_KN_VLIB_TRACK_FEATURES_LUCAS_7x7, 0, NULL, NULL},
 #if defined(VLIB_DISPARITY_FIXED)
-    {"\"C\" VLIB Disparity8", DVP_KN_VLIB_DISPARITY_SAD8, 0},
-    {"\"C\" VLIB Disparity16", DVP_KN_VLIB_DISPARITY_SAD16, 0},
+    {"\"C\" VLIB Disparity8", DVP_KN_VLIB_DISPARITY_SAD8, 0, NULL, NULL},
+    {"\"C\" VLIB Disparity16", DVP_KN_VLIB_DISPARITY_SAD16, 0, NULL, NULL},
 #endif
-    {"\"C\" VLIB MeanLuma16", DVP_KN_VLIB_INIT_MEAN_LUMA_S16, 0},
-    {"\"C\" VLIB MeanLuma32", DVP_KN_VLIB_INIT_MEAN_LUMA_S32, 0},
-    {"\"C\" VLIB VarConst16", DVP_KN_VLIB_INIT_VAR_CONST_S16, 0},
-    {"\"C\" VLIB VarConst32", DVP_KN_VLIB_INIT_VAR_CONST_S32, 0},
+    {"\"C\" VLIB MeanLuma16", DVP_KN_VLIB_INIT_MEAN_LUMA_S16, 0, NULL, NULL},
+    {"\"C\" VLIB MeanLuma32", DVP_KN_VLIB_INIT_MEAN_LUMA_S32, 0, NULL, NULL},
+    {"\"C\" VLIB VarConst16", DVP_KN_VLIB_INIT_VAR_CONST_S16, 0, NULL, NULL},
+    {"\"C\" VLIB VarConst32", DVP_KN_VLIB_INIT_VAR_CONST_S32, 0, NULL, NULL},
 
-    {"\"C\" VLIB YxYx to LUMA",  DVP_KN_VLIB_YXYX_TO_Y800, 0},
-    {"\"C\" VLIB YUV422p to UYVY", DVP_KN_VLIB_YUV422p_TO_UYVY, 0},
-    {"\"C\" VLIB UYVY to YUV422p", DVP_KN_VLIB_UYVY_TO_YUV422p, 0},
+    {"\"C\" VLIB YxYx to LUMA",  DVP_KN_VLIB_YXYX_TO_Y800, 0, NULL, NULL},
+    {"\"C\" VLIB YUV422p to UYVY", DVP_KN_VLIB_YUV422p_TO_UYVY, 0, NULL, NULL},
+    {"\"C\" VLIB UYVY to YUV422p", DVP_KN_VLIB_UYVY_TO_YUV422p, 0, NULL, NULL},
 
 #endif //DVP_USE_VLIB
 
 #if defined(DVP_USE_YUV)
-    {"NEON \"YUV\" xYxY to LUMA",    DVP_KN_YUV_XYXY_TO_Y800, 0},
-    {"NEON \"YUV\" UYVY to YUV420p", DVP_KN_YUV_UYVY_TO_IYUV, 0},
-    {"NEON \"YUV\" UYVY to YUV444p", DVP_KN_YUV_UYVY_TO_YU24, 0},
-    {"NEON \"YUV\" UYVY to RGBp",    DVP_KN_YUV_UYVY_TO_RGBp, 0},
+    {"NEON \"YUV\" xYxY to LUMA",    DVP_KN_YUV_XYXY_TO_Y800, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY to YUV420p", DVP_KN_YUV_UYVY_TO_IYUV, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY to YUV444p", DVP_KN_YUV_UYVY_TO_YU24, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY to RGBp",    DVP_KN_YUV_UYVY_TO_RGBp, 0, NULL, NULL},
 #elif defined(DVP_USE_VLIB)
-    {"\"C\" VLIB xYxY to LUMA",  DVP_KN_VLIB_XYXY_TO_Y800, 0},
-    {"\"C\" VLIB UYVY to YUV420p", DVP_KN_VLIB_UYVY_TO_YUV420p, 0},
-    {"\"C\" VLIB UYVY to YUV444p", DVP_KN_VLIB_UYVY_TO_YUV444p, 0},
-    {"\"C\" VLIB UYVY to RGBp", DVP_KN_VLIB_UYVY_TO_RGBp, 0},
+    {"\"C\" VLIB xYxY to LUMA",  DVP_KN_VLIB_XYXY_TO_Y800, 0, NULL, NULL},
+    {"\"C\" VLIB UYVY to YUV420p", DVP_KN_VLIB_UYVY_TO_YUV420p, 0, NULL, NULL},
+    {"\"C\" VLIB UYVY to YUV444p", DVP_KN_VLIB_UYVY_TO_YUV444p, 0, NULL, NULL},
+    {"\"C\" VLIB UYVY to RGBp", DVP_KN_VLIB_UYVY_TO_RGBp, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON \"YUV\" YUV444 to RGBp",  DVP_KN_YUV_IYUV_TO_RGBp, 0},
-    {"NEON \"YUV\" LUMA to xYxY",    DVP_KN_YUV_Y800_TO_XYXY, 0},
-    {"NEON \"YUV\" NV12 to YUV444p", DVP_KN_YUV_NV12_TO_YU24_HALF_SCALE, 0},
-    {"NEON \"YUV\" UYVY HALF SCALE", DVP_KN_YUV_UYVY_HALF_SCALE, 0},
-    {"NEON \"YUV\" UYVY QTR SCALE",  DVP_KN_YUV_UYVY_QTR_SCALE, 0},
-    {"NEON \"YUV\" PLANAR ROTATE CW90", DVP_KN_YUV_Y800_ROTATE_CW_90, 0},
-    {"NEON \"YUV\" PLANAR ROTATE CCW90", DVP_KN_YUV_Y800_ROTATE_CCW_90, 0},
-    {"NEON \"YUV\" UYVY ROTATE CW90", DVP_KN_YUV_UYVY_ROTATE_CW_90, 0},
-    {"NEON \"YUV\" UYVY ROTATE CCW90", DVP_KN_YUV_UYVY_ROTATE_CCW_90, 0},
-    {"NEON \"YUV\" UYVY to BGR",     DVP_KN_YUV_UYVY_TO_BGR, 0},
-    {"NEON \"YUV\" ARGB to UYVY",    DVP_KN_YUV_ARGB_TO_UYVY, 0},
+    {"NEON \"YUV\" YUV444 to RGBp",  DVP_KN_YUV_IYUV_TO_RGBp, 0, NULL, NULL},
+    {"NEON \"YUV\" LUMA to xYxY",    DVP_KN_YUV_Y800_TO_XYXY, 0, NULL, NULL},
+    {"NEON \"YUV\" NV12 to YUV444p", DVP_KN_YUV_NV12_TO_YU24_HALF_SCALE, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY HALF SCALE", DVP_KN_YUV_UYVY_HALF_SCALE, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY QTR SCALE",  DVP_KN_YUV_UYVY_QTR_SCALE, 0, NULL, NULL},
+    {"NEON \"YUV\" PLANAR ROTATE CW90", DVP_KN_YUV_Y800_ROTATE_CW_90, 0, NULL, NULL},
+    {"NEON \"YUV\" PLANAR ROTATE CCW90", DVP_KN_YUV_Y800_ROTATE_CCW_90, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY ROTATE CW90", DVP_KN_YUV_UYVY_ROTATE_CW_90, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY ROTATE CCW90", DVP_KN_YUV_UYVY_ROTATE_CCW_90, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY to BGR",     DVP_KN_YUV_UYVY_TO_BGR, 0, NULL, NULL},
+    {"NEON \"YUV\" ARGB to UYVY",    DVP_KN_YUV_ARGB_TO_UYVY, 0, NULL, NULL},
 
-    {"NEON \"YUV\" BGR3 to UYVY", DVP_KN_YUV_BGR_TO_UYVY, 0},
-    {"NEON \"YUV\" BGR3 to IYUV", DVP_KN_YUV_BGR_TO_IYUV, 0},
+    {"NEON \"YUV\" BGR3 to UYVY", DVP_KN_YUV_BGR_TO_UYVY, 0, NULL, NULL},
+    {"NEON \"YUV\" BGR3 to IYUV", DVP_KN_YUV_BGR_TO_IYUV, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_IMGFILTER)
-    {"NEON IMGFILTER Sobel3x3",   DVP_KN_IMGFILTER_SOBEL, 0},
-    {"NEON IMGFILTER Scharr3x3",  DVP_KN_IMGFILTER_SCHARR, 0},
-    {"NEON IMGFILTER Kroon3x3",   DVP_KN_IMGFILTER_KROON, 0},
-    {"NEON IMGFILTER Prewitt3x3", DVP_KN_IMGFILTER_PREWITT, 0},
+    {"NEON IMGFILTER Sobel3x3",   DVP_KN_IMGFILTER_SOBEL, 0, NULL, NULL},
+    {"NEON IMGFILTER Scharr3x3",  DVP_KN_IMGFILTER_SCHARR, 0, NULL, NULL},
+    {"NEON IMGFILTER Kroon3x3",   DVP_KN_IMGFILTER_KROON, 0, NULL, NULL},
+    {"NEON IMGFILTER Prewitt3x3", DVP_KN_IMGFILTER_PREWITT, 0, NULL, NULL},
 #elif defined(DVP_USE_VLIB)
-    {"\"C\" VLIB Sobel3x3",   DVP_KN_VLIB_SOBEL_8, 0},
-    {"\"C\" VLIB Scharr3x3",  DVP_KN_VLIB_SCHARR_8, 0},
-    {"\"C\" VLIB Kroon3x3",   DVP_KN_VLIB_KROON_8, 0},
-    {"\"C\" VLIB Prewitt3x3", DVP_KN_VLIB_PREWITT_8, 0},
+    {"\"C\" VLIB Sobel3x3",   DVP_KN_VLIB_SOBEL_8, 0, NULL, NULL},
+    {"\"C\" VLIB Scharr3x3",  DVP_KN_VLIB_SCHARR_8, 0, NULL, NULL},
+    {"\"C\" VLIB Kroon3x3",   DVP_KN_VLIB_KROON_8, 0, NULL, NULL},
+    {"\"C\" VLIB Prewitt3x3", DVP_KN_VLIB_PREWITT_8, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_RVM)
-    {"\"C\" RVM", DVP_KN_RVM, 0},
+    {"\"C\" RVM", DVP_KN_RVM, 0, NULL, NULL},
 #endif
 #if defined(DVP_USE_ORB)
-    {"\"C\" ORB", DVP_KN_ORB, 0},
+    {"\"C\" ORB", DVP_KN_ORB, 0, NULL, NULL},
 #endif
 };
 static DVP_U32 numLocalKernels = dimof(local_kernels);
@@ -3030,7 +3030,7 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                             if(y+blockHeight > newheight)
                                 blockHeight = newheight-y;
 
-                            for(i=0; i<(blockHeight + (3 -1)); i++)
+                            for(i=0; i<((DVP_U32)blockHeight + (3 -1)); i++)
                                 memcpy(&tmpBuf[i*pIO->input.width], &pIO->input.pData[0][(y+i)*pIO->input.y_stride], pIO->input.width);
 
                             IMG_sobel_3x3_8(tmpBuf,
@@ -4196,7 +4196,15 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
         {
             // for Transforms, check WxH and NULL base pointers
             case DVP_KN_ECHO:
-            // BASE
+            {
+                DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, &pT->output.color, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, &pT->input.color, 1) == DVP_FALSE ||
+                    pT->input.width > pT->output.width ||
+                    pT->input.height > pT->output.width)
+                    pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
+                break;
+            }
             case DVP_KN_XYXY_TO_Y800:
             {
                 fourcc_t valid_colors[] = {FOURCC_UYVY, FOURCC_VYUY, FOURCC_Y800};
@@ -5388,7 +5396,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
         }
         if (pSubNodes[n].header.error == DVP_SUCCESS)
         {
-            DVP_PRINT(DVP_ZONE_KGM, "Node %u passed verification! (%u)\n", n, verified);
+            DVP_PRINT(DVP_ZONE_KGM, "Node[%u] of %u passed verification! (%u)\n", n, numNodes, verified);
             verified++;
         }
     }

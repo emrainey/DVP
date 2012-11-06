@@ -47,11 +47,11 @@ int main(int argc, char *argv[])
 {
     FILE *fp_inp, *fp_outp;
     int fldnum = 0;
-    int i,j;
+    DVP_U32 i,j;
     DVP_U32 image_buffer_stride;
     DVP_U32 x_stride;
-    int TEST_IMG_INPUT_X;
-    int TEST_IMG_INPUT_Y;
+    DVP_U32 TEST_IMG_INPUT_X;
+    DVP_U32 TEST_IMG_INPUT_Y;
 
     const DVP_U32 numNodes = 2;
     DVP_KernelNode_t *pNodes = NULL;
@@ -147,11 +147,12 @@ int main(int argc, char *argv[])
             };
             DVP_U32  orders[] = {0};
             DVP_KernelGraph_t graph = {
-                                    sections,
-                                    dimof(sections),
-                                    orders,
-                                    DVP_PERF_INIT,
-                                        };
+                sections,
+                dimof(sections),
+                orders,
+                DVP_PERF_INIT,
+                DVP_FALSE,
+            };
 
             DVP_Transform_t *pT = dvp_knode_to(&pNodes[0], DVP_Transform_t);
             pNodes[0].header.kernel = DVP_KN_YUV_ARGB_TO_UYVY;

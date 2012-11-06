@@ -26,15 +26,15 @@
 #define KGM_TAG "DVP KGM OCL"
 
 static DVP_CoreFunction_t local_kernels[] = {
-    {"OCL SOBEL 8",     DVP_KN_SOBEL_8,     0},
-    {"OCL SCHARR 8",    DVP_KN_SCHARR_8,    0},
-    {"OCL PREWITT 8",   DVP_KN_PREWITT_8,   0},
-    {"OCL KROON 8",     DVP_KN_KROON_8,     0},
+    {"OCL SOBEL 8",     DVP_KN_SOBEL_8,     0, NULL, NULL},
+    {"OCL SCHARR 8",    DVP_KN_SCHARR_8,    0, NULL, NULL},
+    {"OCL PREWITT 8",   DVP_KN_PREWITT_8,   0, NULL, NULL},
+    {"OCL KROON 8",     DVP_KN_KROON_8,     0, NULL, NULL},
 
-    {"OCL SOBEL 8",     DVP_KN_OCL_SOBEL,   0},
-    {"OCL SCHARR 8",    DVP_KN_OCL_SCHARR,  0},
-    {"OCL PREWITT 8",   DVP_KN_OCL_PREWITT, 0},
-    {"OCL KROON 8",     DVP_KN_OCL_KROON,   0},
+    {"OCL SOBEL 8",     DVP_KN_OCL_SOBEL,   0, NULL, NULL},
+    {"OCL SCHARR 8",    DVP_KN_OCL_SCHARR,  0, NULL, NULL},
+    {"OCL PREWITT 8",   DVP_KN_OCL_PREWITT, 0, NULL, NULL},
+    {"OCL KROON 8",     DVP_KN_OCL_KROON,   0, NULL, NULL},
 };
 static DVP_U32 numLocalKernels = dimof(local_kernels);
 

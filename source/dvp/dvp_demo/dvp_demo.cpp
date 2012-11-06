@@ -397,7 +397,8 @@ int main(int argc, char *argv[])
                 sections,
                 dimof(sections),
                 order,
-                DVP_PERF_INIT
+                DVP_PERF_INIT,
+                DVP_FALSE,
             };
             DVP_Transform_t *io = NULL;
             DVP_Morphology_t *morph = NULL;

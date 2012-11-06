@@ -30,152 +30,176 @@
 
 #define KGM_TAG "DVP KGM SIMCOP"
 
+static dvp_image_shift_t imx_shift3 = {
+    -1, -1, 0, 2, 2, 0,
+};
+
+static dvp_image_shift_t imx_shift5 = {
+    -2, -2, 0, 4, 4, 0,
+};
+
+static dvp_image_shift_t imx_shift7 = {
+    -3, -3, 0, 6, 6, 0,
+};
+
+static void dvp_vrun_conv_mxn_shift(DVP_KernelNode_t *node, dvp_image_shift_t *shift)
+{
+    if (node && shift)
+    {
+        DVP_ImageConvolution_t *pC = dvp_knode_to(node, DVP_ImageConvolution_t);
+        shift->centerShiftHorz = -(DVP_S32)pC->mask.width/2;
+        shift->centerShiftVert = -(DVP_S32)pC->mask.height/2;
+        shift->rightBorder = pC->mask.width - 1;
+        shift->bottomBorder = pC->mask.height - 1;
+    }
+}
+
 static DVP_CoreFunction_t remote_kernels[] = {
 #ifdef DVP_USE_IPC
-    {"SIMCOP No operation",    DVP_KN_NOOP,                         0},
+    {"SIMCOP No operation",    DVP_KN_NOOP,                         0, NULL, NULL},
 #ifdef DVP_USE_VRUN
     // name                 kernel                            load
-    {"SIMCOP Dilate Cross",    DVP_KN_DILATE_CROSS,                 0},
-    {"SIMCOP Dilate Mask",     DVP_KN_DILATE_MASK,                  0},
-    {"SIMCOP Dilate Square",   DVP_KN_DILATE_SQUARE,                0},
-    {"SIMCOP Erode Cross",     DVP_KN_ERODE_CROSS,                  0},
-    {"SIMCOP Erode Mask",      DVP_KN_ERODE_MASK,                   0},
-    {"SIMCOP Erode Cross",     DVP_KN_ERODE_SQUARE,                 0},
+    {"SIMCOP Dilate Cross",    DVP_KN_DILATE_CROSS,                 0, NULL, NULL},
+    {"SIMCOP Dilate Mask",     DVP_KN_DILATE_MASK,                  0, NULL, NULL},
+    {"SIMCOP Dilate Square",   DVP_KN_DILATE_SQUARE,                0, NULL, NULL},
+    {"SIMCOP Erode Cross",     DVP_KN_ERODE_CROSS,                  0, NULL, NULL},
+    {"SIMCOP Erode Mask",      DVP_KN_ERODE_MASK,                   0, NULL, NULL},
+    {"SIMCOP Erode Cross",     DVP_KN_ERODE_SQUARE,                 0, NULL, NULL},
 
-    {"SIMCOP Dilate Cross",    DVP_KN_VRUN_DILATE_CROSS,            0},
-    {"SIMCOP Dilate Mask",     DVP_KN_VRUN_DILATE_MASK,             0},
-    {"SIMCOP Dilate Square",   DVP_KN_VRUN_DILATE_SQUARE,           0},
-    {"SIMCOP Erode Cross",     DVP_KN_VRUN_ERODE_CROSS,             0},
-    {"SIMCOP Erode Mask",      DVP_KN_VRUN_ERODE_MASK,              0},
-    {"SIMCOP Erode Cross",     DVP_KN_VRUN_ERODE_SQUARE,            0},
+    {"SIMCOP Dilate Cross",    DVP_KN_VRUN_DILATE_CROSS,            0, NULL, NULL},
+    {"SIMCOP Dilate Mask",     DVP_KN_VRUN_DILATE_MASK,             0, NULL, NULL},
+    {"SIMCOP Dilate Square",   DVP_KN_VRUN_DILATE_SQUARE,           0, NULL, NULL},
+    {"SIMCOP Erode Cross",     DVP_KN_VRUN_ERODE_CROSS,             0, NULL, NULL},
+    {"SIMCOP Erode Mask",      DVP_KN_VRUN_ERODE_MASK,              0, NULL, NULL},
+    {"SIMCOP Erode Cross",     DVP_KN_VRUN_ERODE_SQUARE,            0, NULL, NULL},
 
-    {"SIMCOP IIR Horz",        DVP_KN_IIR_HORZ,                     0},
-    {"SIMCOP IIR Vert",        DVP_KN_IIR_VERT,                     0},
+    {"SIMCOP IIR Horz",        DVP_KN_IIR_HORZ,                     0, NULL, NULL},
+    {"SIMCOP IIR Vert",        DVP_KN_IIR_VERT,                     0, NULL, NULL},
 
-    {"SIMCOP IIR Horz",        DVP_KN_VRUN_IIR_HORZ,                0},
-    {"SIMCOP IIR Vert",        DVP_KN_VRUN_IIR_VERT,                0},
+    {"SIMCOP IIR Horz",        DVP_KN_VRUN_IIR_HORZ,                0, NULL, NULL},
+    {"SIMCOP IIR Vert",        DVP_KN_VRUN_IIR_VERT,                0, NULL, NULL},
 
-    {"SIMCOP NonMax Sup 3x3",  DVP_KN_NONMAXSUPPRESS_3x3_S16,       0},
-    {"SIMCOP NonMax Sup 5x5",  DVP_KN_NONMAXSUPPRESS_5x5_S16,       0},
-    {"SIMCOP NonMax Sup 7x7",  DVP_KN_NONMAXSUPPRESS_7x7_S16,       0},
+    {"SIMCOP NonMax Sup 3x3",  DVP_KN_NONMAXSUPPRESS_3x3_S16,       0, &imx_shift3, NULL},
+    {"SIMCOP NonMax Sup 5x5",  DVP_KN_NONMAXSUPPRESS_5x5_S16,       0, &imx_shift5, NULL},
+    {"SIMCOP NonMax Sup 7x7",  DVP_KN_NONMAXSUPPRESS_7x7_S16,       0, &imx_shift7, NULL},
 
-    {"SIMCOP NonMax Sup 3x3",  DVP_KN_VRUN_NONMAXSUPPRESS_3x3_S16,  0},
-    {"SIMCOP NonMax Sup 5x5",  DVP_KN_VRUN_NONMAXSUPPRESS_5x5_S16,  0},
-    {"SIMCOP NonMax Sup 7x7",  DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16,  0},
+    {"SIMCOP NonMax Sup 3x3",  DVP_KN_VRUN_NONMAXSUPPRESS_3x3_S16,  0, &imx_shift3, NULL},
+    {"SIMCOP NonMax Sup 5x5",  DVP_KN_VRUN_NONMAXSUPPRESS_5x5_S16,  0, &imx_shift5, NULL},
+    {"SIMCOP NonMax Sup 7x7",  DVP_KN_VRUN_NONMAXSUPPRESS_7x7_S16,  0, &imx_shift7, NULL},
 
-    {"SIMCOP Img Conv 3x3",    DVP_KN_CONV_3x3,                     0},
-    {"SIMCOP Img Conv 5x5",    DVP_KN_CONV_5x5,                     0},
-    {"SIMCOP Img Conv 7x7",    DVP_KN_CONV_7x7,                     0},
+    {"SIMCOP Img Conv 3x3",    DVP_KN_CONV_3x3,                     0, &imx_shift3, NULL},
+    {"SIMCOP Img Conv 5x5",    DVP_KN_CONV_5x5,                     0, &imx_shift5, NULL},
+    {"SIMCOP Img Conv 7x7",    DVP_KN_CONV_7x7,                     0, &imx_shift7, NULL},
 
-    {"SIMCOP Img Conv 3x3",    DVP_KN_VRUN_CONV_3x3,                0},
-    {"SIMCOP Img Conv 5x5",    DVP_KN_VRUN_CONV_5x5,                0},
-    {"SIMCOP Img Conv 7x7",    DVP_KN_VRUN_CONV_7x7,                0},
-    {"SIMCOP Img Conv MxN",    DVP_KN_VRUN_CONV_MxN,                0},
+    {"SIMCOP Img Conv 3x3",    DVP_KN_VRUN_CONV_3x3,                0, &imx_shift3, NULL},
+    {"SIMCOP Img Conv 5x5",    DVP_KN_VRUN_CONV_5x5,                0, &imx_shift5, NULL},
+    {"SIMCOP Img Conv 7x7",    DVP_KN_VRUN_CONV_7x7,                0, &imx_shift7, NULL},
+    {"SIMCOP Img Conv MxN",    DVP_KN_VRUN_CONV_MxN,                0, NULL, dvp_vrun_conv_mxn_shift},
 
-    {"SIMCOP Img Thr gt2max8",   DVP_KN_THR_GT2MAX_8,               0},
-    {"SIMCOP Img Thr gt2max16",  DVP_KN_THR_GT2MAX_16,              0},
-    {"SIMCOP Img Thr gt2thr8",   DVP_KN_THR_GT2THR_8,               0},
-    {"SIMCOP Img Thr gt2thr16",  DVP_KN_THR_GT2THR_16,              0},
-    {"SIMCOP Img Thr le2min8",   DVP_KN_THR_LE2MIN_8,               0},
-    {"SIMCOP Img Thr le2min16",  DVP_KN_THR_LE2MIN_16,              0},
-    {"SIMCOP Img Thr le2thr8",   DVP_KN_THR_LE2THR_8,               0},
-    {"SIMCOP Img Thr le2thr16",  DVP_KN_THR_LE2THR_16,              0},
+    {"SIMCOP Img Thr gt2max8",   DVP_KN_THR_GT2MAX_8,               0, NULL, NULL},
+    {"SIMCOP Img Thr gt2max16",  DVP_KN_THR_GT2MAX_16,              0, NULL, NULL},
+    {"SIMCOP Img Thr gt2thr8",   DVP_KN_THR_GT2THR_8,               0, NULL, NULL},
+    {"SIMCOP Img Thr gt2thr16",  DVP_KN_THR_GT2THR_16,              0, NULL, NULL},
+    {"SIMCOP Img Thr le2min8",   DVP_KN_THR_LE2MIN_8,               0, NULL, NULL},
+    {"SIMCOP Img Thr le2min16",  DVP_KN_THR_LE2MIN_16,              0, NULL, NULL},
+    {"SIMCOP Img Thr le2thr8",   DVP_KN_THR_LE2THR_8,               0, NULL, NULL},
+    {"SIMCOP Img Thr le2thr16",  DVP_KN_THR_LE2THR_16,              0, NULL, NULL},
 
-    {"SIMCOP Img Thr gt2max8",   DVP_KN_VRUN_THR_GT2MAX_8,          0},
-    {"SIMCOP Img Thr gt2max16",  DVP_KN_VRUN_THR_GT2MAX_16,         0},
-    {"SIMCOP Img Thr gt2thr8",   DVP_KN_VRUN_THR_GT2THR_8,          0},
-    {"SIMCOP Img Thr gt2thr16",  DVP_KN_VRUN_THR_GT2THR_16,         0},
-    {"SIMCOP Img Thr le2min8",   DVP_KN_VRUN_THR_LE2MIN_8,          0},
-    {"SIMCOP Img Thr le2min16",  DVP_KN_VRUN_THR_LE2MIN_16,         0},
-    {"SIMCOP Img Thr le2thr8",   DVP_KN_VRUN_THR_LE2THR_8,          0},
-    {"SIMCOP Img Thr le2thr16",  DVP_KN_VRUN_THR_LE2THR_16,         0},
+    {"SIMCOP Img Thr gt2max8",   DVP_KN_VRUN_THR_GT2MAX_8,          0, NULL, NULL},
+    {"SIMCOP Img Thr gt2max16",  DVP_KN_VRUN_THR_GT2MAX_16,         0, NULL, NULL},
+    {"SIMCOP Img Thr gt2thr8",   DVP_KN_VRUN_THR_GT2THR_8,          0, NULL, NULL},
+    {"SIMCOP Img Thr gt2thr16",  DVP_KN_VRUN_THR_GT2THR_16,         0, NULL, NULL},
+    {"SIMCOP Img Thr le2min8",   DVP_KN_VRUN_THR_LE2MIN_8,          0, NULL, NULL},
+    {"SIMCOP Img Thr le2min16",  DVP_KN_VRUN_THR_LE2MIN_16,         0, NULL, NULL},
+    {"SIMCOP Img Thr le2thr8",   DVP_KN_VRUN_THR_LE2THR_8,          0, NULL, NULL},
+    {"SIMCOP Img Thr le2thr16",  DVP_KN_VRUN_THR_LE2THR_16,         0, NULL, NULL},
 
-    {"SIMCOP Img Sobel 3x3 8s",  DVP_KN_SOBEL_3x3_8s,               0},
-    {"SIMCOP Img Sobel 3x3 8",   DVP_KN_SOBEL_3x3_8,                0},
-    {"SIMCOP Img Sobel 3x3 16s", DVP_KN_SOBEL_3x3_16s,              0},
-    {"SIMCOP Img Sobel 3x3 16",  DVP_KN_SOBEL_3x3_16,               0},
-    {"SIMCOP Img Sobel 5x5 8s",  DVP_KN_SOBEL_5x5_8s,               0},
-    {"SIMCOP Img Sobel 5x5 8",   DVP_KN_SOBEL_5x5_8,                0},
-    {"SIMCOP Img Sobel 5x5 16s", DVP_KN_SOBEL_5x5_16s,              0},
-    {"SIMCOP Img Sobel 5x5 16",  DVP_KN_SOBEL_5x5_16,               0},
-    {"SIMCOP Img Sobel 7x7 8s",  DVP_KN_SOBEL_7x7_8s,               0},
-    {"SIMCOP Img Sobel 7x7 8",   DVP_KN_SOBEL_7x7_8,                0},
-    {"SIMCOP Img Sobel 7x7 16s", DVP_KN_SOBEL_7x7_16s,              0},
-    {"SIMCOP Img Sobel 7x7 16",  DVP_KN_SOBEL_7x7_16,               0},
+    {"SIMCOP Img Sobel 3x3 8s",  DVP_KN_SOBEL_3x3_8s,               0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 3x3 8",   DVP_KN_SOBEL_3x3_8,                0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 3x3 16s", DVP_KN_SOBEL_3x3_16s,              0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 3x3 16",  DVP_KN_SOBEL_3x3_16,               0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 5x5 8s",  DVP_KN_SOBEL_5x5_8s,               0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 5x5 8",   DVP_KN_SOBEL_5x5_8,                0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 5x5 16s", DVP_KN_SOBEL_5x5_16s,              0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 5x5 16",  DVP_KN_SOBEL_5x5_16,               0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 7x7 8s",  DVP_KN_SOBEL_7x7_8s,               0, &imx_shift7, NULL},
+    {"SIMCOP Img Sobel 7x7 8",   DVP_KN_SOBEL_7x7_8,                0, &imx_shift7, NULL},
+    {"SIMCOP Img Sobel 7x7 16s", DVP_KN_SOBEL_7x7_16s,              0, &imx_shift7, NULL},
+    {"SIMCOP Img Sobel 7x7 16",  DVP_KN_SOBEL_7x7_16,               0, &imx_shift7, NULL},
 
-    {"SIMCOP Img Sobel 3x3 8s",  DVP_KN_VRUN_SOBEL_3x3_8s,          0},
-    {"SIMCOP Img Sobel 3x3 8",   DVP_KN_VRUN_SOBEL_3x3_8,           0},
-    {"SIMCOP Img Sobel 3x3 16s", DVP_KN_VRUN_SOBEL_3x3_16s,         0},
-    {"SIMCOP Img Sobel 3x3 16",  DVP_KN_VRUN_SOBEL_3x3_16,          0},
-    {"SIMCOP Img Sobel 5x5 8s",  DVP_KN_VRUN_SOBEL_5x5_8s,          0},
-    {"SIMCOP Img Sobel 5x5 8",   DVP_KN_VRUN_SOBEL_5x5_8,           0},
-    {"SIMCOP Img Sobel 5x5 16s", DVP_KN_VRUN_SOBEL_5x5_16s,         0},
-    {"SIMCOP Img Sobel 5x5 16",  DVP_KN_VRUN_SOBEL_5x5_16,          0},
-    {"SIMCOP Img Sobel 7x7 8s",  DVP_KN_VRUN_SOBEL_7x7_8s,          0},
-    {"SIMCOP Img Sobel 7x7 8",   DVP_KN_VRUN_SOBEL_7x7_8,           0},
-    {"SIMCOP Img Sobel 7x7 16s", DVP_KN_VRUN_SOBEL_7x7_16s,         0},
-    {"SIMCOP Img Sobel 7x7 16",  DVP_KN_VRUN_SOBEL_7x7_16,          0},
+    {"SIMCOP Img Sobel 3x3 8s",  DVP_KN_VRUN_SOBEL_3x3_8s,          0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 3x3 8",   DVP_KN_VRUN_SOBEL_3x3_8,           0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 3x3 16s", DVP_KN_VRUN_SOBEL_3x3_16s,         0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 3x3 16",  DVP_KN_VRUN_SOBEL_3x3_16,          0, &imx_shift3, NULL},
+    {"SIMCOP Img Sobel 5x5 8s",  DVP_KN_VRUN_SOBEL_5x5_8s,          0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 5x5 8",   DVP_KN_VRUN_SOBEL_5x5_8,           0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 5x5 16s", DVP_KN_VRUN_SOBEL_5x5_16s,         0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 5x5 16",  DVP_KN_VRUN_SOBEL_5x5_16,          0, &imx_shift5, NULL},
+    {"SIMCOP Img Sobel 7x7 8s",  DVP_KN_VRUN_SOBEL_7x7_8s,          0, &imx_shift7, NULL},
+    {"SIMCOP Img Sobel 7x7 8",   DVP_KN_VRUN_SOBEL_7x7_8,           0, &imx_shift7, NULL},
+    {"SIMCOP Img Sobel 7x7 16s", DVP_KN_VRUN_SOBEL_7x7_16s,         0, &imx_shift7, NULL},
+    {"SIMCOP Img Sobel 7x7 16",  DVP_KN_VRUN_SOBEL_7x7_16,          0, &imx_shift7, NULL},
 
-    {"SIMCOP Img Harris Corners",DVP_KN_VRUN_HARRIS_CORNERS,        0},
-    {"SIMCOP Img Harris Score",  DVP_KN_VRUN_HARRIS_SCORE_7x7,      0},
-    {"SIMCOP Img Block Maxima",  DVP_KN_VRUN_BLOCK_MAXIMA,          0},
-    {"SIMCOP Img NMS Step1",     DVP_KN_VRUN_NMS_STEP1,             0},
+    {"SIMCOP Img Harris Corners",DVP_KN_VRUN_HARRIS_CORNERS,        0, NULL, NULL},
+    {"SIMCOP Img Harris Score",  DVP_KN_VRUN_HARRIS_SCORE_7x7,      0, NULL, NULL},
+    {"SIMCOP Img Block Maxima",  DVP_KN_VRUN_BLOCK_MAXIMA,          0, NULL, NULL},
+    {"SIMCOP Img NMS Step1",     DVP_KN_VRUN_NMS_STEP1,             0, NULL, NULL},
 
-    {"SIMCOP Canny Img",       DVP_KN_CANNY_IMAGE_SMOOTHING,        0},
-    {"SIMCOP Canny 2D Grad",   DVP_KN_CANNY_2D_GRADIENT,            0},
-    {"SIMCOP Canny NonMax",    DVP_KN_CANNY_NONMAX_SUPPRESSION,     0},
-    {"SIMCOP Canny Hyst Th",   DVP_KN_CANNY_HYST_THRESHHOLD,        0},
+    {"SIMCOP Canny Img",       DVP_KN_CANNY_IMAGE_SMOOTHING,        0, NULL, NULL},
+    {"SIMCOP Canny 2D Grad",   DVP_KN_CANNY_2D_GRADIENT,            0, NULL, NULL},
+    {"SIMCOP Canny NonMax",    DVP_KN_CANNY_NONMAX_SUPPRESSION,     0, NULL, NULL},
+    {"SIMCOP Canny Hyst Th",   DVP_KN_CANNY_HYST_THRESHHOLD,        0, NULL, NULL},
 
-    {"SIMCOP Canny Img",       DVP_KN_VRUN_CANNY_IMAGE_SMOOTHING,   0},
-    {"SIMCOP Canny 2D Grad",   DVP_KN_VRUN_CANNY_2D_GRADIENT,       0},
-    {"SIMCOP Canny NonMax",    DVP_KN_VRUN_CANNY_NONMAX_SUPPRESSION, 0},
-    {"SIMCOP Canny Hyst Th",   DVP_KN_VRUN_CANNY_HYST_THRESHHOLD,   0},
+    {"SIMCOP Canny Img",       DVP_KN_VRUN_CANNY_IMAGE_SMOOTHING,   0, NULL, NULL},
+    {"SIMCOP Canny 2D Grad",   DVP_KN_VRUN_CANNY_2D_GRADIENT,       0, NULL, NULL},
+    {"SIMCOP Canny NonMax",    DVP_KN_VRUN_CANNY_NONMAX_SUPPRESSION, 0, NULL, NULL},
+    {"SIMCOP Canny Hyst Th",   DVP_KN_VRUN_CANNY_HYST_THRESHHOLD,   0, NULL, NULL},
 
-    {"SIMCOP UYVY to YUV444p", DVP_KN_UYVY_TO_YUV444p,              0},
-    {"SIMCOP UYVY to RGBp",    DVP_KN_UYVY_TO_RGBp,                 0},
-    {"SIMCOP UYVY to IYUV",    DVP_KN_UYVY_TO_YUV420p,              0},
-    {"SIMCOP xYxY to LUMA",    DVP_KN_XYXY_TO_Y800,                 0},
-    {"SIMCOP NV12 to YUV444p", DVP_KN_NV12_TO_YUV444p,              0},
-    {"SIMCOP YUV444p to RGBp", DVP_KN_YUV444p_TO_RGBp,              0},
+    {"SIMCOP UYVY to YUV444p", DVP_KN_UYVY_TO_YUV444p,              0, NULL, NULL},
+    {"SIMCOP UYVY to RGBp",    DVP_KN_UYVY_TO_RGBp,                 0, NULL, NULL},
+    {"SIMCOP UYVY to IYUV",    DVP_KN_UYVY_TO_YUV420p,              0, NULL, NULL},
+    {"SIMCOP xYxY to LUMA",    DVP_KN_XYXY_TO_Y800,                 0, NULL, NULL},
+    {"SIMCOP NV12 to YUV444p", DVP_KN_NV12_TO_YUV444p,              0, NULL, NULL},
+    {"SIMCOP YUV444p to RGBp", DVP_KN_YUV444p_TO_RGBp,              0, NULL, NULL},
 
-    {"SIMCOP UYVY to YUV444p", DVP_KN_VRUN_UYVY_TO_YUV444p,         0},
-    {"SIMCOP UYVY to RGBp",    DVP_KN_VRUN_UYVY_TO_RGBp,            0},
-    {"SIMCOP UYVY to IYUV",    DVP_KN_VRUN_UYVY_TO_YUV420p,         0},
-    {"SIMCOP xYxY to LUMA",    DVP_KN_VRUN_XYXY_TO_Y800,            0},
-    {"SIMCOP NV12 to YUV444p", DVP_KN_VRUN_NV12_TO_YUV444p,         0},
-    {"SIMCOP YUV444p to RGBp", DVP_KN_VRUN_YUV444p_TO_RGBp,         0},
+    {"SIMCOP UYVY to YUV444p", DVP_KN_VRUN_UYVY_TO_YUV444p,         0, NULL, NULL},
+    {"SIMCOP UYVY to RGBp",    DVP_KN_VRUN_UYVY_TO_RGBp,            0, NULL, NULL},
+    {"SIMCOP UYVY to IYUV",    DVP_KN_VRUN_UYVY_TO_YUV420p,         0, NULL, NULL},
+    {"SIMCOP xYxY to LUMA",    DVP_KN_VRUN_XYXY_TO_Y800,            0, NULL, NULL},
+    {"SIMCOP NV12 to YUV444p", DVP_KN_VRUN_NV12_TO_YUV444p,         0, NULL, NULL},
+    {"SIMCOP YUV444p to RGBp", DVP_KN_VRUN_YUV444p_TO_RGBp,         0, NULL, NULL},
 
-    {"SIMCOP Integral 8",      DVP_KN_INTEGRAL_IMAGE_8,             0},
+    {"SIMCOP Integral 8",      DVP_KN_INTEGRAL_IMAGE_8,             0, NULL, NULL},
 
-    {"SIMCOP Integral 8",      DVP_KN_VRUN_INTEGRAL_IMAGE_8,        0},
+    {"SIMCOP Integral 8",      DVP_KN_VRUN_INTEGRAL_IMAGE_8,        0, NULL, NULL},
 
-    {"LDC Affine Transfm",     DVP_KN_LDC_AFFINE_TRANSFORM,         0},
-    {"LDC Distortion Correct", DVP_KN_LDC_DISTORTION_CORRECTION,    0},
-    {"LDC Distortion & Aff",   DVP_KN_LDC_DISTORTION_AND_AFFINE,    0},
-    {"SIMCOP SAD 8x8",         DVP_KN_VRUN_SAD_8x8,                 0},
-    {"SIMCOP SAD 16x16",       DVP_KN_VRUN_SAD_16x16,               0},
-    {"SIMCOP SAD 3x3",         DVP_KN_VRUN_SAD_3x3,                 0},
-    {"SIMCOP SAD 5x5",         DVP_KN_VRUN_SAD_5x5,                 0},
-    {"SIMCOP SAD 7x7",         DVP_KN_VRUN_SAD_7x7,                 0},
+    {"LDC Affine Transfm",     DVP_KN_LDC_AFFINE_TRANSFORM,         0, NULL, NULL},
+    {"LDC Distortion Correct", DVP_KN_LDC_DISTORTION_CORRECTION,    0, NULL, NULL},
+    {"LDC Distortion & Aff",   DVP_KN_LDC_DISTORTION_AND_AFFINE,    0, NULL, NULL},
+    {"SIMCOP SAD 8x8",         DVP_KN_VRUN_SAD_8x8,                 0, NULL, NULL},
+    {"SIMCOP SAD 16x16",       DVP_KN_VRUN_SAD_16x16,               0, NULL, NULL},
+    {"SIMCOP SAD 3x3",         DVP_KN_VRUN_SAD_3x3,                 0, NULL, NULL},
+    {"SIMCOP SAD 5x5",         DVP_KN_VRUN_SAD_5x5,                 0, NULL, NULL},
+    {"SIMCOP SAD 7x7",         DVP_KN_VRUN_SAD_7x7,                 0, NULL, NULL},
 
-    {"SIMCOP ImgPyramid8",          DVP_KN_VRUN_IMAGE_PYRAMID_8,         0},
-    {"SIMCOP Gauss3x3Pyramid8",     DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8,  0},
-    {"SIMCOP Gauss5x5Pyramid8",     DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8,  0},
-    {"SIMCOP Gauss7x7Pyramid8",     DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8,  0},
-    {"SIMCOP GradientH3x3Pyramid8", DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8, 0},
-    {"SIMCOP GradientH5x5Pyramid8", DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8, 0},
-    {"SIMCOP GradientH7x7Pyramid8", DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8, 0},
-    {"SIMCOP GradientV3x3Pyramid8", DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8, 0},
-    {"SIMCOP GradientV5x5Pyramid8", DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8, 0},
-    {"SIMCOP GradientV7x7Pyramid8", DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8, 0},
+    {"SIMCOP ImgPyramid8",          DVP_KN_VRUN_IMAGE_PYRAMID_8,         0, NULL, NULL},
+    {"SIMCOP Gauss3x3Pyramid8",     DVP_KN_VRUN_GAUSSIAN_3x3_PYRAMID_8,  0, NULL, NULL},
+    {"SIMCOP Gauss5x5Pyramid8",     DVP_KN_VRUN_GAUSSIAN_5x5_PYRAMID_8,  0, NULL, NULL},
+    {"SIMCOP Gauss7x7Pyramid8",     DVP_KN_VRUN_GAUSSIAN_7x7_PYRAMID_8,  0, NULL, NULL},
+    {"SIMCOP GradientH3x3Pyramid8", DVP_KN_VRUN_GRADIENT_H3x3_PYRAMID_8, 0, NULL, NULL},
+    {"SIMCOP GradientH5x5Pyramid8", DVP_KN_VRUN_GRADIENT_H5x5_PYRAMID_8, 0, NULL, NULL},
+    {"SIMCOP GradientH7x7Pyramid8", DVP_KN_VRUN_GRADIENT_H7x7_PYRAMID_8, 0, NULL, NULL},
+    {"SIMCOP GradientV3x3Pyramid8", DVP_KN_VRUN_GRADIENT_V3x3_PYRAMID_8, 0, NULL, NULL},
+    {"SIMCOP GradientV5x5Pyramid8", DVP_KN_VRUN_GRADIENT_V5x5_PYRAMID_8, 0, NULL, NULL},
+    {"SIMCOP GradientV7x7Pyramid8", DVP_KN_VRUN_GRADIENT_V7x7_PYRAMID_8, 0, NULL, NULL},
 
 #endif
 #ifdef DVP_USE_DEI
-    {"SIMCOP DEI INIT",        DVP_KN_DEI_DEINTERLACER_INIT,        0},
-    {"SIMCOP DEI DEINIT",      DVP_KN_DEI_DEINTERLACER_DEINIT,      0},
+    {"SIMCOP DEI INIT",        DVP_KN_DEI_DEINTERLACER_INIT,        0, NULL, NULL},
+    {"SIMCOP DEI DEINIT",      DVP_KN_DEI_DEINTERLACER_DEINIT,      0, NULL, NULL},
 #endif
 #else
-    {"SIMCOP Echo", DVP_KN_ECHO, 0},
+    {"SIMCOP Echo", DVP_KN_ECHO, 0, NULL, NULL},
 #endif
 };
 static DVP_U32 numRemoteKernels = dimof(remote_kernels);
@@ -586,7 +610,7 @@ static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 s
                 }
                 case DVP_KN_VRUN_IMAGE_PYRAMID_8:
                 {
-                    DVP_Pyramid_t *pPyramid = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    DVP_Pyramid_t *pPyramid = dvp_knode_to(&pNodes[n], DVP_Pyramid_t);
                     dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pPyramid->input, DVP_TRUE, (DVP_PTR)pTmp, &translations);
                     dvp_rpc_prepare_buffer(rpc, DVP_GetSupportedRemoteCore(), &pPyramid->output, DVP_FALSE, (DVP_PTR)pTmp, &translations);
                     break;
@@ -1441,7 +1465,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
             }
             case DVP_KN_VRUN_IMAGE_PYRAMID_8:
             {
-                DVP_Pyramid_t *pPyramid = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                DVP_Pyramid_t *pPyramid = dvp_knode_to(&pNodes[n], DVP_Pyramid_t);
                 if (DVP_Image_Validate(&pPyramid->input, 16, 16, 128, 2, colorY800, 1) == DVP_FALSE ||
                     DVP_Buffer_Validate(&pPyramid->output) == DVP_FALSE ||
                     pPyramid->output.numBytes < pPyramid->input.width*pPyramid->input.height*21/64)

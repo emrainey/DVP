@@ -4259,7 +4259,7 @@ status_e TestVisionEngine::Test_TeslaGraphSetup()
             dvp_knode_to(&m_pNodes[43], DVP_Simplex_t)->N_val = SimplexN;
             dvp_knode_to(&m_pNodes[43], DVP_Simplex_t)->N_INV = 32767 / SimplexN;
             dvp_knode_to(&m_pNodes[43], DVP_Simplex_t)->MaxIteration = 200;
-            dvp_knode_to(&m_pNodes[43], DVP_Simplex_t)->EPSILON = 0.00001 * MAX_S32_S/MAX_4p27;
+            dvp_knode_to(&m_pNodes[43], DVP_Simplex_t)->EPSILON = (DVP_S32)(0.00001 * MAX_S32_S/MAX_4p27);
             dvp_knode_to(&m_pNodes[43], DVP_Simplex_t)->addtlArgs.n = SimplexN;
             dvp_knode_to(&m_pNodes[43], DVP_Simplex_t)->addtlArgs.coeff = 10;
 
@@ -4274,7 +4274,7 @@ status_e TestVisionEngine::Test_TeslaGraphSetup()
             dvp_knode_to(&m_pNodes[44], DVP_Simplex_t)->intBuf[4] = m_buffers[57];
             dvp_knode_to(&m_pNodes[44], DVP_Simplex_t)->intBuf[5] = m_buffers[58];
             dvp_knode_to(&m_pNodes[44], DVP_Simplex_t)->MaxIteration = 200;
-            dvp_knode_to(&m_pNodes[44], DVP_Simplex_t)->EPSILON = 0.00001 * MAX_S32_S/MAX_4p27;
+            dvp_knode_to(&m_pNodes[44], DVP_Simplex_t)->EPSILON = (DVP_S32)(0.00001 * MAX_S32_S/MAX_4p27);
             dvp_knode_to(&m_pNodes[44], DVP_Simplex_t)->addtlArgs.n = SimplexN;
             dvp_knode_to(&m_pNodes[44], DVP_Simplex_t)->addtlArgs.coeff = 10;
 

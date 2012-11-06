@@ -533,7 +533,7 @@ void DVP_PrintNode(DVP_U32 zone, DVP_KernelNode_t *node)
 {
     if (zone && node)
     {
-        DVP_PRINT(zone, "DVP_KernelNode_t:%p KERN:%08x AFFINITY:%d\n", node, node->header.kernel, node->header.affinity);
+        DVP_PRINT(zone, "DVP_KernelNode_t:%p KERN:%08x AFFINITY:%d MGR:%u FXN:%u\n", node, node->header.kernel, node->header.affinity, node->header.mgrIndex, node->header.funcIndex);
     }
 }
 
@@ -656,6 +656,44 @@ DVP_KernelGraph_t *DVP_KernelGraph_Alloc(DVP_Handle handle, DVP_U32 numSections)
         return graph;
     }
     return NULL;
+}
+
+void DVP_KernelGraph_ImageShiftAccum(DVP_Handle handle, DVP_KernelNode_t *node, dvp_image_shift_t *shift)
+{
+    DVP_t *dvp = (DVP_t *)handle;
+
+    if (dvp == NULL || node == NULL || shift == NULL)
+        return;
+
+    DVP_PrintNode(DVP_ZONE_KGAPI, node);
+
+    if (node->header.mgrIndex < DVP_CORE_MAX &&
+        node->header.funcIndex <= dvp->managers[node->header.mgrIndex].numSupportedKernels)
+    {
+        dvp_image_shift_t *s = dvp->managers[node->header.mgrIndex].kernels[node->header.funcIndex].shift;
+        dvp_image_shift_f fn = dvp->managers[node->header.mgrIndex].kernels[node->header.funcIndex].shift_func;
+
+        DVP_PRINT(DVP_ZONE_KGAPI, "Accumulating Image Shift for %s\n",
+                dvp->managers[node->header.mgrIndex].kernels[node->header.funcIndex].name);
+
+        if (s != NULL)
+        {
+            shift->centerShiftHorz += s->centerShiftHorz;
+            shift->centerShiftVert += s->centerShiftVert;
+            shift->topBorder       += s->topBorder;
+            shift->rightBorder     += s->rightBorder;
+            shift->bottomBorder    += s->bottomBorder;
+            shift->leftBorder      += s->leftBorder;
+        }
+        else if (fn != NULL)
+        {
+            fn(node, shift);
+        }
+    }
+    else
+    {
+        DVP_PRINT(DVP_ZONE_ERROR, "Handle, node or KGM index is invalid!\n");
+    }
 }
 
 /******************************************************************************/

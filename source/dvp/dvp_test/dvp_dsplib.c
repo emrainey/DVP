@@ -357,6 +357,7 @@ int main(int argc, char *argv[])
                 dimof(ssections),
                 orders,
                 DVP_PERF_INIT,
+                DVP_FALSE,
             };
 
             // DSP Processing
