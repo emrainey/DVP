@@ -544,6 +544,9 @@ static void DVP_Image_to_image_t(image_t *img, DVP_Image_t *pImage)
     }
     switch (img->color)
     {
+        case FOURCC_BIN1:
+            img->plane[0].xscale = 8;
+            break;
         case FOURCC_UYVY:
         case FOURCC_YUY2:
         case FOURCC_VYUY:
@@ -663,11 +666,11 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                         {
                             for (y = 0; y < pIO->input.height; y++)
                             {
-                                tmpIn  = (DVP_U08 *) (pIO->input.pData[p] + y*pIO->input.y_stride);
-                                tmpOut = (DVP_U08 *) (pIO->output.pData[p] + y*pIO->output.y_stride);
+                                tmpIn  = DVP_Image_Addressing(&pIO->input, 0, y, p);
+                                tmpOut = DVP_Image_Addressing(&pIO->output, 0, y, p);
                                 for(j = 0; j < pIO->input.width; j++)
                                 {
-                                    tmpOut[j] = (tmpIn[j] >> 7);    // Make binary image
+                                    tmpOut[j] = (tmpIn[j] >> 7);    // Make binary image.
                                 }
                             }
                         }
@@ -694,8 +697,8 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                             {
                                for (y = 0; y < pIO->input.height; y++)
                                {
-                                   DVP_U08 *tmpIn  = (DVP_U08 *) (pIO->input.pData[p] + y*pIO->input.y_stride);
-                                   DVP_U16 *tmpOut = (DVP_U16 *) (pIO->output.pData[p] + y*pIO->output.y_stride);
+                                   DVP_U08 *tmpIn  = (DVP_U08 *)DVP_Image_Addressing(&pIO->input, 0, y, p);
+                                   DVP_U16 *tmpOut = (DVP_U16 *)DVP_Image_Addressing(&pIO->output, 0, y, p);
                                    if(kernel == DVP_KN_XSTRIDE_CONVERT)
                                        for(j = 0; j < pIO->input.width; j++)
                                        {
@@ -712,8 +715,8 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                             {
                                for (y = 0; y < pIO->input.height; y++)
                                {
-                                   DVP_U16 *tmpIn  = (DVP_U16 *) (pIO->input.pData[p] + y*pIO->input.y_stride);
-                                   DVP_U08 *tmpOut = (DVP_U08 *) (pIO->output.pData[p] + y*pIO->output.y_stride);
+                                   DVP_U16 *tmpIn  = (DVP_U16 *)DVP_Image_Addressing(&pIO->input, 0, y, p);
+                                   DVP_U08 *tmpOut = (DVP_U08 *)DVP_Image_Addressing(&pIO->output, 0, y, p);
                                    if(kernel == DVP_KN_XSTRIDE_CONVERT)
                                        for(j = 0; j < pIO->input.width; j++)
                                        {
@@ -756,14 +759,17 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                     {
                         DVP_U32 j,y,p,len,n = 0;
                         // for equal sized plane images
-                        if (pImage->planes == 1)
+                        if (pImage->planes == 1 ||
+                            pImage->color == FOURCC_RGBP ||
+                            pImage->color == FOURCC_YU24 ||
+                            pImage->color == FOURCC_YV24)
                         {
                             for (p = 0; p < pImage->planes; p++)        // loop for each plane
                             {
                                 for (y = pImage->y_start; y < pImage->height; y++)    // loop for each line
                                 {
-                                    len = (pImage->x_stride * pImage->width);
-                                    j = (y * pImage->y_stride) + (pImage->x_start * pImage->x_stride);
+                                    len = DVP_Image_LineSize(pImage, p);
+                                    j = DVP_Image_Offset(pImage, 0, y, p);
                                     n += (uint32_t)fwrite(&pImage->pData[p][j], 1, len, pImgdbg->fp);
                                 }
                                 fflush(pImgdbg->fp);
@@ -798,8 +804,8 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                             }
                             for (y = 0; y < pImage->height; y++)
                             {
-                                len = (pImage->x_stride * pImage->width);
-                                j = (y * pImage->y_stride);
+                                len = DVP_Image_LineSize(pImage, 0);
+                                j = DVP_Image_Offset(pImage, 0, y, 0);
                                 n += (DVP_U32)fwrite(&pImage->pData[0][j], 1, len, pImgdbg->fp);
                             }
                             fflush(pImgdbg->fp);
@@ -1405,11 +1411,11 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                     for(i=0; i<pT->input.height/2; i+=1)
                     {
                         VLIB_gauss5x5PyramidKernel_16((DVP_U16 *)&pT->input.pData[0][2*i*pT->input.y_stride],
-                                                     (DVP_U32 *)pT->scratch.pData[0],
-                                                     pT->input.width,
-                                                     pT->input.width,
-                                                     1,
-                                                     (DVP_U16 *)&pT->output.pData[0][i*pT->output.y_stride]);
+                                                      (DVP_U32 *)pT->scratch.pData[0],
+                                                      pT->input.width,
+                                                      pT->input.width,
+                                                      1,
+                                                      (DVP_U16 *)&pT->output.pData[0][i*pT->output.y_stride]);
                     }
                     break;
                 }

@@ -4686,6 +4686,7 @@ void OMXVisionCam::FrameReceivedFunc(void *data)
         cFrame->mContext         = this;
 
         DVP_Image_t *pImage = (DVP_Image_t *)cFrame->mFrameBuff;
+        /*! \note FOURCC_BIN1 is not a possible Camera format yet, but this calc would be wrong if it were */
         pImage->x_start = cFrame->mOffsetX/pImage->x_stride;
         pImage->y_start = cFrame->mOffsetY;
 

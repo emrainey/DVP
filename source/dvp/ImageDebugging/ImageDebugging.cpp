@@ -105,7 +105,7 @@ void ImageDebug_Write(ImageDebug_t *pImgd, DVP_U32 numImg)
                     {
                         for (y = 0; y < pImage->height; y++)    // loop for each line
                         {
-                            len = (pImage->x_stride * pImage->width);
+                            len = DVP_Image_LineSize(pImage, 0);
                             j = (y * pImage->y_stride);
                             n += (uint32_t)fwrite(&pImage->pData[p][j], 1, len, pImgd[i].debug);
                         }
@@ -117,7 +117,7 @@ void ImageDebug_Write(ImageDebug_t *pImgd, DVP_U32 numImg)
                     DVP_U32 x_divisor = 1;
                     DVP_U32 y_divisor = 1;
                     if (pImage->color == FOURCC_YVU9 ||
-                         pImage->color == FOURCC_YUV9)
+                        pImage->color == FOURCC_YUV9)
                     {
                         x_divisor = 4;
                         y_divisor = 1;

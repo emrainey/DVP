@@ -159,6 +159,14 @@ size_t DVP_Image_Serialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len);
  */
 size_t DVP_Image_Unserialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len);
 
+/*! \brief Calculates the size the plane's lines in bytes.
+ * \param [in] pImage the image meta-pointer.
+ * \param [in] plane The plane index.
+ * \return Returns the lineSize in bytes.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_LineSize(DVP_Image_t *pImage, DVP_U32 plane);
+
 /*!
  * \brief Calculates the size of the plane indexed as given.
  * \param [in] pImage The image pointer to calculate the plane size of.
@@ -173,6 +181,47 @@ DVP_U32 DVP_Image_PlaneSize(DVP_Image_t *pImage, DVP_U32 plane);
  * \ingroup group_images
  */
 DVP_U32 DVP_Image_Size(DVP_Image_t *pImage);
+
+/*! \brief Calculates the range the plane's lines in bytes.
+ * \param [in] pImage the image meta-pointer.
+ * \param [in] plane The plane index.
+ * \return Returns the lineSize in bytes.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_LineRange(DVP_Image_t *pImage, DVP_U32 plane);
+
+/*!
+ * \brief Calculates the range of the plane indexed as given.
+ * \param [in] pImage The image pointer to calculate the plane size of.
+ * \param [in] plane The plane index to use to get the size from.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_PlaneRange(DVP_Image_t *pImage, DVP_U32 plane);
+
+/*!
+ * \brief Calculates the byte range of all the data in the image.
+ * \param [in] pImage The pointer to the image structure.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_Range(DVP_Image_t *pImage);
+
+/*! \brief Computes the pointer to an X,Y location on a plane of the image.
+ * \param [in] pImage The pointer to the image structure.
+ * \param [in] x The x coordinate.
+ * \param [in] y The y coordinate.
+ * \param [in] p The plane index.
+ * \returns Returns a pointer to the requested pixel.
+ */
+DVP_U08 *DVP_Image_Addressing(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p);
+
+/*! \brief Computes the per olane offset to an X,Y location of the image.
+ * \param [in] pImage The pointer to the image structure.
+ * \param [in] x The x coordinate.
+ * \param [in] y The y coordinate.
+ * \param [in] p The plane index.
+ * \returns Returns an offset to the requested pixel on a plane.
+ */
+DVP_U32 DVP_Image_Offset(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p);
 
 /*!
  * \brief Validates the values of the various members of the Image structure.
@@ -204,6 +253,15 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
                             DVP_U32 heigthMultiple,
                             fourcc_t *colors,
                             DVP_U32 numColors);
+
+/*! \brief Determines if two images are bit equal regardless of the memory layout
+ * of each image.
+ * \param [in] pDst The image to determine if equal.
+ * \param [in] pSrc The image to compare against.
+ * \return DVP_BOOL
+ * \ingroup group_images
+ */
+DVP_BOOL DVP_Image_Equal(DVP_Image_t *pDst, DVP_Image_t *pSrc);
 
 /*!
  * \brief Allocates and maps a flat buffer to all remote cores.

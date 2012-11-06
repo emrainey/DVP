@@ -1155,7 +1155,7 @@ bool save2Dframe( VisionCamFrame *fr)
     bool success = true;
     DVP_Image_t *pImage = NULL;
     static int cur = -1;
-    unsigned char *pos = NULL;
+    DVP_U08 *pos = NULL;
     char filename[33];
     FILE *outFile = NULL;
 
@@ -1171,10 +1171,9 @@ bool save2Dframe( VisionCamFrame *fr)
         pImage = (DVP_Image_t *)fr->mFrameBuff;
 
         // beginning of meaningful image data
-        pos = pImage->pData[0] + fr->mOffsetY * pImage->y_stride
-                               + fr->mOffsetX * pImage->x_stride;
+        pos = DVP_Image_Addressing(pImage, fr->mOffsetX, fr->mOffsetY, 0);
 
-        size_t widthInBytes = pImage->width * pImage->x_stride;
+        size_t widthInBytes = DVP_Image_LineSize(pImage, 0);
 
         for( uint32_t h = 0; h < fr->mHeight; h++ , pos += pImage->y_stride )
         {
@@ -1207,7 +1206,7 @@ bool save2Dimage( DVP_Image_t *pImage)
     if( recNextFrame )
     {
         static int cur = -1;
-        unsigned char *pos = NULL;
+        DVP_U08 *pos = NULL;
         char filename[33];
         FILE *outFile = NULL;
 
@@ -1223,10 +1222,9 @@ bool save2Dimage( DVP_Image_t *pImage)
         if( outFile )
         {
             // beginning of meaningful image data
-            pos = pImage->pData[0] + pImage->y_start * pImage->y_stride
-                                   + pImage->x_start * pImage->x_stride;
+            pos = DVP_Image_Addressing(pImage, pImage->x_start, pImage->y_start, 0);
 
-            size_t widthInBytes = pImage->width * pImage->x_stride;
+            size_t widthInBytes = DVP_Image_LineSize(pImage, 0);
 
             for( uint32_t h = 0; h < pImage->bufHeight; h++ , pos += pImage->y_stride )
             {
@@ -1458,6 +1456,9 @@ void drawFaceBox(VisionCamFrame *cameraFrame)
     unsigned char * pos = NULL;
     unsigned int bottom;
     DVP_Image_t *pFrame = (DVP_Image_t *)cameraFrame->mFrameBuff;
+
+    if (pFrame->color == FOURCC_BIN1)
+        return;
 
     for(uint32_t face = 0; face < cameraFrame->mDetectedFacesNum; face++ )
     {

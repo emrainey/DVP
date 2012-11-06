@@ -171,7 +171,7 @@ uint32_t FileVisionCam::avi_stream_parse(AVI_List_t *aList, DVP_Image_t *pImage)
                     for (y = pImage->height - 1; y >= 0 ; y--)
                     {
                         i = (y * pImage->y_stride);
-                        s += fread(&pImage->pData[0][i], 1, pImage->x_stride * pImage->width, m_file);
+                        s += fread(&pImage->pData[0][i], 1, DVP_Image_LineSize(pImage, 0), m_file);
                     }
                 }
                 else
@@ -356,10 +356,10 @@ thread_ret_t FileVisionCam::RunThread()
                     pImage->color == FOURCC_NV12 ||
                     pImage->color == FOURCC_Y800)
                 {
-                    size_t numBytes = pImage->x_stride * pImage->width;
                     DVP_PRINT(DVP_ZONE_CAM, "About to read File data into DVP_Image_t* %p {%p} stride=%u!\n",pImage, &(pImage->pData[0][j]),pImage->y_stride);
                     for (z = 0; z < pImage->planes; z++)
                     {
+                        size_t numBytes = DVP_Image_LineSize(pImage, z);
                         uint32_t readHeight = (pImage->color == FOURCC_NV12 && z==1) ? pImage->height/2 : pImage->height;
                         for (y = 0; y < readHeight; y++)
                         {

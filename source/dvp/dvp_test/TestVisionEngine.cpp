@@ -5029,11 +5029,11 @@ status_e TestVisionEngine::Test_Tismo()
 
                     for (DVP_U32 y = 0; y < m_images[m_dispIdx].bufHeight; y++) {
                         int i = (y * m_images[m_dispIdx].y_stride);
-                        memset(&m_images[m_dispIdx].pData[0][i], 0, m_images[m_dispIdx].bufWidth*m_images[m_dispIdx].x_stride);
+                        memset(&m_images[m_dispIdx].pData[0][i], 0, DVP_Image_LineSize(&m_images[m_dispIdx], 0));
                     }
                     for (DVP_U32 y = 0; y < m_images[m_dispIdx].bufHeight/2; y++) {
                         int i = (y * m_images[m_dispIdx].y_stride);
-                        memset(&m_images[m_dispIdx].pData[1][i], 0x80, m_images[m_dispIdx].bufWidth*m_images[m_dispIdx].x_stride);
+                        memset(&m_images[m_dispIdx].pData[1][i], 0x80, DVP_Image_LineSize(&m_images[m_dispIdx], 0));
                     }
                 }
             }
@@ -5098,7 +5098,7 @@ status_e TestVisionEngine::Test_Tismo()
 
            // y stride should be the same
             if (info.layout == VCAM_STEREO_LAYOUT_LEFTRIGHT && info.subsampling == 1) {
-                right.pData[0] = right.pBuffer[0] +  left.width*left.x_stride;
+                right.pData[0] = right.pBuffer[0] + left.width*left.x_stride;
                 disp = m_images[m_dispMax];
             } else if (info.layout == VCAM_STEREO_LAYOUT_TOPBOTTOM && info.subsampling == 1) {
                 right.pData[0] = left.pBuffer[0] + left.height*left.y_stride;

@@ -37,21 +37,21 @@
 
 typedef struct _dvp_demo_t {
 #ifdef VCAM_AS_SHARED
-    module_t mod;
+    module_t            mod;
 #endif
-    uint32_t numDisplayImages;
-    VisionCamFactory_f factory;
-    VisionCam *pCam;
-    queue_t *frameq;
-    dvp_display_t *dvpd;
-    DVP_Image_t *displays;      /**< Buffers from the DVP Display */
-    DVP_Image_t *subImages;     /**< Subsections of the Display Image */
-    DVP_Image_t *camImages;     /**< GCam Images */
-    DVP_Image_t *images;        /**< DVP Graph Images */
-    DVP_Handle dvp;
-    DVP_KernelNode_t *nodes;   /**< The Kernel Graph Nodes */
-    DVP_KernelGraph_t *graph;
-    uint32_t numNodes;
+    uint32_t            numDisplayImages;
+    VisionCamFactory_f  factory;
+    VisionCam          *pCam;
+    queue_t            *frameq;
+    dvp_display_t      *dvpd;
+    DVP_Image_t        *displays;      /**< Buffers from the DVP Display */
+    DVP_Image_t        *subImages;     /**< Subsections of the Display Image */
+    DVP_Image_t        *camImages;     /**< GCam Images */
+    DVP_Image_t        *images;        /**< DVP Graph Images */
+    DVP_Handle          dvp;
+    DVP_KernelNode_t   *nodes;         /**< The Kernel Graph Nodes */
+    DVP_KernelGraph_t  *graph;
+    uint32_t            numNodes;
 } DVP_Demo_t;
 
 void DVPCallback(void *cookie, DVP_KernelGraph_t *graph, DVP_U32 sectionIndex, DVP_U32 numNodesExecuted)
@@ -258,7 +258,9 @@ int main(int argc, char *argv[])
                 // Blank the Images
                 for (i = 0; i < demo->displays[n].planes; i++)
                     for (j = 0; j < demo->displays[n].height; j++)
-                        memset(&demo->displays[n].pData[i][j*demo->displays[n].y_stride],0x80,demo->displays[n].x_stride*demo->displays[n].width);
+                        memset(DVP_Image_Addressing(&demo->displays[n], 0, j, i),
+                               0x80,
+                               DVP_Image_LineSize(&demo->displays[n], i));
                 // initialize images which are the subsections of the display buffers
                 for (i = 0; i < numSubImages; i++)
                 {
