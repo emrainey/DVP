@@ -18,22 +18,13 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PRELINK_MODULE := false
 LOCAL_ARM_MODE := arm
 LOCAL_CFLAGS := -DDVP_KGAPI_THREADED $(DVP_DEBUGGING) $(DVP_CFLAGS) $(DVP_FEATURES)
+LOCAL_SRC_FILES := dvp_kgb.c dvp_kmdl.c dvp_kgraph.c dvp_mem.c dvp_mem_int.c
 ifeq ($(TARGET_ANDROID_VERSION),GINGERBREAD)
 LOCAL_CFLAGS += -DV4L2_SUPPORT
-else ifeq ($(PLAT_MAJOR),4) # ICS/JB
+LOCAL_SRC_FILES += dvp_display_v4l2.c dvp_rpc_rcm.c
+else ifeq ($(PLAT_MAJOR),4)
 LOCAL_CFLAGS += -DSURFACE_FLINGER -DDVP_CONTINUE_ON_ERRORS
-endif
-LOCAL_SRC_FILES := \
-	dvp_kgb.c \
-	dvp_kmdl.c \
-	dvp_kgraph.c \
-	dvp_mem.c \
-	dvp_mem_int.c \
-	dvp_display.c
-ifeq ($(PLAT_MAJOR),4)
-LOCAL_SRC_FILES += dvp_rpc_omaprpc.c
-else
-LOCAL_SRC_FILES += dvp_rpc_rcm.c
+LOCAL_SRC_FILES += dvp_display_sf.c dvp_rpc_omaprpc.c
 endif
 
 LOCAL_C_INCLUDES := $(DVP_INCLUDES)

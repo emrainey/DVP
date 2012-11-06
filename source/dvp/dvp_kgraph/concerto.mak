@@ -15,7 +15,7 @@
 include $(PRELUDE)
 TARGET=dvp
 TARGETTYPE=dsmo
-CSOURCES=$(all-c-files)
+CSOURCES=dvp_kgraph.c dvp_kgb.c dvp_mem.c dvp_mem_int.c dvp_kmdl.c
 DEFFILE=dvp.def
 DEFS+=DVP_KGAPI_THREADED $(DVP_FEATURES)
 IDIRS += $(IPC_INCS) $(MEM_INCS)
@@ -26,16 +26,25 @@ ifeq ($(TARGET_OS),LINUX)
         LDIRS+=$(GTK_LDIRS)
         STATIC_LIBS+=gtkwindow
         SYS_SHARED_LIBS+=$(GTK_LIBS)
+        CSOURCES+=dvp_display_gtk.c
     endif
     SHARED_LIBS += $(IPC_LIBS)
+    ifeq ($(TARGET_CPU),ARM)
+        CSOURCES+=dvp_rpc_omaprpc.c
+    else
+        CSOURCES+=dvp_rpc_stub.c
+    endif
 else ifeq ($(TARGET_OS),Windows_NT)
     SYS_SHARED_LIBS += $(IPC_LIBS) $(PLATFORM_LIBS)
+    CSOURCES+=dvp_display_file.c dvp_rpc_stub.c
 else ifeq ($(TARGET_OS),__QNX__)
     STATIC_LIBS += qnxscreen
     SYS_SHARED_LIBS += $(IPC_LIBS) $(PLATFORM_LIBS)
+    CSOURCES+=dvp_display_qnx.c dvp_rpc_rcm.c
 else
     # in non-linux systems, are aren't using OMAPRPC
     SYS_SHARED_LIBS += $(IPC_LIBS) $(PLATFORM_LIBS)
+    CSOURCES+=dvp_rpc_stub.c
 endif
 STATIC_LIBS+=sosal
 include $(FINALE)
