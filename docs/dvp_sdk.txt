@@ -5,7 +5,7 @@
   Distributed Vision Processing (DVP) framework.
 
 
-  \version RLS_2.04-53-g45d5072-dirty
+  \version VERSION
   \date DATE
 
 */
