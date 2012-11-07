@@ -50,6 +50,42 @@
 
 #define KGM_TAG "DVP KGM DSP"
 
+static dvp_image_shift_t dsp_shift3 = {
+    -1, -1, 0, 2, 2, 0,
+};
+
+static dvp_image_shift_t dsp_shift5 = {
+    -2, -2, 0, 4, 4, 0,
+};
+
+static dvp_image_shift_t dsp_shift7 = {
+    -3, -3, 0, 6, 6, 0,
+};
+
+static dvp_image_shift_t dsp_shift8 = {
+    -4, -4, 0, 7, 7, 0,
+};
+
+static dvp_image_shift_t dsp_shift11 = {
+    -5, -5, 0, 10, 10, 0,
+};
+
+static dvp_image_shift_t dsp_shift16 = {
+    -8, -8, 0, 15, 15, 0,
+};
+
+static dvp_image_shift_t dsp_nonmax_shift3 = {
+    -1, 1, 2, 2, 0, 0,
+};
+
+static dvp_image_shift_t dsp_nonmax_shift5 = {
+    -2, 2, 4, 4, 0, 0,
+};
+
+static dvp_image_shift_t dsp_nonmax_shift7 = {
+    -3, 3, 6, 6, 0, 0,
+};
+
 static DVP_CoreFunction_t remote_kernels[] = {
 #ifdef DVP_USE_IPC
     {"c64t No operation",               DVP_KN_NOOP,                        0, NULL, NULL},
@@ -73,40 +109,40 @@ static DVP_CoreFunction_t remote_kernels[] = {
     {"c64t UnPackMask32",               DVP_KN_VLIB_UNPACK_MASK_32,         0, NULL, NULL},
 
     // Generic Morph
-    {"c64t DilateCross",                DVP_KN_DILATE_CROSS,                0, NULL, NULL},
-    {"c64t DilateMask",                 DVP_KN_DILATE_MASK,                 0, NULL, NULL},
-    {"c64t DilateSquare",               DVP_KN_DILATE_SQUARE,               0, NULL, NULL},
-    {"c64t ErodeCross",                 DVP_KN_ERODE_CROSS,                 0, NULL, NULL},
-    {"c64t ErodeMask",                  DVP_KN_ERODE_MASK,                  0, NULL, NULL},
-    {"c64t ErodeSquare",                DVP_KN_ERODE_SQUARE,                0, NULL, NULL},
+    {"c64t DilateCross",                DVP_KN_DILATE_CROSS,                0, &dsp_shift3, NULL},
+    {"c64t DilateMask",                 DVP_KN_DILATE_MASK,                 0, &dsp_shift3, NULL},
+    {"c64t DilateSquare",               DVP_KN_DILATE_SQUARE,               0, &dsp_shift3, NULL},
+    {"c64t ErodeCross",                 DVP_KN_ERODE_CROSS,                 0, &dsp_shift3, NULL},
+    {"c64t ErodeMask",                  DVP_KN_ERODE_MASK,                  0, &dsp_shift3, NULL},
+    {"c64t ErodeSquare",                DVP_KN_ERODE_SQUARE,                0, &dsp_shift3, NULL},
 
-    {"c64t DilateCross",                DVP_KN_VLIB_DILATE_CROSS,           0, NULL, NULL},
-    {"c64t DilateMask",                 DVP_KN_VLIB_DILATE_MASK,            0, NULL, NULL},
-    {"c64t DilateSquare",               DVP_KN_VLIB_DILATE_SQUARE,          0, NULL, NULL},
-    {"c64t ErodeCross",                 DVP_KN_VLIB_ERODE_CROSS,            0, NULL, NULL},
-    {"c64t ErodeMask",                  DVP_KN_VLIB_ERODE_MASK,             0, NULL, NULL},
-    {"c64t ErodeSquare",                DVP_KN_VLIB_ERODE_SQUARE,           0, NULL, NULL},
+    {"c64t DilateCross",                DVP_KN_VLIB_DILATE_CROSS,           0, &dsp_shift3, NULL},
+    {"c64t DilateMask",                 DVP_KN_VLIB_DILATE_MASK,            0, &dsp_shift3, NULL},
+    {"c64t DilateSquare",               DVP_KN_VLIB_DILATE_SQUARE,          0, &dsp_shift3, NULL},
+    {"c64t ErodeCross",                 DVP_KN_VLIB_ERODE_CROSS,            0, &dsp_shift3, NULL},
+    {"c64t ErodeMask",                  DVP_KN_VLIB_ERODE_MASK,             0, &dsp_shift3, NULL},
+    {"c64t ErodeSquare",                DVP_KN_VLIB_ERODE_SQUARE,           0, &dsp_shift3, NULL},
     {"c64t Erode1Pixel",                DVP_KN_VLIB_ERODE_SINGLEPIXEL,      0, NULL, NULL},
 
     {"c64t ConnectedComponent",         DVP_KN_VLIB_CCL,                    0, NULL, NULL},
 
-    {"c64t Canny2DGradient",            DVP_KN_CANNY_2D_GRADIENT,           0, NULL, NULL},
-    {"c64t CannyNonmaxSupress",         DVP_KN_CANNY_NONMAX_SUPPRESSION,    0, NULL, NULL},
+    {"c64t Canny2DGradient",            DVP_KN_CANNY_2D_GRADIENT,           0, &dsp_shift3, NULL},
+    {"c64t CannyNonmaxSupress",         DVP_KN_CANNY_NONMAX_SUPPRESSION,    0, &dsp_shift3, NULL},
 //    {"c64t CannyHystThresh",            DVP_KN_CANNY_HYST_THRESHHOLD,       0, NULL, NULL},
 
-    {"c64t Canny2DGradient",            DVP_KN_VLIB_CANNY_2D_GRADIENT,      0, NULL, NULL},
-    {"c64t CannyNonmaxSupress",         DVP_KN_VLIB_CANNY_NONMAX_SUPPRESSION, 0, NULL, NULL},
+    {"c64t Canny2DGradient",            DVP_KN_VLIB_CANNY_2D_GRADIENT,      0, &dsp_shift3, NULL},
+    {"c64t CannyNonmaxSupress",         DVP_KN_VLIB_CANNY_NONMAX_SUPPRESSION, 0, &dsp_shift3, NULL},
 //    {"c64t CannyHystThresh",            DVP_KN_VLIB_CANNY_HYST_THRESHHOLD,  0, NULL, NULL},
     {"c64t HystThresh",                 DVP_KN_VLIB_HYST_THRESHOLD,         0, NULL, NULL},
 
     {"c64t ImgPyramid8",                DVP_KN_VLIB_IMAGE_PYRAMID_8,        0, NULL, NULL},
     {"c64t ImgPyramid16",               DVP_KN_VLIB_IMAGE_PYRAMID_16,       0, NULL, NULL},
 
-    {"c64t Gauss5x5Pyramid8",           DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8,  0, NULL, NULL},
-    {"c64t Gauss5x5Pyramid16",          DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16, 0, NULL, NULL},
+    {"c64t Gauss5x5Pyramid8",           DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_8,  0, &dsp_shift5, NULL},
+    {"c64t Gauss5x5Pyramid16",          DVP_KN_VLIB_GAUSSIAN_5x5_PYRAMID_16, 0, &dsp_shift5, NULL},
 
-    {"c64t GradientH5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8, 0, NULL, NULL},
-    {"c64t GradientV5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8, 0, NULL, NULL},
+    {"c64t GradientH5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_H5x5_PYRAMID_8, 0, &dsp_shift5, NULL},
+    {"c64t GradientV5x5Pyramid8",       DVP_KN_VLIB_GRADIENT_V5x5_PYRAMID_8, 0, &dsp_shift5, NULL},
 
     {"c64t HarrisScore7x7",             DVP_KN_VLIB_HARRIS_SCORE_7x7,       0, NULL, NULL},
     {"c64t Track Features Lucas 7x7",   DVP_KN_VLIB_TRACK_FEATURES_LUCAS_7x7, 0, NULL, NULL},
@@ -124,13 +160,13 @@ static DVP_CoreFunction_t remote_kernels[] = {
 
     {"c64t HoughLine",                  DVP_KN_VLIB_HOUGH_LINE_FROM_LIST,   0, NULL, NULL},
 
-    {"c64t Nonmaxsupress3x316",         DVP_KN_NONMAXSUPPRESS_3x3_S16,      0, NULL, NULL},
-    {"c64t Nonmaxsupress5x516",         DVP_KN_NONMAXSUPPRESS_5x5_S16,      0, NULL, NULL},
-    {"c64t Nonmaxsupress7x716",         DVP_KN_NONMAXSUPPRESS_7x7_S16,      0, NULL, NULL},
+    {"c64t Nonmaxsupress3x316",         DVP_KN_NONMAXSUPPRESS_3x3_S16,      0, &dsp_nonmax_shift3, NULL},
+    {"c64t Nonmaxsupress5x516",         DVP_KN_NONMAXSUPPRESS_5x5_S16,      0, &dsp_nonmax_shift5, NULL},
+    {"c64t Nonmaxsupress7x716",         DVP_KN_NONMAXSUPPRESS_7x7_S16,      0, &dsp_nonmax_shift7, NULL},
 
-    {"c64t Nonmaxsupress3x316",         DVP_KN_VLIB_NONMAXSUPPRESS_3x3_S16, 0, NULL, NULL},
-    {"c64t Nonmaxsupress5x516",         DVP_KN_VLIB_NONMAXSUPPRESS_5x5_S16, 0, NULL, NULL},
-    {"c64t Nonmaxsupress7x716",         DVP_KN_VLIB_NONMAXSUPPRESS_7x7_S16, 0, NULL, NULL},
+    {"c64t Nonmaxsupress3x316",         DVP_KN_VLIB_NONMAXSUPPRESS_3x3_S16, 0, &dsp_nonmax_shift3, NULL},
+    {"c64t Nonmaxsupress5x516",         DVP_KN_VLIB_NONMAXSUPPRESS_5x5_S16, 0, &dsp_nonmax_shift5, NULL},
+    {"c64t Nonmaxsupress7x716",         DVP_KN_VLIB_NONMAXSUPPRESS_7x7_S16, 0, &dsp_nonmax_shift7, NULL},
 
     {"c64t NormalFlow",                 DVP_KN_VLIB_NORMALFLOW_16,          0, NULL, NULL},
     {"c64t Kalman2x4",                  DVP_KN_VLIB_KALMAN_2x4,             0, NULL, NULL},
@@ -173,26 +209,26 @@ static DVP_CoreFunction_t remote_kernels[] = {
     {"c64t VarConst32",                 DVP_KN_VLIB_INIT_VAR_CONST_S32,     0, NULL, NULL},
     {"c64t Legendre Moments Init",      DVP_KN_VLIB_LEGENDRE_MOMENTS_INIT,  0, NULL, NULL},
     {"c64t HarrisScore7x7 32bit",       DVP_KN_VLIB_HARRIS_SCORE_7x7_U32,   0, NULL, NULL},
-    {"c64t Nonmaxsupress 32bit",        DVP_KN_VLIB_NONMAXSUPPRESS_U32,     0, NULL, NULL},
+    {"c64t Nonmaxsupress 32bit",        DVP_KN_VLIB_NONMAXSUPPRESS_U32,     0, &dsp_nonmax_shift3, NULL},
 #endif
 #ifdef DVP_USE_IMGLIB
     {"c64t YUV420p to RGB565",          DVP_KN_YUV422p_TO_RGB565,           0, NULL, NULL},
     {"c64t YUV420p to RGB565",          DVP_KN_IMG_YUV422p_TO_RGB565,       0, NULL, NULL},
 
-    {"c64t Img Conv 3x3",               DVP_KN_CONV_3x3,                    0, NULL, NULL},
-    {"c64t Img Conv 5x5",               DVP_KN_CONV_5x5,                    0, NULL, NULL},
-    {"c64t Img Conv 7x7",               DVP_KN_CONV_7x7,                    0, NULL, NULL},
+    {"c64t Img Conv 3x3",               DVP_KN_CONV_3x3,                    0, &dsp_shift3, NULL},
+    {"c64t Img Conv 5x5",               DVP_KN_CONV_5x5,                    0, &dsp_shift5, NULL},
+    {"c64t Img Conv 7x7",               DVP_KN_CONV_7x7,                    0, &dsp_shift7, NULL},
 
-    {"c64t Img Conv 3x3",               DVP_KN_IMG_CONV_3x3,                0, NULL, NULL},
-    {"c64t Img Conv 5x5",               DVP_KN_IMG_CONV_5x5,                0, NULL, NULL},
-    {"c64t Img Conv 7x7",               DVP_KN_IMG_CONV_7x7,                0, NULL, NULL},
-    {"c64t Img Conv 11x11",             DVP_KN_IMG_CONV_11x11,              0, NULL, NULL},
-    {"c64t Img Conv 5x5 i8 c16s",       DVP_KN_IMG_CONV_5x5_I8_C16,         0, NULL, NULL},
-    {"c64t Img Conv 7x7 i8 c16s",       DVP_KN_IMG_CONV_7x7_I8_C16,         0, NULL, NULL},
-    {"c64t Img Conv 3x3 i16s c16s",     DVP_KN_IMG_CONV_3x3_I16s_C16,       0, NULL, NULL},
-    {"c64t Img Conv 5x5 i16 c16s",      DVP_KN_IMG_CONV_5x5_I16s_C16,       0, NULL, NULL},
-    {"c64t Img Conv 7x7 i16 c16s",      DVP_KN_IMG_CONV_7x7_I16s_C16,       0, NULL, NULL},
-    {"c64t Img Conv 11x11 i16s c16s",   DVP_KN_IMG_CONV_11x11_I16s_C16,     0, NULL, NULL},
+    {"c64t Img Conv 3x3",               DVP_KN_IMG_CONV_3x3,                0, &dsp_shift3, NULL},
+    {"c64t Img Conv 5x5",               DVP_KN_IMG_CONV_5x5,                0, &dsp_shift5, NULL},
+    {"c64t Img Conv 7x7",               DVP_KN_IMG_CONV_7x7,                0, &dsp_shift7, NULL},
+    {"c64t Img Conv 11x11",             DVP_KN_IMG_CONV_11x11,              0, &dsp_shift11, NULL},
+    {"c64t Img Conv 5x5 i8 c16s",       DVP_KN_IMG_CONV_5x5_I8_C16,         0, &dsp_shift5, NULL},
+    {"c64t Img Conv 7x7 i8 c16s",       DVP_KN_IMG_CONV_7x7_I8_C16,         0, &dsp_shift7, NULL},
+    {"c64t Img Conv 3x3 i16s c16s",     DVP_KN_IMG_CONV_3x3_I16s_C16,       0, &dsp_shift3, NULL},
+    {"c64t Img Conv 5x5 i16 c16s",      DVP_KN_IMG_CONV_5x5_I16s_C16,       0, &dsp_shift5, NULL},
+    {"c64t Img Conv 7x7 i16 c16s",      DVP_KN_IMG_CONV_7x7_I16s_C16,       0, &dsp_shift7, NULL},
+    {"c64t Img Conv 11x11 i16s c16s",   DVP_KN_IMG_CONV_11x11_I16s_C16,     0, &dsp_shift11, NULL},
 
     {"c64t Img Thr gt2max8",            DVP_KN_THR_GT2MAX_8,                0, NULL, NULL},
     {"c64t Img Thr gt2max16",           DVP_KN_THR_GT2MAX_16,               0, NULL, NULL},
@@ -202,7 +238,7 @@ static DVP_CoreFunction_t remote_kernels[] = {
     {"c64t Img Thr le2min16",           DVP_KN_THR_LE2MIN_16,               0, NULL, NULL},
     {"c64t Img Thr le2thr8",            DVP_KN_THR_LE2THR_8,                0, NULL, NULL},
     {"c64t Img Thr le2thr16",           DVP_KN_THR_LE2THR_16,               0, NULL, NULL},
-    {"c64t Img sobel 3x3_8",            DVP_KN_SOBEL_3x3_8,                 0, NULL, NULL},
+    {"c64t Img sobel 3x3_8",            DVP_KN_SOBEL_3x3_8,                 0, &dsp_shift3, NULL},
 
     {"c64t Img Thr gt2max8",            DVP_KN_IMG_THR_GT2MAX_8,            0, NULL, NULL},
     {"c64t Img Thr gt2max16",           DVP_KN_IMG_THR_GT2MAX_16,           0, NULL, NULL},
@@ -212,37 +248,37 @@ static DVP_CoreFunction_t remote_kernels[] = {
     {"c64t Img Thr le2min16",           DVP_KN_IMG_THR_LE2MIN_16,           0, NULL, NULL},
     {"c64t Img Thr le2thr8",            DVP_KN_IMG_THR_LE2THR_8,            0, NULL, NULL},
     {"c64t Img Thr le2thr16",           DVP_KN_IMG_THR_LE2THR_16,           0, NULL, NULL},
-    {"c64t Img sobel 3x3_8",            DVP_KN_IMG_SOBEL_3x3_8,             0, NULL, NULL},
-    {"c64t Img sobel 3x3_16s",          DVP_KN_IMG_SOBEL_3x3_16s,           0, NULL, NULL},
-    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_5x5_16s,           0, NULL, NULL},
-    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_7x7_16s,           0, NULL, NULL},
-    {"c64t CannyImgSmooth",             DVP_KN_CANNY_IMAGE_SMOOTHING,       0, NULL, NULL},
+    {"c64t Img sobel 3x3_8",            DVP_KN_IMG_SOBEL_3x3_8,             0, &dsp_shift3, NULL},
+    {"c64t Img sobel 3x3_16s",          DVP_KN_IMG_SOBEL_3x3_16s,           0, &dsp_shift3, NULL},
+    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_5x5_16s,           0, &dsp_shift5, NULL},
+    {"c64t Img sobel 5x5_16s",          DVP_KN_IMG_SOBEL_7x7_16s,           0, &dsp_shift7, NULL},
+    {"c64t CannyImgSmooth",             DVP_KN_CANNY_IMAGE_SMOOTHING,       0, &dsp_shift7, NULL},
     {"c64t Img Clipping 16",            DVP_KN_IMG_CLIPPING_16,             0, NULL, NULL},
     {"c64t Img Boundary8",              DVP_KN_IMG_BOUNDARY_8,              0, NULL, NULL},
     {"c64t Img Boundary16s",            DVP_KN_IMG_BOUNDARY_16s,            0, NULL, NULL},
-    {"c64t Img Correlation 3x3",        DVP_KN_IMG_CORR_3x3,                0, NULL, NULL},
-    {"c64t Img Correlation 3x3 I8 C16s",  DVP_KN_IMG_CORR_3x3_I8_C16s,      0, NULL, NULL},
-    {"c64t Img Correlation 3x3 I16s C16s",  DVP_KN_IMG_CORR_3x3_I16s_C16s,  0, NULL, NULL},
-    {"c64t Img Correlation 5x5 I16s C16s",  DVP_KN_IMG_CORR_5x5_I16s_C16s,  0, NULL, NULL},
-    {"c64t Img Correlation 11x11 I8 C16s",  DVP_KN_IMG_CORR_11x11_I8_C16s,  0, NULL, NULL},
-    {"c64t Img Correlation 11x11 I16s C16s",  DVP_KN_IMG_CORR_11x11_I16s_C16s, 0, NULL, NULL},
-    {"c64t Img Correlation Gen I16 C16s",  DVP_KN_IMG_CORR_GEN_I16s_C16s,   0, NULL, NULL},
+    {"c64t Img Correlation 3x3",        DVP_KN_IMG_CORR_3x3,                0, &dsp_shift3, NULL},
+    {"c64t Img Correlation 3x3 I8 C16s",  DVP_KN_IMG_CORR_3x3_I8_C16s,      0, &dsp_shift3, NULL},
+    {"c64t Img Correlation 3x3 I16s C16s",  DVP_KN_IMG_CORR_3x3_I16s_C16s,  0, &dsp_shift3, NULL},
+    {"c64t Img Correlation 5x5 I16s C16s",  DVP_KN_IMG_CORR_5x5_I16s_C16s,  0, &dsp_shift5, NULL},
+    {"c64t Img Correlation 11x11 I8 C16s",  DVP_KN_IMG_CORR_11x11_I8_C16s,  0, &dsp_shift11, NULL},
+    {"c64t Img Correlation 11x11 I16s C16s",  DVP_KN_IMG_CORR_11x11_I16s_C16s, 0, &dsp_shift11, NULL},
+    {"c64t Img Correlation Gen I16 C16s",  DVP_KN_IMG_CORR_GEN_I16s_C16s,   0, &dsp_shift11, NULL},
     {"c64t Img Correlation Gen Iq",     DVP_KN_IMG_CORR_GEN_IQ,             0, NULL, NULL},
     {"c64t Img Histogram8",             DVP_KN_IMG_HISTOGRAM_8,             0, NULL, NULL},
     {"c64t Img Histogram16",            DVP_KN_IMG_HISTOGRAM_16,            0, NULL, NULL},
-    {"c64t Img Median 3x3 8",           DVP_KN_IMG_MEDIAN_3x3_8,            0, NULL, NULL},
-    {"c64t Img Median 3x3 16s",          DVP_KN_IMG_MEDIAN_3x3_16s,         0, NULL, NULL},
-    {"c64t Img Perimeter 8",            DVP_KN_IMG_PERIMETER_8,             0, NULL, NULL},
-    {"c64t Img Perimeter 16",           DVP_KN_IMG_PERIMETER_16,            0, NULL, NULL},
+    {"c64t Img Median 3x3 8",           DVP_KN_IMG_MEDIAN_3x3_8,            0, &dsp_shift3, NULL},
+    {"c64t Img Median 3x3 16s",          DVP_KN_IMG_MEDIAN_3x3_16s,         0, &dsp_shift3, NULL},
+    {"c64t Img Perimeter 8",            DVP_KN_IMG_PERIMETER_8,             0, &dsp_shift3, NULL},
+    {"c64t Img Perimeter 16",           DVP_KN_IMG_PERIMETER_16,            0, &dsp_shift3, NULL},
     {"c64t Img Demux LE 8",             DVP_KN_IMG_YC_DEMUX_LE16_8,         0, NULL, NULL},
     {"c64t Img Demux BE 8",             DVP_KN_IMG_YC_DEMUX_BE16_8,         0, NULL, NULL},
     {"c64t Img Pix Sat ",               DVP_KN_IMG_PIX_SAT,                 0, NULL, NULL},
     {"c64t Img Pix Expand ",            DVP_KN_IMG_PIX_EXPAND,              0, NULL, NULL},
-    {"c64t Img SAD 3x3",                DVP_KN_IMG_SAD_3x3,                 0, NULL, NULL},
-    {"c64t Img SAD 5x5",                DVP_KN_IMG_SAD_5x5,                 0, NULL, NULL},
-    {"c64t Img SAD 7x7",                DVP_KN_IMG_SAD_7x7,                 0, NULL, NULL},
-    {"c64t Img SAD 8x8",                DVP_KN_IMG_SAD_8x8,                 0, NULL, NULL},
-    {"c64t Img SAD 16x16",              DVP_KN_IMG_SAD_16x16,               0, NULL, NULL},
+    {"c64t Img SAD 3x3",                DVP_KN_IMG_SAD_3x3,                 0, &dsp_shift3, NULL},
+    {"c64t Img SAD 5x5",                DVP_KN_IMG_SAD_5x5,                 0, &dsp_shift5, NULL},
+    {"c64t Img SAD 7x7",                DVP_KN_IMG_SAD_7x7,                 0, &dsp_shift7, NULL},
+    {"c64t Img SAD 8x8",                DVP_KN_IMG_SAD_8x8,                 0, &dsp_shift8, NULL},
+    {"c64t Img SAD 16x16",              DVP_KN_IMG_SAD_16x16,               0, &dsp_shift16, NULL},
     {"c64t Img ErrDiff 8",              DVP_KN_IMG_ERRDIFF_BIN_8,           0, NULL, NULL},
     {"c64t Img ErrDiff 16",             DVP_KN_IMG_ERRDIFF_BIN_16,          0, NULL, NULL},
     {"c64t Img FDCT 8x8",               DVP_KN_IMG_FDCT_8x8,                0, NULL, NULL},
