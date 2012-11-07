@@ -89,6 +89,7 @@ static dvp_image_shift_t dsp_nonmax_shift7 = {
 static DVP_CoreFunction_t remote_kernels[] = {
 #ifdef DVP_USE_IPC
     {"c64t No operation",               DVP_KN_NOOP,                        0, NULL, NULL},
+    {"c64t Echo",                       DVP_KN_COPY,                        0, NULL, NULL},
 #ifdef DVP_USE_VLIB
     // name                             kernel                              priority,   load
     {"c64t EWRMeanS16",                 DVP_KN_VLIB_EWR_MEAN_S16,           0, NULL, NULL},
@@ -358,8 +359,6 @@ static DVP_CoreFunction_t remote_kernels[] = {
 #ifdef DVP_USE_DEI
     {"c64t Deinterlacer",               DVP_KN_DEI_DEINTERLACER,            0, NULL, NULL},
 #endif
-#else //DVP_USE_IPC
-    {"c64t Echo",                       DVP_KN_ECHO,                        0, NULL, NULL},
 #endif
 };
 static DVP_U32 numRemoteKernels = dimof(remote_kernels);
@@ -496,6 +495,15 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
             {
                 case DVP_KN_NOOP:
                 {
+                    break;
+                }
+                case DVP_KN_COPY:
+                {
+                    DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->input, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->output, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pIO->input);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pIO->output);
                     break;
                 }
 #ifdef DVP_USE_VLIB
@@ -1493,6 +1501,13 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
             {
                 case DVP_KN_NOOP:
                 {
+                    break;
+                }
+                case DVP_KN_COPY:
+                {
+                    DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->input, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->output, DVP_TRUE);
                     break;
                 }
 #ifdef DVP_USE_VLIB

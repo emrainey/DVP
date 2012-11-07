@@ -77,6 +77,7 @@ static void dvp_vrun_conv_mxn_shift(DVP_KernelNode_t *node, dvp_image_shift_t *s
 static DVP_CoreFunction_t remote_kernels[] = {
 #ifdef DVP_USE_IPC
     {"SIMCOP No operation",    DVP_KN_NOOP,                         0, NULL, NULL},
+    {"SIMCOP Echo",            DVP_KN_COPY,                         0, NULL, NULL},
 #ifdef DVP_USE_VRUN
     // name                    kernel                               load  shift   shift_func
     {"SIMCOP Dilate Cross",    DVP_KN_DILATE_CROSS,                 0, &imx_shift3, NULL},
@@ -218,8 +219,6 @@ static DVP_CoreFunction_t remote_kernels[] = {
     {"SIMCOP DEI INIT",        DVP_KN_DEI_DEINTERLACER_INIT,        0, NULL, NULL},
     {"SIMCOP DEI DEINIT",      DVP_KN_DEI_DEINTERLACER_DEINIT,      0, NULL, NULL},
 #endif
-#else
-    {"SIMCOP Echo", DVP_KN_ECHO, 0, NULL, NULL},
 #endif
 };
 static DVP_U32 numRemoteKernels = dimof(remote_kernels);
@@ -358,6 +357,15 @@ static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 s
                 case DVP_KN_DEI_DEINTERLACER_DEINIT:
 #endif
                 {
+                    break;
+                }
+                case DVP_KN_COPY:
+                {
+                    DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->input, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->output, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pIO->input);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pIO->output);
                     break;
                 }
 #ifdef DVP_USE_VRUN
@@ -673,6 +681,13 @@ static DVP_U32 DVP_KernelGraphManager_SIMCOP(DVP_KernelNode_t *pNodes, DVP_U32 s
                 case DVP_KN_DEI_DEINTERLACER_DEINIT:
 #endif
                 {
+                    break;
+                }
+                case DVP_KN_COPY:
+                {
+                    DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->input, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pIO->output, DVP_TRUE);
                     break;
                 }
 #ifdef DVP_USE_VRUN
@@ -1085,6 +1100,16 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
             case DVP_KN_DEI_DEINTERLACER_DEINIT:
 #endif
             {
+                break;
+            }
+            case DVP_KN_COPY:
+            {
+                DVP_Transform_t *pIO = dvp_knode_to(&pNodes[n], DVP_Transform_t);
+                if (DVP_Image_Validate(&pIO->input, 1, 1, 1, 1, &pIO->output.color, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pIO->output, 1, 1, 1, 1, &pIO->input.color, 1) == DVP_FALSE ||
+                    pIO->input.width  > pIO->output.width ||
+                    pIO->input.height > pIO->output.height)
+                    pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
 #ifdef DVP_USE_VRUN

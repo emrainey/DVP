@@ -349,7 +349,7 @@ status_e dvp_copy_test(void)
                         if (cores[c].enabled == DVP_TRUE)
                         {
                             DVP_Transform_t *pT = dvp_knode_to(&nodes[n], DVP_Transform_t);
-                            nodes[n].header.kernel = DVP_KN_ECHO;
+                            nodes[n].header.kernel = DVP_KN_COPY;
                             nodes[n].header.affinity = (DVP_Core_e)c;
 
                             DVP_Image_Init(&pT->input, width, height, FOURCC_Y800);
@@ -524,13 +524,13 @@ status_e dvp_custom_copy_test(void)
     {
         if (cores[c].enabled == DVP_TRUE)
         {
-            nodes[n].header.kernel = DVP_KN_ECHO;
+            nodes[n].header.kernel = DVP_KN_COPY;
             nodes[n].header.affinity = (DVP_Core_e)c;
 
-            nodes[n + numCoresEnabled].header.kernel = DVP_KN_ECHO;
+            nodes[n + numCoresEnabled].header.kernel = DVP_KN_COPY;
             nodes[n + numCoresEnabled].header.affinity = (DVP_Core_e)c;
 
-            nodes[n + 2 * numCoresEnabled].header.kernel = DVP_KN_ECHO;
+            nodes[n + 2 * numCoresEnabled].header.kernel = DVP_KN_COPY;
             nodes[n + 2 * numCoresEnabled].header.affinity = (DVP_Core_e)c;
 
             n++;

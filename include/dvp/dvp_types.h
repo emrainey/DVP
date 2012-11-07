@@ -570,10 +570,16 @@ typedef enum _dvp_knode_e {
     DVP_KF_DEBUG_BASE = DVP_KN_FEATURE_BASE(DVP_KF_DEBUG),
 
     /*!
-     * Copies the input image to the output memory\n
+     * Copies the input image to the output memory, including cropping and padding\n
      * Configuration Structure: DVP_Transform_t
      */
-    DVP_KN_ECHO,
+    DVP_KN_COPY,
+
+    /*!
+     * Copies the input image to the output memory (DEPRECIATED)\n
+     * Configuration Structure: DVP_Transform_t
+     */
+    DVP_KN_ECHO = DVP_KN_COPY,
 
     /*!
      * Writes an images to a file\n

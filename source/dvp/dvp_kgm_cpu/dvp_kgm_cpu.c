@@ -182,7 +182,7 @@ static DVP_CoreFunction_t local_kernels[] = {
     {"Threshold",      DVP_KN_THRESHOLD, 0, NULL, NULL},
     {"XStrideConvert", DVP_KN_XSTRIDE_CONVERT, 0, NULL, NULL},
     {"XStrideShift",   DVP_KN_XSTRIDE_SHIFT, 0, NULL, NULL},
-    {"Image Copy",     DVP_KN_ECHO, 0, NULL, NULL},
+    {"Image Copy",     DVP_KN_COPY, 0, NULL, NULL},
     {"Image Debug",    DVP_KN_IMAGE_DEBUG, 0, NULL, NULL},
     {"Buffer Debug",   DVP_KN_BUFFER_DEBUG, 0, NULL, NULL},
     {"Gamma",          DVP_KN_GAMMA, 0, NULL, NULL},
@@ -691,7 +691,7 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                 {
                     break;
                 }
-                case DVP_KN_ECHO:
+                case DVP_KN_COPY:
                 {
                     DVP_Transform_t *pIO = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                     if (DVP_Image_Copy(&pIO->output, &pIO->input) == DVP_FALSE)
@@ -4246,7 +4246,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
         switch (pSubNodes[n].header.kernel)
         {
             // for Transforms, check WxH and NULL base pointers
-            case DVP_KN_ECHO:
+            case DVP_KN_COPY:
             {
                 DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, &pT->output.color, 1) == DVP_FALSE ||

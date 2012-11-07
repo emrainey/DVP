@@ -2408,7 +2408,6 @@ status_e TestVisionEngine::Test_VrunGraphSetup2() // The first VRUN test is too 
 
 #if defined(DVP_USE_VRUN)
     DVP_MemType_e opType = DVP_MTYPE_DEFAULT;
-    DVP_Image_t tmpImages[3];
 
     if (m_hDVP)
     {
@@ -2564,7 +2563,6 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
 {
     status_e status = STATUS_SUCCESS;
 #if defined(DVP_USE_VRUN) || (defined(DVP_USE_VLIB) && defined(DVP_USE_IMGLIB))
-    DVP_Image_t tmpImages[3];
     DVP_Bounds_t bound = {NULL, 0, 0};
     DVP_S08 maskOnes[3][3] = {{1,1,1},{1,1,1},{1,1,1}};
     DVP_S08 maskBlurNeg3x3[3][3] = {{-5, 20, 17} ,
@@ -2598,20 +2596,14 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
 #endif
     if (m_hDVP)
     {
-        if (AllocateImageStructs(75))
+        if (AllocateImageStructs(69))
         {
             /** **/
             DVP_Image_Init(&m_images[0], m_width, m_height, FOURCC_UYVY);
             DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_YV24);
-            DVP_Image_Init(&tmpImages[0], m_width, ((m_height-1)/16+1)*16, FOURCC_Y800); // Height needs to be divisible by 16 for Sobel and multineighbor
-            DVP_Image_Init(&tmpImages[1], m_width, ((m_height-1)/16+1)*16, FOURCC_Y800);
-            DVP_Image_Init(&tmpImages[2], m_width, ((m_height-1)/16+1)*16, FOURCC_Y800);
-            DVP_Image_Init(&m_images[2], m_width, ((m_height-1)/16+1)*16, FOURCC_Y800);
-            DVP_Image_Init(&m_images[3], m_width, ((m_height-1)/16+1)*16, FOURCC_Y800);
-            DVP_Image_Init(&m_images[4], m_width, ((m_height-1)/16+1)*16, FOURCC_Y800);
-            DVP_Image_Init(&m_images[5], ((m_height-1)/16+1)*16, m_width, FOURCC_Y800);   // Height/width transposed
-            DVP_Image_Init(&m_images[6], m_width, ((m_height-1)/16+1)*16,  FOURCC_Y800);
-            DVP_Image_Init(&m_images[7], ((m_height-1)/16+1)*16, m_width, FOURCC_Y800);  // Height/width transposed
+
+            // images 2-7 moved to end of list
+
             /** Misc**/
             DVP_Image_Init(&m_images[8], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[9], m_width, m_height, FOURCC_RGBP);
@@ -2654,14 +2646,14 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             DVP_Image_Init(&m_images[42], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[43], 7, 1, FOURCC_Y800);
             DVP_Image_Init(&m_images[44], 1, 7, FOURCC_Y800);
-            DVP_Image_Init(&m_images[45], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[46], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[47], m_width, ((m_height-1)/16+1)*16, FOURCC_Y16);
-            DVP_Image_Init(&m_images[48], m_width, ((m_height-1)/16+1)*16, FOURCC_Y16);
-            DVP_Image_Init(&m_images[49], m_width, ((m_height-1)/16+1)*16, FOURCC_Y800);
-            DVP_Image_Init(&m_images[50], ((m_height-1)/16+1)*16, m_width, FOURCC_Y800);   // Height/width transposed
-            DVP_Image_Init(&m_images[51], m_width, m_height, FOURCC_Y800);
-            DVP_Image_Init(&m_images[52], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[45], m_width, m_height, FOURCC_Y800); // copy
+            DVP_Image_Init(&m_images[46], m_width*2, m_height*2, FOURCC_Y800); // pad
+            DVP_Image_Init(&m_images[47], m_width/2-15, m_height/2-15, FOURCC_Y800); // crop
+            DVP_Image_Init(&m_images[48], m_width, m_height, FOURCC_Y800); // crop + pad
+            DVP_Image_Init(&m_images[49], m_width, m_height, FOURCC_Y800); // resv
+            DVP_Image_Init(&m_images[50], m_width, m_height, FOURCC_Y800); // resv
+            DVP_Image_Init(&m_images[51], m_width, m_height, FOURCC_Y800); // resv
+            DVP_Image_Init(&m_images[52], m_width, m_height, FOURCC_Y800); // resv
             DVP_Image_Init(&m_images[53], m_width, m_height, FOURCC_RGBP);
             /** Imglib **/
             DVP_Image_Init(&m_images[54], m_width, m_height, FOURCC_Y16);
@@ -2679,19 +2671,17 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             DVP_Image_Init(&m_images[66], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[67], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[68], m_width, m_height, FOURCC_Y800);
-            if(m_width<1280)
-            {
-                DVP_Image_Init(&m_images[69], m_width, m_height, FOURCC_Y16);
-                DVP_Image_Init(&m_images[70], m_width, m_height, FOURCC_Y16);
-                DVP_Image_Init(&m_images[71], m_width, m_height, FOURCC_Y16);
-                DVP_Image_Init(&m_images[72], m_width, m_height, FOURCC_Y16);
-                DVP_Image_Init(&m_images[73], m_width, m_height, FOURCC_Y16);
-                DVP_Image_Init(&m_images[74], m_width, m_height, FOURCC_Y16);
-            }
+
+            DVP_Image_Init(&m_images[2], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[3], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[4], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[5], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[6], m_width, m_height, FOURCC_Y16);
+            DVP_Image_Init(&m_images[7], m_width, m_height, FOURCC_Y16);
+
             /** Misc**/
             if (!DVP_Image_Alloc(m_hDVP, &m_images[0],   camType) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[1],  DVP_MTYPE_DEFAULT) ||
-                //Skipping tmpImages since they are fields that are already allocated in [1]
                 !DVP_Image_Alloc(m_hDVP, &m_images[2],  DVP_MTYPE_DEFAULT) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[3],  DVP_MTYPE_DEFAULT) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[4],  DVP_MTYPE_DEFAULT) ||
@@ -2771,14 +2761,6 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
                 !DVP_Image_Alloc(m_hDVP, &m_images[68], DVP_MTYPE_DEFAULT))
                 return STATUS_NOT_ENOUGH_MEMORY;
 
-            if(m_width<1280)
-                if(!DVP_Image_Alloc(m_hDVP, &m_images[69], DVP_MTYPE_DEFAULT) ||
-                   !DVP_Image_Alloc(m_hDVP, &m_images[70], DVP_MTYPE_DEFAULT) ||
-                   !DVP_Image_Alloc(m_hDVP, &m_images[71], DVP_MTYPE_DEFAULT) ||
-                   !DVP_Image_Alloc(m_hDVP, &m_images[72], DVP_MTYPE_DEFAULT) ||
-                   !DVP_Image_Alloc(m_hDVP, &m_images[73], DVP_MTYPE_DEFAULT) ||
-                   !DVP_Image_Alloc(m_hDVP, &m_images[74], DVP_MTYPE_DEFAULT))
-                    return STATUS_NOT_ENOUGH_MEMORY;
         }
         else
             return STATUS_NOT_ENOUGH_MEMORY;
@@ -2792,21 +2774,6 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             m_pNodes[0].header.kernel = DVP_KN_UYVY_TO_YUV444p;
             dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = m_images[0];
             dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = m_images[1];
-
-            tmpImages[0].pBuffer[0] = m_images[1].pBuffer[0];    // Using Luma from YUV444p function
-            tmpImages[0].pData[0]   = m_images[1].pData[0];      // Using Luma from YUV444p function
-            tmpImages[0].y_stride   = m_images[1].y_stride;
-            tmpImages[0].memType    = m_images[1].memType;
-
-            tmpImages[1].pBuffer[0] = m_images[1].pBuffer[1];    // Using Chroma from YUV444p function
-            tmpImages[1].pData[0]   = m_images[1].pData[1];      // Using Chroma from YUV444p function
-            tmpImages[1].y_stride   = m_images[1].y_stride;
-            tmpImages[1].memType    = m_images[1].memType;
-
-            tmpImages[2].pBuffer[0] = m_images[1].pBuffer[2];    // Using Chroma from YUV444p function
-            tmpImages[2].pData[0]   = m_images[1].pData[2];      // Using Chroma from YUV444p function
-            tmpImages[2].y_stride   = m_images[1].y_stride;
-            tmpImages[2].memType    = m_images[1].memType;
 
             m_pNodes[1].header.kernel = DVP_KN_NOOP;
             m_pNodes[2].header.kernel = DVP_KN_NOOP;
@@ -2983,10 +2950,50 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             DVP_Image_Fill(&m_images[43], (DVP_S08*)maskAvg, 7*sizeof(DVP_S08)); // Copying the mask
             DVP_Image_Fill(&m_images[44], (DVP_S08*)maskAvg, 7*sizeof(DVP_S08)); // Copying the mask
 
-            m_pNodes[30].header.kernel = DVP_KN_NOOP;
-            m_pNodes[31].header.kernel = DVP_KN_NOOP;
-            m_pNodes[32].header.kernel = DVP_KN_NOOP;
-            m_pNodes[33].header.kernel = DVP_KN_NOOP;
+            // Copy (copy full image to full image)
+            m_pNodes[30].header.kernel = DVP_KN_COPY;
+            dvp_knode_to(&m_pNodes[30], DVP_Transform_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[30], DVP_Transform_t)->output = m_images[45];
+
+            // Pad (copy full image to an offset within a larger buffer)
+            m_pNodes[31].header.kernel = DVP_KN_COPY;
+            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output = m_images[46];
+            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output.x_start = m_width/2-15;
+            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output.y_start = m_height/2-15;
+            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output.pData[0] = (DVP_U08*)
+                ((size_t)m_images[46].pBuffer[0] +
+                DVP_Image_Offset(&m_images[46], m_width/2-15,  m_height/2-15, 0));
+
+            // Crop (copy part of an image to a full buffer)
+            m_pNodes[32].header.kernel = DVP_KN_COPY;
+            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.width   = m_width/2-15;
+            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.height  = m_height/2-15;
+            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.x_start = m_width/2-15;
+            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.y_start = m_height/2-15;
+            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.pData[0] = (DVP_U08*)
+                ((size_t)m_images[8].pBuffer[0] +
+                DVP_Image_Offset(&m_images[8], m_width/2-15,  m_height/2-15, 0));
+            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->output = m_images[47];
+
+            // Crop + Pad (copy part of an image to part of another image with an offset)
+            m_pNodes[33].header.kernel = DVP_KN_COPY;
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input = m_images[8];
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.width   = m_width/2-15;
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.height  = m_height/2-15;
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.x_start = m_width/2-15;
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.y_start = m_height/2-15;
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.pData[0] = (DVP_U08*)
+                ((size_t)m_images[8].pBuffer[0] +
+                DVP_Image_Offset(&m_images[8], m_width/2-15,  m_height/2-15, 0));
+
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output = m_images[48];
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output.x_start = m_width/4-15;
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output.y_start = m_height/4-15;
+            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output.pData[0] = (DVP_U08*)
+                ((size_t)m_images[48].pBuffer[0] +
+                DVP_Image_Offset(&m_images[48], m_width/4-15,  m_height/4-15, 0));
 
             m_pNodes[34].header.kernel = DVP_KN_YUV444p_TO_RGBp;
             dvp_knode_to(&m_pNodes[34], DVP_Transform_t)->input  = m_images[1];
@@ -3065,45 +3072,27 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
 
             m_pNodes[50].header.kernel = DVP_KN_SOBEL_3x3_16s;
             dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            if(m_width < 1280)
-                dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->output = m_images[69];
-            else
-                dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->output = m_images[62];
+            dvp_knode_to(&m_pNodes[50], DVP_Transform_t)->output = m_images[2];
 
             m_pNodes[51].header.kernel = DVP_KN_SOBEL_3x3_16;
             dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            if(m_width < 1280)
-                dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->output = m_images[70];
-            else
-                dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->output = m_images[62];
+            dvp_knode_to(&m_pNodes[51], DVP_Transform_t)->output = m_images[3];
 
             m_pNodes[52].header.kernel = DVP_KN_SOBEL_5x5_16s;
             dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            if(m_width < 1280)
-                dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->output = m_images[71];
-            else
-                dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->output = m_images[62];
+            dvp_knode_to(&m_pNodes[52], DVP_Transform_t)->output = m_images[4];
 
             m_pNodes[53].header.kernel = DVP_KN_SOBEL_5x5_16;
             dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            if(m_width < 1280)
-                dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->output = m_images[72];
-            else
-                dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->output = m_images[62];
+            dvp_knode_to(&m_pNodes[53], DVP_Transform_t)->output = m_images[5];
 
             m_pNodes[54].header.kernel = DVP_KN_SOBEL_7x7_16s;
             dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            if(m_width < 1280)
-                dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->output = m_images[73];
-            else
-                dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->output = m_images[62];
+            dvp_knode_to(&m_pNodes[54], DVP_Transform_t)->output = m_images[6];
 
             m_pNodes[55].header.kernel = DVP_KN_SOBEL_7x7_16;
             dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->input = m_images[54];       // Use 16bit luma
-            if(m_width < 1280)
-                dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->output = m_images[74];
-            else
-                dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->output = m_images[62];
+            dvp_knode_to(&m_pNodes[55], DVP_Transform_t)->output = m_images[7];
 
             // put all the nodes in the section.
             m_graphs[0].sections[0].pNodes = &m_pNodes[0];
@@ -3120,17 +3109,14 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
         status = CameraInit(this, m_images[0].color);
         if (status == STATUS_SUCCESS)
         {
-            if (m_imgdbg_enabled && AllocateImageDebug(67))
+            if (m_imgdbg_enabled && AllocateImageDebug(61))
             {
                 /** Misc**/
                 ImageDebug_Init(&m_imgdbg[0],  &m_images[0],  m_imgdbg_path, "00_input");
                 ImageDebug_Init(&m_imgdbg[1],  &m_images[1],  m_imgdbg_path, "01_YUV444");
-                ImageDebug_Init(&m_imgdbg[2],  &m_images[2],  m_imgdbg_path, "02_resv1");
-                ImageDebug_Init(&m_imgdbg[3],  &m_images[3],  m_imgdbg_path, "03_resv1");
-                ImageDebug_Init(&m_imgdbg[4],  &m_images[4],  m_imgdbg_path, "04_resv1");
-                ImageDebug_Init(&m_imgdbg[5],  &m_images[5],  m_imgdbg_path, "05_resv1");
-                ImageDebug_Init(&m_imgdbg[6],  &m_images[6],  m_imgdbg_path, "06_resv1");
-                ImageDebug_Init(&m_imgdbg[7],  &m_images[7],  m_imgdbg_path, "07_resv1");
+
+                // images 2-7 moved to end of list
+
                 /** **/
                 ImageDebug_Init(&m_imgdbg[8],  &m_images[8],  m_imgdbg_path, "08_luma");
                 ImageDebug_Init(&m_imgdbg[9],  &m_images[9],  m_imgdbg_path, "09_RGBpl");
@@ -3165,10 +3151,10 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
                 /** New Requests**/
                 ImageDebug_Init(&m_imgdbg[35], &m_images[41], m_imgdbg_path, "35_fir7X1");
                 ImageDebug_Init(&m_imgdbg[36], &m_images[42], m_imgdbg_path, "36_fir1X7");
-                ImageDebug_Init(&m_imgdbg[37], &m_images[45], m_imgdbg_path, "37_resv1");
-                ImageDebug_Init(&m_imgdbg[38], &m_images[46], m_imgdbg_path, "38_resv1");
-                ImageDebug_Init(&m_imgdbg[39], &m_images[47], m_imgdbg_path, "39_resv1");
-                ImageDebug_Init(&m_imgdbg[40], &m_images[48], m_imgdbg_path, "40_resv1");
+                ImageDebug_Init(&m_imgdbg[37], &m_images[45], m_imgdbg_path, "37_copy");
+                ImageDebug_Init(&m_imgdbg[38], &m_images[46], m_imgdbg_path, "38_pad");
+                ImageDebug_Init(&m_imgdbg[39], &m_images[47], m_imgdbg_path, "39_crop");
+                ImageDebug_Init(&m_imgdbg[40], &m_images[48], m_imgdbg_path, "40_crop_pad");
                 ImageDebug_Init(&m_imgdbg[41], &m_images[49], m_imgdbg_path, "41_resv1");
                 ImageDebug_Init(&m_imgdbg[42], &m_images[50], m_imgdbg_path, "42_resv1");
                 ImageDebug_Init(&m_imgdbg[43], &m_images[51], m_imgdbg_path, "43_resv1");
@@ -3190,22 +3176,12 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
                 ImageDebug_Init(&m_imgdbg[58], &m_images[66], m_imgdbg_path, "58_sobel8_5X5");
                 ImageDebug_Init(&m_imgdbg[59], &m_images[67], m_imgdbg_path, "59_sobel8_7X7_s");
                 ImageDebug_Init(&m_imgdbg[60], &m_images[68], m_imgdbg_path, "60_sobel8_7X7");
-                if(m_width < 1280)
-                {
-                    ImageDebug_Init(&m_imgdbg[61], &m_images[69], m_imgdbg_path, "61_sobel16_3X3_s");
-                    ImageDebug_Init(&m_imgdbg[62], &m_images[70], m_imgdbg_path, "62_sobel16_3X3");
-                    ImageDebug_Init(&m_imgdbg[63], &m_images[71], m_imgdbg_path, "63_sobel16_5X5_s");
-                    ImageDebug_Init(&m_imgdbg[64], &m_images[72], m_imgdbg_path, "64_sobel16_5X5");
-                    ImageDebug_Init(&m_imgdbg[65], &m_images[74], m_imgdbg_path, "65_sobel16_7X7_s");
-                    ImageDebug_Init(&m_imgdbg[66], &m_images[73], m_imgdbg_path, "66_sobel16_7X7");
-                } else {
-                    ImageDebug_Init(&m_imgdbg[61], &m_images[62], m_imgdbg_path, "61_sobel16_3X3_s");
-                    ImageDebug_Init(&m_imgdbg[62], &m_images[62], m_imgdbg_path, "62_sobel16_3X3");
-                    ImageDebug_Init(&m_imgdbg[63], &m_images[62], m_imgdbg_path, "63_sobel16_5X5_s");
-                    ImageDebug_Init(&m_imgdbg[64], &m_images[62], m_imgdbg_path, "64_sobel16_5X5");
-                    ImageDebug_Init(&m_imgdbg[65], &m_images[62], m_imgdbg_path, "65_sobel16_7X7_s");
-                    ImageDebug_Init(&m_imgdbg[66], &m_images[62], m_imgdbg_path, "66_sobel16_7X7");
-                }
+                ImageDebug_Init(&m_imgdbg[2], &m_images[2], m_imgdbg_path, "61_sobel16_3X3_s");
+                ImageDebug_Init(&m_imgdbg[3], &m_images[3], m_imgdbg_path, "62_sobel16_3X3");
+                ImageDebug_Init(&m_imgdbg[4], &m_images[4], m_imgdbg_path, "63_sobel16_5X5_s");
+                ImageDebug_Init(&m_imgdbg[5], &m_images[5], m_imgdbg_path, "64_sobel16_5X5");
+                ImageDebug_Init(&m_imgdbg[6], &m_images[7], m_imgdbg_path, "65_sobel16_7X7_s");
+                ImageDebug_Init(&m_imgdbg[7], &m_images[6], m_imgdbg_path, "66_sobel16_7X7");
                 ImageDebug_Open(m_imgdbg, m_numImgDbg);
             }
             // clear the performance
