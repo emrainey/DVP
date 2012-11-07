@@ -1062,13 +1062,21 @@ size_t DVP_Image_Serialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len)
 DVP_U32 DVP_Image_Offset(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p)
 {
     DVP_U32 i = 0;
-    if (pImage != NULL && p < pImage->planes)
+    if (pImage != NULL &&
+        p < pImage->planes &&
+        x < pImage->bufWidth &&
+        y < pImage->bufHeight)
     {
         i = (y * pImage->y_stride) + (x * pImage->x_stride);
         if (p > 0)
         {
              switch (pImage->color)
              {
+                case FOURCC_NV12:
+                case FOURCC_NV21:
+                    // U/V sub channel pair.
+                    i = (pImage->y_stride * y/2) + (pImage->x_stride*2 + x/2);
+                    break;
                 case FOURCC_YUV9:
                 case FOURCC_YVU9:
                     i = (pImage->y_stride * y/4) + (pImage->x_stride * x/4);
