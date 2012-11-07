@@ -4218,7 +4218,9 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManager(DVP_KernelNode_t *pSubNodes, DVP_U3
                         queue_write(retqueue, true_e, &kgmr);
                 }
                 else
-                    break;
+                {
+                    DVP_PRINT(DVP_ZONE_WARNING, "Failed to read from return queue, trying again!\n");
+                }
             } while (1);
         }
         return 0;
