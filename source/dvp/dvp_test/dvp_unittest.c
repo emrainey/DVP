@@ -399,6 +399,177 @@ status_e dvp_copy_test(void)
 #undef height
 }
 
+/*! \brief Tests a serial/parallel/serial copy graph on all available cores.
+ * \return Returns status_e
+ * \retval STATUS_SUCCESS on success.
+ * \retval STATUS_FAILURE on failure.
+ * \ingroup group_tests
+ */
+status_e dvp_custom_copy_test(void)
+{
+    status_e status = STATUS_FAILURE;
+
+    DVP_U32 numSections = 2 + numCoresEnabled;
+    DVP_U32 numNodes = 3 * numCoresEnabled;
+
+    DVP_U32 section_index = 0, image_index = 0, in_index;
+    DVP_KernelNode_t *section_node;
+
+    DVP_U32 numNodesExecuted = 0;
+    DVP_U32 numSectionsRun = 0;
+
+    DVP_Core_e c;
+    DVP_Transform_t *pT;
+
+    DVP_U32 width = 640, height = 480;
+    DVP_U32 numImages = numNodes + 1;
+    DVP_Image_t images[numImages];
+
+    DVP_U32 n;
+    DVP_Error_e err = DVP_SUCCESS;
+
+    DVP_U08 ptr[height][width];
+    memset(ptr, 0x57, sizeof(ptr));
+
+
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    if (dvp == 0)
+        return status;
+
+    DVP_KernelNode_t *nodes = DVP_KernelNode_Alloc(dvp, numNodes);
+    if (nodes == NULL)
+    {
+        DVP_KernelGraph_Deinit(dvp);
+        return STATUS_NOT_ENOUGH_MEMORY;
+    }
+
+    DVP_KernelGraph_t *graph = DVP_KernelGraph_Alloc(dvp, numSections);
+    if (graph == NULL)
+    {
+        DVP_KernelNode_Free(dvp, nodes, numNodes);
+        DVP_KernelGraph_Deinit(dvp);
+        return STATUS_NOT_ENOUGH_MEMORY;
+    }
+
+    for (n = 0; n < numImages; n++)
+    {
+        DVP_Image_Init(&images[n], width, height, FOURCC_Y800);
+        DVP_Image_Alloc(dvp, &images[n], DVP_MTYPE_DEFAULT);
+    }
+
+    section_node = nodes;
+
+    err = DVP_KernelGraphSection_Init(dvp, graph, section_index, section_node, numCoresEnabled);
+    if (err != DVP_SUCCESS)
+    {
+        goto exit;
+    }
+    graph->order[section_index] = 0;
+
+    for (n = 0; n < numCoresEnabled; n++)
+    {
+        pT = dvp_knode_to(&section_node[n], DVP_Transform_t);
+        pT->input = images[image_index];
+        pT->output = images[image_index + 1];
+
+        image_index ++;
+    }
+
+    section_index ++;
+    section_node += numCoresEnabled;
+
+    in_index = image_index;
+
+    // one node per section...
+    for (n = 0; n < numCoresEnabled; n++)
+    {
+        image_index ++;
+
+        err = DVP_KernelGraphSection_Init(dvp, graph, section_index, section_node, 1);
+        if (err != DVP_SUCCESS)
+        {
+            status = STATUS_NOT_ENOUGH_MEMORY;
+            goto exit;
+        }
+        graph->order[section_index] = 1;
+
+        pT = dvp_knode_to(section_node, DVP_Transform_t);
+        pT->input = images[in_index];
+        pT->output = images[image_index];
+
+        section_node ++;
+        section_index ++;
+    }
+
+    err = DVP_KernelGraphSection_Init(dvp, graph, section_index, section_node, numCoresEnabled);
+    if (err != DVP_SUCCESS)
+    {
+        goto exit;
+    }
+    graph->order[section_index] = 2;
+
+    for (n = 0; n < numCoresEnabled; n++)
+    {
+        pT = dvp_knode_to(&section_node[n], DVP_Transform_t);
+        pT->input = images[image_index];
+        pT->output = images[image_index + 1];
+
+        image_index ++;
+    }
+
+    // set to last image
+    section_node += numCoresEnabled - 1;
+
+    for (n = 0, c = DVP_CORE_MIN+1; c < DVP_CORE_MAX; c++)
+    {
+        if (cores[c].enabled == DVP_TRUE)
+        {
+            nodes[n].header.kernel = DVP_KN_ECHO;
+            nodes[n].header.affinity = (DVP_Core_e)c;
+
+            nodes[n + numCoresEnabled].header.kernel = DVP_KN_ECHO;
+            nodes[n + numCoresEnabled].header.affinity = (DVP_Core_e)c;
+
+            nodes[n + 2 * numCoresEnabled].header.kernel = DVP_KN_ECHO;
+            nodes[n + 2 * numCoresEnabled].header.affinity = (DVP_Core_e)c;
+
+            n++;
+        }
+    }
+
+    pT = dvp_knode_to(&nodes[0], DVP_Transform_t);
+    DVP_Image_Fill(&pT->input, (DVP_S08 *)ptr, width*height*sizeof(DVP_U08));
+
+    numSectionsRun = DVP_KernelGraph_Process(dvp, graph, &numNodesExecuted, dvp_section_complete);
+
+    err = dvp_get_error_from_nodes(nodes, numNodes);
+    if (numSectionsRun == numSections && numNodesExecuted == numNodes && err == DVP_SUCCESS)
+    {
+        DVP_Transform_t *pT1 = dvp_knode_to(section_node, DVP_Transform_t);
+        if (DVP_Image_Equal(&pT->input, &pT1->output) == DVP_FALSE)
+        {
+            DVP_PRINT(DVP_ZONE_ERROR, "dvp_custom_copy_test: Output != Input\n");
+        }
+        else
+            status = STATUS_SUCCESS;
+    }
+
+    DVP_PRINT(DVP_ZONE_ALWAYS, "CUSTOM COPY processed %u sections, %u nodes, first DVP_Error_e=%d\n", numSectionsRun, numNodesExecuted, err);
+
+exit:
+    for (n = 0; n < numImages; n++)
+    {
+        DVP_Image_Free(dvp, &images[n]);
+        DVP_Image_Deinit(&images[n]);
+    }
+
+    DVP_KernelGraph_Free(dvp, graph);
+    DVP_KernelNode_Free(dvp, nodes, numNodes);
+    DVP_KernelGraph_Deinit(dvp);
+
+    return status;
+}
+
 
 #if defined(DVP_USE_YUV)
 /*! \brief Tests a split image color conversion.
@@ -578,6 +749,7 @@ dvp_unittest_t unittests[] = {
     {STATUS_FAILURE, "Framework: SERIAL Nop Test", dvp_serial_nop_test},
     {STATUS_FAILURE, "Framework: PARALLEL Nop Test", dvp_parallel_nop_test},
     {STATUS_FAILURE, "Framework: SERIAL Copy Test", dvp_copy_test},
+    {STATUS_FAILURE, "Framework: CUSTOM Copy Test", dvp_custom_copy_test},
 #if defined(DVP_USE_YUV)
     {STATUS_FAILURE, "Framework: PARALLEL CC Test", dvp_split_cc_test},
 #endif
