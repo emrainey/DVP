@@ -4767,7 +4767,7 @@ void OMXVisionCam::FrameReceivedFunc(void *data)
                     else
                     {
                         /// @todo add to queue
-						DVP_PRINT(DVP_ZONE_CAM, "Loosing a frame here port:%d...\n", cFrame->mFrameSource);
+                        DVP_PRINT(DVP_ZONE_CAM, "Loosing a frame here port:%d...\n", cFrame->mFrameSource);
                     }
                 }
 

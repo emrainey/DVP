@@ -100,7 +100,7 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
 
     for (p = 0; p < pImage->planes; p++)
     {
-        size_t range = abs(pImage->y_stride) * pImage->bufHeight;
+        size_t range = DVP_Image_PlaneRange(pImage, p);
         size_t line = DVP_Image_LineSize(pImage, p);
         DVP_U08 *pLo = pImage->pBuffer[p];
         DVP_U08 *pHi = pImage->pBuffer[p] + range;
@@ -127,7 +127,7 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
         }
 
         // if the image is strided, check to make sure it's not in the badlands.
-        if (abs(pImage->y_stride) > line && pImage->bufWidth == pImage->width)
+        if ((size_t)abs(pImage->y_stride) > line && pImage->bufWidth == pImage->width)
         {
             size_t offset = (size_t)(pImage->pData[p] - pImage->pBuffer[p]);
             if ((offset % abs(pImage->y_stride)) > line)
@@ -160,53 +160,100 @@ void DVP_Image_Dup(DVP_Image_t *dst, DVP_Image_t *src)
     memcpy(dst, src, sizeof(DVP_Image_t));
 }
 
+static inline DVP_U32 DVP_Image_WidthStep(DVP_Image_t *pImage, DVP_U32 plane)
+{
+    DVP_U32 step = 1;
+    if (pImage && plane < pImage->planes && plane > 0)
+    {
+        switch (pImage->color)
+        {
+            case FOURCC_NV12:
+            case FOURCC_NV21:
+                step = 2;
+                break;
+        }
+    }
+    return step;
+}
+
+DVP_U32 inline DVP_Image_HeightDiv(DVP_Image_t *pImage, DVP_U32 plane)
+{
+    DVP_U32 div = 1;
+    if (pImage && plane < pImage->planes && plane > 0)
+    {
+        switch (pImage->color)
+        {
+            case FOURCC_IYUV:
+            case FOURCC_YV12:
+            case FOURCC_NV12:
+            case FOURCC_NV21:
+                div = 2;
+                break;
+            case FOURCC_YUV9:
+            case FOURCC_YVU9:
+                div = 4;
+                break;
+            case FOURCC_YU16:
+            case FOURCC_YV16:
+            default:
+                div = 1;
+                break;
+        }
+    }
+    return div;
+}
+
+DVP_U32 inline DVP_Image_WidthDiv(DVP_Image_t *pImage, DVP_U32 plane)
+{
+    DVP_U32 div = 1;
+    if (pImage && plane < pImage->planes)
+    {
+        if (plane > 0)
+        {
+            switch (pImage->color)
+            {
+                case FOURCC_IYUV:
+                case FOURCC_YV12:
+                case FOURCC_NV12:
+                case FOURCC_NV21:
+                case FOURCC_YU16:
+                case FOURCC_YV16:
+                    div = 2;
+                    break;
+                case FOURCC_YUV9:
+                case FOURCC_YVU9:
+                    div = 4;
+                    break;
+                default:
+                    div = 1;
+                    break;
+            }
+        } else if (pImage->color == FOURCC_BIN1)
+            div = 8;
+    }
+    return div;
+}
+
 
 DVP_U32 DVP_Image_LineRange(DVP_Image_t *pImage, DVP_U32 plane)
 {
     DVP_U32 lineRange = 0;
+    DVP_U32 secLineSize = 0;
+    DVP_U32 priLineSize = 0;
     if (pImage != NULL && plane < pImage->planes)
     {
-        lineRange = pImage->x_stride * pImage->bufWidth;
-
+        lineRange = abs(pImage->y_stride);
         if (plane > 0)
         {
-            // for subsampled secondary planes...
-            switch(pImage->color)
-            {
-                case FOURCC_NV12:
-                case FOURCC_NV21:
-                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
-                        lineRange = abs(pImage->y_stride);
-                    break;
-                case FOURCC_YU16:
-                case FOURCC_YV16:
-                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
-                        lineRange = abs(pImage->y_stride);
-                    break;
-                case FOURCC_IYUV:
-                case FOURCC_YV12:
-                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
-                        lineRange = abs(pImage->y_stride);
-                    else
-                        lineRange /= 2;
-                    break;
-                case FOURCC_YUV9:
-                case FOURCC_YVU9:
-                    if (abs(pImage->y_stride) != (DVP_S32)lineRange)
-                        lineRange = abs(pImage->y_stride);
-                    else
-                        lineRange /= 4;
-                    break;
-                default:
-                    break;
-            }
-        }
-        else if (pImage->color == FOURCC_BIN1)
-        {
-            if (abs(pImage->y_stride) != (DVP_S32)lineRange)
-                lineRange = abs(pImage->y_stride);
-            else
-                lineRange = pImage->bufWidth / 8;
+            DVP_U32 xdiv = DVP_Image_WidthDiv(pImage, plane);
+            DVP_U32 xstep = DVP_Image_WidthStep(pImage, plane);
+
+            priLineSize = (pImage->x_stride * DVP_Image_WidthStep(pImage, 0)) *
+                          (pImage->bufWidth / DVP_Image_WidthDiv(pImage, 0));
+            secLineSize = (pImage->x_stride * xstep) *
+                          (pImage->bufWidth / xdiv);
+            if (lineRange == priLineSize)
+                lineRange = secLineSize;
         }
     }
     return lineRange;
@@ -217,35 +264,11 @@ DVP_U32 DVP_Image_PlaneRange(DVP_Image_t *pImage, DVP_U32 plane)
     DVP_U32 lineRange = 0;
     DVP_U32 planeRange = 0;
 
-    if (pImage == NULL)
-        return 0;
-
-    lineRange = DVP_Image_LineRange(pImage, plane);
-    planeRange = pImage->y_stride * pImage->bufHeight; // potentially overestimated
-
-    if (0 < plane && plane < pImage->planes)
+    if (pImage != NULL && plane < pImage->planes)
     {
-        DVP_U32 y_divisor = 1;
-        switch (pImage->color)
-        {
-            case FOURCC_YU16:
-            case FOURCC_YV16:
-                y_divisor = 1;
-                break;
-            case FOURCC_YV12:
-            case FOURCC_IYUV:
-            case FOURCC_NV12:
-            case FOURCC_NV21:
-                y_divisor = 2;
-                break;
-            case FOURCC_YUV9:
-            case FOURCC_YVU9:
-                y_divisor = 4;
-                break;
-            default:
-                break;
-        }
-        planeRange = lineRange * pImage->bufHeight/y_divisor;
+        DVP_U32 ydiv = DVP_Image_HeightDiv(pImage, plane);
+        lineRange = DVP_Image_LineRange(pImage, plane);
+        planeRange = lineRange * pImage->bufHeight/ydiv;
     }
     return planeRange;
 }
@@ -254,10 +277,8 @@ DVP_U32 DVP_Image_Range(DVP_Image_t *pImage)
 {
     DVP_U32 p,range = 0;
     if (pImage != NULL)
-    {
         for (p = 0; p < pImage->planes; p++)
             range += DVP_Image_PlaneSize(pImage, p);
-    }
     return range;
 }
 
@@ -266,37 +287,11 @@ DVP_U32 DVP_Image_LineSize(DVP_Image_t *pImage, DVP_U32 plane)
     DVP_U32 lineSize = 0;
     if (pImage != NULL && plane < pImage->planes)
     {
-        // assume it's normal, this could be overstated.
-        lineSize = pImage->x_stride * pImage->bufWidth;
-        if (plane > 0)
-        {
-            // for subsampled secondary planes...
-            switch(pImage->color)
-            {
-                case FOURCC_NV12:
-                case FOURCC_NV21:
-                    // lineSize == lineSize // due to macropixel * w/2
-                    break;
-                case FOURCC_YU16:
-                case FOURCC_YV16:
-                    // lineSize == lineSize // due to macropixel * w/2
-                    break;
-                case FOURCC_IYUV:
-                case FOURCC_YV12:
-                    if (lineSize == (DVP_U32)abs(pImage->y_stride)) // non-TILED
-                        lineSize /= 2;
-                    break;
-                case FOURCC_YUV9:
-                case FOURCC_YVU9:
-                    if (lineSize == (DVP_U32)abs(pImage->y_stride)) // non-TILED
-                        lineSize /= 4;
-                    break;
-                default:
-                    break;
-            }
-        }
-        else if (pImage->color == FOURCC_BIN1)
-            lineSize = pImage->bufWidth / 8;
+        DVP_U32 xstep = DVP_Image_WidthStep(pImage, plane);
+        DVP_U32 xdiv = DVP_Image_WidthDiv(pImage, plane);
+
+        lineSize = (pImage->x_stride * xstep) *
+                   (pImage->bufWidth / xdiv);
     }
     return lineSize;
 }
@@ -306,35 +301,12 @@ DVP_U32 DVP_Image_PlaneSize(DVP_Image_t *pImage, DVP_U32 plane)
     DVP_U32 lineSize = 0;
     DVP_U32 planeSize = 0;
 
-    if (pImage == NULL)
-        return 0;
-
-    lineSize = DVP_Image_LineSize(pImage, plane);
-    planeSize = pImage->y_stride * pImage->bufHeight; // potentially overestimated
-
-    if (plane > 0)
+    if (pImage != NULL && plane < pImage->planes)
     {
-        switch (pImage->color)
-        {
-            case FOURCC_NV12:
-            case FOURCC_NV21:
-                planeSize = lineSize * pImage->bufHeight/2;
-                break;
-            case FOURCC_YU16:
-            case FOURCC_YV16:
-                planeSize = lineSize * pImage->bufHeight;
-                break;
-            case FOURCC_YV12:
-            case FOURCC_IYUV:
-                planeSize = lineSize * pImage->bufHeight/2;
-                break;
-            case FOURCC_YUV9:
-            case FOURCC_YVU9:
-                planeSize = lineSize * pImage->bufHeight/4;
-                break;
-            default:
-                break;
-        }
+        DVP_U32 ydiv = DVP_Image_HeightDiv(pImage, plane);
+
+        lineSize = DVP_Image_LineSize(pImage, plane);
+        planeSize = lineSize * pImage->bufHeight/ydiv;
     }
     return planeSize;
 }
@@ -342,10 +314,50 @@ DVP_U32 DVP_Image_PlaneSize(DVP_Image_t *pImage, DVP_U32 plane)
 DVP_U32 DVP_Image_Size(DVP_Image_t *pImage)
 {
     DVP_U32 p,size = 0;
-    for (p = 0; p < pImage->planes; p++)
-        size += DVP_Image_PlaneSize(pImage, p);
+    if (pImage != NULL)
+        for (p = 0; p < pImage->planes; p++)
+            size += DVP_Image_PlaneSize(pImage, p);
     return size;
 }
+
+DVP_U32 DVP_Image_PatchLineSize(DVP_Image_t *pImage, DVP_U32 plane)
+{
+    DVP_U32 lineSize = 0;
+    if (pImage != NULL && plane < pImage->planes)
+    {
+        DVP_U32 xstep = DVP_Image_WidthStep(pImage, plane);
+        DVP_U32 xdiv = DVP_Image_WidthDiv(pImage, plane);
+
+        lineSize = (pImage->x_stride * xstep) *
+                   (pImage->width / xdiv);
+    }
+    return lineSize;
+}
+
+DVP_U32 DVP_Image_PatchPlaneSize(DVP_Image_t *pImage, DVP_U32 plane)
+{
+    DVP_U32 lineSize = 0;
+    DVP_U32 planeSize = 0;
+
+    if (pImage != NULL && plane < pImage->planes)
+    {
+        DVP_U32 ydiv = DVP_Image_HeightDiv(pImage, plane);
+
+        lineSize = DVP_Image_PatchLineSize(pImage, plane);
+        planeSize = lineSize * pImage->height/ydiv;
+    }
+    return planeSize;
+}
+
+DVP_U32 DVP_Image_PatchSize(DVP_Image_t *pImage)
+{
+    DVP_U32 p,size = 0;
+    if (pImage != NULL)
+        for (p = 0; p < pImage->planes; p++)
+            size += DVP_Image_PatchPlaneSize(pImage, p);
+    return size;
+}
+
 
 DVP_Dim_t *DVP_Image_Dims(DVP_Image_t *pImage)
 {
@@ -513,7 +525,8 @@ DVP_BOOL DVP_Image_Alloc(DVP_Handle handle, DVP_Image_t *pImage, DVP_MemType_e d
 #endif
             pImage->x_stride = strides[0].dim.x;
             pImage->y_stride = strides[0].dim.y;
-            pImage->numBytes = strides[0].dim.z;
+            // num bytes must encompass the entire image, not just the first plane.
+            pImage->numBytes = DVP_Image_Range(pImage);
 #if defined(DVP_USE_GRALLOC)
             if (pImage->memType == DVP_MTYPE_GRALLOC_2DTILED)
             {
@@ -549,7 +562,6 @@ DVP_BOOL DVP_Image_Alloc(DVP_Handle handle, DVP_Image_t *pImage, DVP_MemType_e d
     {
         // display buffers need to be associated with the remote cores, only UYVY or NV12 is supported
         DVP_t *dvp = (DVP_t *)handle;
-        DVP_U32 planeSize = 0;
         if (pImage->color == FOURCC_UYVY) // TILER
         {
             ret = dvp_rpc_associate(dvp->rpc, dvp->mem, pImage->pBuffer[0], (DVP_VALUE)pImage->reserved, pImage->numBytes, dvpMemType);
@@ -561,21 +573,20 @@ DVP_BOOL DVP_Image_Alloc(DVP_Handle handle, DVP_Image_t *pImage, DVP_MemType_e d
         else if (pImage->color == FOURCC_NV12) // TILER/ION
         {
 #if !defined(DVP_USE_TILER) && defined(GRALLOC_USE_MULTIPLE_POINTERS)
-            planeSize = DVP_Image_PlaneSize(pImage, 0);
+            DVP_U32 planeSize = DVP_Image_PlaneRange(pImage, 0);
             ret = dvp_rpc_associate(dvp->rpc, dvp->mem, pImage->pBuffer[0], (DVP_VALUE)pImage->reserved, planeSize, dvpMemType);
             if (ret == DVP_FALSE)
             {
                 DVP_PRINT(DVP_ZONE_ERROR, "Failed to associate Display buffer %p with remote core!\n", pImage->pBuffer[0]);
             }
-            planeSize = DVP_Image_PlaneSize(pImage, 1);
+            planeSize = DVP_Image_PlaneRange(pImage, 1);
             ret = dvp_rpc_associate(dvp->rpc, dvp->mem, pImage->pBuffer[1], (DVP_VALUE)NULL, planeSize, dvpMemType);
             if (ret == DVP_FALSE)
             {
                 DVP_PRINT(DVP_ZONE_ERROR, "Failed to associate Display buffer %p with remote core!\n", pImage->pBuffer[1]);
             }
 #else
-            planeSize = DVP_Image_PlaneSize(pImage,0) + DVP_Image_PlaneSize(pImage, 1);
-            ret = dvp_rpc_associate(dvp->rpc, dvp->mem, pImage->pBuffer[0], (DVP_VALUE)pImage->reserved, planeSize, dvpMemType);
+            ret = dvp_rpc_associate(dvp->rpc, dvp->mem, pImage->pBuffer[0], (DVP_VALUE)pImage->reserved, pImage->numBytes, dvpMemType);
             if (ret == DVP_FALSE)
             {
                 DVP_PRINT(DVP_ZONE_ERROR, "Failed to associate Display buffer %p with remote core!\n", pImage->pBuffer[0]);
@@ -587,7 +598,7 @@ DVP_BOOL DVP_Image_Alloc(DVP_Handle handle, DVP_Image_t *pImage, DVP_MemType_e d
     else if (handle && pImage && dvpMemType == DVP_MTYPE_CAMERA_1DTILED)
     {
         DVP_t *dvp = (DVP_t *)handle;
-        DVP_U32 p = 0, planeSize = 0;
+        DVP_U32 p = 0;
 
         pImage->reserved = pImage->pBuffer[0];
 
@@ -595,6 +606,8 @@ DVP_BOOL DVP_Image_Alloc(DVP_Handle handle, DVP_Image_t *pImage, DVP_MemType_e d
             pImage->pData[p] = pImage->pBuffer[p]; // assign each pointer
 
         pImage->memType = dvpMemType;
+
+        // set the stride to the first plane's width in bytes...
         pImage->y_stride = DVP_Image_LineSize(pImage, 0);
 
         ret = dvp_rpc_associate(dvp->rpc, dvp->mem, pImage->pBuffer[0], (DVP_VALUE)pImage->reserved, pImage->numBytes, dvpMemType);
@@ -677,23 +690,29 @@ DVP_BOOL DVP_Image_Free_Import(DVP_Handle handle, DVP_Image_t *pImage, DVP_VALUE
     return ret;
 }
 
-void DVP_Image_Fill(DVP_Image_t *pImage, DVP_S08 *ptr, uint32_t size)
+void DVP_Image_Fill(DVP_Image_t *pImage, DVP_S08 *buf, uint32_t size)
 {
-    if (size <= (pImage->height*pImage->width*pImage->x_stride))
+    DVP_U32 p,y,len,ydiv,off = 0;
+    DVP_U08 *ptr = NULL;
+    if (size <= DVP_Image_PatchSize(pImage))
     {
-        uint32_t i,y,l;
-        for (y = 0; y < pImage->height; y++)
+        for (p = 0; p < pImage->planes; p++)
         {
-            i = (y * pImage->y_stride);
-            l = DVP_Image_LineSize(pImage, 0);
-            memcpy(&pImage->pData[0][i], &ptr[y*l], l);
+            ydiv = DVP_Image_HeightDiv(pImage, p);
+            for (y = 0; y < pImage->height/ydiv; y++)
+            {
+                len = DVP_Image_PatchLineSize(pImage, p);
+                ptr = DVP_Image_PatchAddressing(pImage, 0, y*ydiv, p);
+                memcpy(ptr, &buf[off], len);
+                off += len;
+            }
         }
     }
 }
 
 DVP_BOOL DVP_Image_Copy(DVP_Image_t *pDst, DVP_Image_t *pSrc)
 {
-    DVP_U32 p,x,y,i,j,l;
+    DVP_U32 p,x,y;
     DVP_PrintImage(DVP_ZONE_MEM, pSrc);
     DVP_PrintImage(DVP_ZONE_MEM, pDst);
 
@@ -714,51 +733,14 @@ DVP_BOOL DVP_Image_Copy(DVP_Image_t *pDst, DVP_Image_t *pSrc)
 
     if (pDst->color == pSrc->color)
     {
-        DVP_U32 xscale[DVP_MAX_PLANES] = {1,1,1,1};
-        DVP_U32 yscale[DVP_MAX_PLANES] = {1,1,1,1};
-
-        switch (pSrc->color)
-        {
-            case FOURCC_BIN1:
-                xscale[0] = 8;
-                break;
-            case FOURCC_IYUV: // YUV420 planar formats
-            case FOURCC_YV12:
-                xscale[1] = yscale[1] = 2;
-                xscale[2] = yscale[2] = 2;
-                break;
-            case FOURCC_YVU9: // YUV411 planar formats
-            case FOURCC_YUV9:
-                xscale[1] = yscale[1] = 4;
-                xscale[2] = yscale[2] = 4;
-                break;
-            case FOURCC_YV16: // YUV422 planar formats
-            case FOURCC_YU16:
-                xscale[1] = xscale[2] = 2;
-                yscale[1] = yscale[2] = 1;
-                break;
-            case FOURCC_NV12:
-            case FOURCC_NV21:
-                // xscale is literally 2 but macro pixel makes it equivalent to 1.
-                yscale[1] = 2;
-                break;
-            case FOURCC_YV24: // 4:4:4 planar formats
-            case FOURCC_YU24:
-            case FOURCC_RGBP:
-            case FOURCC_RGB565:
-            default:
-                // default values are fine
-                break;
-        }
-
         for (p = 0; p < pSrc->planes; p++)
         {
-            for (y = 0; y < (pSrc->height/yscale[p]); y++)
+            DVP_U32 ydiv = DVP_Image_HeightDiv(pSrc, p);
+            for (y = 0; y < (pSrc->height/ydiv); y++)
             {
-                i = (y * pSrc->y_stride);
-                j = (y * pDst->y_stride);
-                l = (pSrc->width * pSrc->x_stride)/xscale[p];
-                memcpy(&pDst->pData[p][j], &pSrc->pData[p][i], l);
+                memcpy(DVP_Image_PatchAddressing(pDst, 0, y*ydiv, p),
+                       DVP_Image_PatchAddressing(pSrc, 0, y*ydiv, p),
+                       DVP_Image_PatchLineSize(pSrc, p));
             }
         }
         return DVP_TRUE;
@@ -770,14 +752,12 @@ DVP_BOOL DVP_Image_Copy(DVP_Image_t *pDst, DVP_Image_t *pSrc)
         {
             DVP_U08 *luma;
             DVP_U08 *xyxy;
-            for (y = pSrc->y_start; y < pSrc->height; y++)
+            for (y = 0; y < pSrc->height; y++)
             {
-                for (x = pSrc->x_start; x < pSrc->width; x+=2) // macro pixel
+                for (x = 0; x < pSrc->width; x+=2) // macro pixel
                 {
-                    i = (y * pSrc->y_stride) + (x * pSrc->x_stride);
-                    j = (y * pDst->y_stride) + (x * pDst->x_stride);
-                    luma = &pSrc->pData[0][i];
-                    xyxy = &pDst->pData[0][j];
+                    luma = DVP_Image_PatchAddressing(pSrc, x, y, 0);
+                    xyxy = DVP_Image_PatchAddressing(pDst, x, y, 0);
                     xyxy[0] = 128; // "zero" Chromance
                     xyxy[1] = luma[0];
                     xyxy[2] = 128; // "zero" Chromance
@@ -790,14 +770,12 @@ DVP_BOOL DVP_Image_Copy(DVP_Image_t *pDst, DVP_Image_t *pSrc)
         {
             DVP_U08 *luma;
             DVP_U08 *yxyx;
-            for (y = pSrc->y_start; y < pSrc->height; y++)
+            for (y = 0; y < pSrc->height; y++)
             {
-                for (x = pSrc->x_start; x < pSrc->width; x+=2) // macro pixel
+                for (x = 0; x < pSrc->width; x+=2) // macro pixel
                 {
-                    i = (y * pSrc->y_stride) + (x * pSrc->x_stride);
-                    j = (y * pDst->y_stride) + (x * pDst->x_stride);
-                    luma = &pSrc->pData[0][i];
-                    yxyx = &pDst->pData[0][j];
+                    luma = DVP_Image_PatchAddressing(pSrc, x, y, 0);
+                    yxyx = DVP_Image_PatchAddressing(pDst, x, y, 0);
                     yxyx[0] = luma[0];
                     yxyx[1] = 128; // "zero" Chromance
                     yxyx[2] = luma[1];
@@ -812,14 +790,12 @@ DVP_BOOL DVP_Image_Copy(DVP_Image_t *pDst, DVP_Image_t *pSrc)
             // reswizzle
             DVP_U08 *xyxy;
             DVP_U08 *yxyx;
-            for (y = pSrc->y_start; y < pSrc->height; y++)
+            for (y = 0; y < pSrc->height; y++)
             {
-                for (x = pSrc->x_start; x < pSrc->width; x+=2) // macro pixels
+                for (x = 0; x < pSrc->width; x+=2) // macro pixels
                 {
-                    i = (y * pSrc->y_stride) + (x * pSrc->x_stride);
-                    j = (y * pDst->y_stride) + (x * pDst->x_stride);
-                    yxyx = &pSrc->pData[0][i];
-                    xyxy = &pDst->pData[0][j];
+                    yxyx = DVP_Image_PatchAddressing(pSrc, x, y, 0);
+                    xyxy = DVP_Image_PatchAddressing(pDst, x, y, 0);
                     if (pSrc->color == FOURCC_YUY2)
                     {
                         if (pDst->color == FOURCC_UYVY)
@@ -874,13 +850,12 @@ DVP_BOOL DVP_Image_Copy(DVP_Image_t *pDst, DVP_Image_t *pSrc)
                   pSrc->color == FOURCC_YVU9) &&
                  pDst->color == FOURCC_Y800)
         {
-            // a "luma" extract kind-of
-            for (y = pSrc->y_start; y < pSrc->height; y++)
+            // a "luma" extract kind-of (luma plane does not have ydiv)
+            for (y = 0; y < pSrc->height; y++)
             {
-                uint32_t i = (y * pSrc->y_stride);
-                uint32_t j = (y * pDst->y_stride);
-                uint32_t l = (pSrc->x_stride * pSrc->width);
-                memcpy(&pDst->pData[0][j], &pSrc->pData[0][i], l);
+                memcpy(DVP_Image_PatchAddressing(pDst, 0, y, 0),
+                       DVP_Image_PatchAddressing(pSrc, 0, y, 0),
+                       DVP_Image_PatchLineSize(pSrc, 0));
             }
             return DVP_TRUE;
         }
@@ -971,10 +946,12 @@ void DVP_Image_Deinit(DVP_Image_t *pImage)
 size_t DVP_Image_Unserialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len)
 {
     size_t offset = 0;
-    uint32_t p,y,i,l;
+    uint32_t p,y,l;
+    DVP_U08 *ptr = NULL;
     DVP_Dim_t *dims = NULL;
     DVP_Image_t image;
     bool_e copy = false_e;
+    DVP_U32 ydiv = 1;
 
     UNSERIALIZE_UNIT(buffer, offset, len, image.planes);
     UNSERIALIZE_UNIT(buffer, offset, len, image.width);
@@ -1001,15 +978,13 @@ size_t DVP_Image_Unserialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len)
     dims = DVP_Image_Dims(&image);
     for (p = 0; p < image.planes; p++)
     {
-        for (y = pImage->y_start; y < (uint32_t)dims[p].img.height; y++)
+        ydiv = DVP_Image_HeightDiv(pImage, p);
+        l = DVP_Image_PatchLineSize(pImage, p);
+        for (y = 0; y < pImage->height/ydiv; y++)
         {
-            // @TODO this should support FOURCC_BIN1 too...
-            // @TODO This should be identical across all planes
-            i = (y * pImage->y_stride) + (0 * dims[p].dim.x);
-            // @TODO This should be identical across all planes
-            l = (pImage->x_stride * dims[p].img.width);
+            ptr = DVP_Image_PatchAddressing(pImage, 0, y*ydiv, p);
             if (copy) {
-                UNSERIALIZE_ARRAY(buffer, offset, len, &pImage->pBuffer[p][i], l);
+                UNSERIALIZE_ARRAY(buffer, offset, len, ptr, l);
             } else {
                 offset += l;
             }
@@ -1023,8 +998,10 @@ size_t DVP_Image_Unserialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len)
 size_t DVP_Image_Serialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len)
 {
     size_t offset = 0;
-    uint32_t p,y,i,l;
+    uint32_t p,y,l;
     DVP_Dim_t *dims = NULL;
+    DVP_U32 ydiv;
+    DVP_U08 *ptr = NULL;
 
     SERIALIZE_UNIT(buffer, offset, len, pImage->planes);
     SERIALIZE_UNIT(buffer, offset, len, pImage->width);
@@ -1045,14 +1022,12 @@ size_t DVP_Image_Serialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len)
     dims = DVP_Image_Dims(pImage);
     for (p = 0; p < pImage->planes; p++)
     {
-        for (y = 0; y < (uint32_t)dims[p].img.height; y++)
+        ydiv = DVP_Image_HeightDiv(pImage, p);
+        l = DVP_Image_PatchLineSize(pImage, p);
+        for (y = 0; y < pImage->height/ydiv; y++)
         {
-            // @TODO this should support FOURCC_BIN1 too...
-            // @TODO This should be identical across all planes
-            i = (y * pImage->y_stride) + (0 * dims[p].dim.x);
-            // @TODO This should be identical across all planes
-            l = (pImage->x_stride * dims[p].img.width);
-            SERIALIZE_ARRAY(buffer, offset, len, &pImage->pBuffer[p][i], l);
+            ptr = DVP_Image_PatchAddressing(pImage, 0, y*ydiv, p);
+            SERIALIZE_ARRAY(buffer, offset, len, ptr, l);
         }
     }
     mutex_unlock(&dims_mutex);
@@ -1067,30 +1042,30 @@ DVP_U32 DVP_Image_Offset(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p)
         x < pImage->bufWidth &&
         y < pImage->bufHeight)
     {
-        i = (y * pImage->y_stride) + (x * pImage->x_stride);
-        if (p > 0)
-        {
-             switch (pImage->color)
-             {
-                case FOURCC_NV12:
-                case FOURCC_NV21:
-                    // U/V sub channel pair.
-                    i = (pImage->y_stride * y/2) + (pImage->x_stride*2 * x/2);
-                    break;
-                case FOURCC_YUV9:
-                case FOURCC_YVU9:
-                    i = (pImage->y_stride * y/4) + (pImage->x_stride * x/4);
-                    break;
-                case FOURCC_IYUV:
-                case FOURCC_YV12:
-                    i = (pImage->y_stride * y/2) + (pImage->x_stride * x/2);
-                    break;
-                case FOURCC_YU16:
-                case FOURCC_YV16:
-                    i = (pImage->y_stride * y) + (pImage->x_stride * x/2);
-                    break;
-             }
-        }
+        DVP_U32 xstep = DVP_Image_WidthStep(pImage, p);
+        DVP_U32 xdiv = DVP_Image_WidthDiv(pImage, p);
+        DVP_U32 ydiv = DVP_Image_HeightDiv(pImage, p);
+        DVP_U32 ystr = DVP_Image_LineRange(pImage, p);
+
+        i = ((y/ydiv) * ystr) + ((x/xdiv) * (pImage->x_stride*xstep));
+    }
+    return i;
+}
+
+DVP_U32 DVP_Image_PatchOffset(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p)
+{
+    DVP_S32 i = 0;
+    if (pImage != NULL &&
+        p < pImage->planes &&
+        x < pImage->width &&
+        y < pImage->height)
+    {
+        DVP_U32 xstep = DVP_Image_WidthStep(pImage, p);
+        DVP_U32 xdiv = DVP_Image_WidthDiv(pImage, p);
+        DVP_U32 ydiv = DVP_Image_HeightDiv(pImage, p);
+        DVP_U32 ystr = DVP_Image_LineRange(pImage, p);
+
+        i = ((y/ydiv) * ystr) + ((x/xdiv) * (pImage->x_stride*xstep));
     }
     return i;
 }
@@ -1100,13 +1075,94 @@ DVP_U08 *DVP_Image_Addressing(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32
     DVP_U08 *ptr = NULL;
     DVP_U32 i = DVP_Image_Offset(pImage, x, y, p);
     if (pImage != NULL && p < pImage->planes)
+        ptr = pImage->pBuffer[p];
+    return &ptr[i];
+}
+
+DVP_U08 *DVP_Image_PatchAddressing(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p)
+{
+    DVP_U08 *ptr = NULL;
+    DVP_U32 i = DVP_Image_PatchOffset(pImage, x, y, p);
+    if (pImage != NULL && p < pImage->planes)
         ptr = pImage->pData[p];
     return &ptr[i];
 }
 
+DVP_BOOL DVP_Image_SetPatch(DVP_Image_t *pImage,
+                            DVP_U32 x_start,
+                            DVP_U32 y_start,
+                            DVP_U32 width,
+                            DVP_U32 height)
+{
+    DVP_BOOL set = DVP_FALSE;
+    if (pImage != NULL)
+    {
+        if ((x_start + width)  < pImage->bufWidth &&
+            (y_start + height) < pImage->bufHeight)
+        {
+            DVP_U32 p = 0;
+            for (p = 0; p < pImage->planes; p++)
+            {
+                pImage->pData[p] = DVP_Image_Addressing(pImage, x_start, y_start, p);
+                pImage->x_start = x_start;
+                pImage->y_start = y_start;
+                pImage->width = width;
+                pImage->height = height;
+            }
+        }
+    }
+    return set;
+}
+
 DVP_BOOL DVP_Image_Equal(DVP_Image_t *pDst, DVP_Image_t *pSrc)
 {
-    DVP_U32 p,y,i,j,l;
+    DVP_U32 p,y,l;
+
+    DVP_PrintImage(DVP_ZONE_MEM, pSrc);
+    DVP_PrintImage(DVP_ZONE_MEM, pDst);
+
+    if (pSrc == NULL || pDst == NULL)
+        return DVP_FALSE;
+
+    for (p = 0; p < pSrc->planes; p++)
+        if (pSrc->pData[p] == NULL)
+            return DVP_FALSE;
+
+    for (p = 0; p < pDst->planes; p++)
+        if (pDst->pData[p] == NULL)
+            return DVP_FALSE;
+
+    if (pSrc->bufWidth != pDst->bufWidth ||
+        pSrc->bufHeight != pDst->bufHeight)
+        return DVP_FALSE;
+
+    if (pDst->color == pSrc->color)
+    {
+        for (p = 0; p < pSrc->planes; p++)
+        {
+            // strictly speaking, you don't need to use ydiv but we do to reduce
+            // the amount of comparing.
+            DVP_U32 ydiv = DVP_Image_HeightDiv(pSrc, p);
+            l = DVP_Image_LineSize(pSrc, p);
+            for (y = 0; y < pSrc->bufHeight/ydiv; y++)
+            {
+                DVP_U08 *src = DVP_Image_Addressing(pSrc, 0, y*ydiv, p);
+                DVP_U08 *dst = DVP_Image_Addressing(pDst, 0, y*ydiv, p);
+                if (memcmp(dst, src, l) != 0)
+                {
+                    DVP_PRINT(DVP_ZONE_ERROR, "Line %d is not equal!\n", y);
+                    return DVP_FALSE;
+                }
+            }
+        }
+        return DVP_TRUE;
+    }
+    return DVP_FALSE;
+}
+
+DVP_BOOL DVP_Image_PatchEqual(DVP_Image_t *pDst, DVP_Image_t *pSrc)
+{
+    DVP_U32 p,y,l;
 
     DVP_PrintImage(DVP_ZONE_MEM, pSrc);
     DVP_PrintImage(DVP_ZONE_MEM, pDst);
@@ -1126,53 +1182,25 @@ DVP_BOOL DVP_Image_Equal(DVP_Image_t *pDst, DVP_Image_t *pSrc)
         pSrc->height != pDst->height)
         return DVP_FALSE;
 
+    if (pSrc->x_start + pSrc->width > pSrc->bufWidth ||
+        pDst->x_start + pDst->width > pDst->bufWidth ||
+        pSrc->y_start + pSrc->height > pSrc->bufHeight ||
+        pDst->y_start + pDst->height > pDst->bufHeight)
+        return DVP_FALSE;
+
     if (pDst->color == pSrc->color)
     {
-        DVP_U32 xscale[DVP_MAX_PLANES] = {1,1,1,1};
-        DVP_U32 yscale[DVP_MAX_PLANES] = {1,1,1,1};
-
-        switch (pSrc->color)
-        {
-            case FOURCC_BIN1:
-                xscale[0] = 8;
-                break;
-            case FOURCC_IYUV: // YUV420 planar formats
-            case FOURCC_YV12:
-                xscale[1] = yscale[1] = 2;
-                xscale[2] = yscale[2] = 2;
-                break;
-            case FOURCC_YVU9: // YUV411 planar formats
-            case FOURCC_YUV9:
-                xscale[1] = yscale[1] = 4;
-                xscale[2] = yscale[2] = 4;
-                break;
-            case FOURCC_YV16: // YUV422 planar formats
-            case FOURCC_YU16:
-                xscale[1] = xscale[2] = 2;
-                yscale[1] = yscale[2] = 1;
-                break;
-            case FOURCC_NV12:
-            case FOURCC_NV21:
-                // xscale is literally 2 but macro pixel makes it equivalent to 1.
-                yscale[1] = 2;
-                break;
-            case FOURCC_YV24: // 4:4:4 planar formats
-            case FOURCC_YU24:
-            case FOURCC_RGBP:
-            case FOURCC_RGB565:
-            default:
-                // default values are fine
-                break;
-        }
-
         for (p = 0; p < pSrc->planes; p++)
         {
-            for (y = 0; y < (pSrc->height/yscale[p]); y++)
+            // strictly speaking, you don't need to use ydiv but we do to reduce
+            // the amount of comparing.
+            DVP_U32 ydiv = DVP_Image_HeightDiv(pSrc, p);
+            l = DVP_Image_PatchLineSize(pSrc, p);
+            for (y = 0; y < pSrc->height/ydiv; y++)
             {
-                i = (y * pSrc->y_stride);
-                j = (y * pDst->y_stride);
-                l = (pSrc->width * pSrc->x_stride)/xscale[p];
-                if (memcmp(&pDst->pData[p][j], &pSrc->pData[p][i], l) != 0)
+                DVP_U08 *src = DVP_Image_PatchAddressing(pSrc, 0, y*ydiv, p);
+                DVP_U08 *dst = DVP_Image_PatchAddressing(pDst, 0, y*ydiv, p);
+                if (memcmp(dst, src, l) != 0)
                 {
                     DVP_PRINT(DVP_ZONE_ERROR, "Line %d is not equal!\n", y);
                     return DVP_FALSE;

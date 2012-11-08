@@ -162,16 +162,15 @@ uint32_t FileVisionCam::avi_stream_parse(AVI_List_t *aList, DVP_Image_t *pImage)
             memcpy(&tag, &aChunk.chunkcode, sizeof(tag));
             if (strncmp(tag.streamType,"db",2) == 0)
             {
-                uint32_t i = 0;
+                uint32_t i,l = 0;
                 int32_t y = 0;
                 if (m_space == FOURCC_BGR)
                 {
-                    DVP_PrintImage(DVP_ZONE_CAM, pImage);
-                    DVP_PRINT(DVP_ZONE_CAM, "About to read RGB AVI data into DVP_Image_t* %p {%p} stride=%d!\n", pImage, &(pImage->pData[0][i]),pImage->y_stride);
                     for (y = pImage->height - 1; y >= 0 ; y--)
                     {
-                        i = (y * pImage->y_stride);
-                        s += fread(&pImage->pData[0][i], 1, DVP_Image_LineSize(pImage, 0), m_file);
+                        i = DVP_Image_PatchOffset(pImage, 0, y, 0);
+                        l = DVP_Image_PatchLineSize(pImage, 0);
+                        s += fread(&pImage->pData[0][i], 1, l, m_file);
                     }
                 }
                 else
@@ -346,7 +345,7 @@ thread_ret_t FileVisionCam::RunThread()
         else // fill in the data
         {
             bytesRead = 0;
-            uint32_t j = 0, y = 0, z = 0; // don't use i
+            uint32_t j = 0, y = 0, p = 0; // don't use i
 
             pImage = (DVP_Image_t *)m_buffers[i].data;
 
@@ -356,24 +355,26 @@ thread_ret_t FileVisionCam::RunThread()
                     pImage->color == FOURCC_NV12 ||
                     pImage->color == FOURCC_Y800)
                 {
-                    DVP_PRINT(DVP_ZONE_CAM, "About to read File data into DVP_Image_t* %p {%p} stride=%u!\n",pImage, &(pImage->pData[0][j]),pImage->y_stride);
-                    for (z = 0; z < pImage->planes; z++)
+                    for (p = 0; p < pImage->planes; p++)
                     {
-                        size_t numBytes = DVP_Image_LineSize(pImage, z);
-                        uint32_t readHeight = (pImage->color == FOURCC_NV12 && z==1) ? pImage->height/2 : pImage->height;
-                        for (y = 0; y < readHeight; y++)
+                        DVP_U32 len = DVP_Image_PatchLineSize(pImage, p);
+                        DVP_U32 ydiv = DVP_Image_HeightDiv(pImage, p);
+                        DVP_U08 *ptr = NULL;
+                        for (y = 0; y < pImage->height/ydiv; y++)
                         {
-                            j = (y * pImage->y_stride);
+                            ptr = DVP_Image_PatchAddressing(pImage, 0, y*ydiv, p);
                             if (m_file == NULL)
                             {
-                                if(y<1) // Limit the warning to only 1 line per frame, instead of each line
+                                if (y < 1) // Limit the warning to only 1 line per frame, instead of each line
+                                {
                                     DVP_PRINT(DVP_ZONE_WARNING, "WARNING: File %s does not exist, using GRAY image instead!\n", m_name);
-                                memset(&(pImage->pData[z][j]), 0x80, numBytes);
-                                bytesRead += numBytes;
+                                }
+                                memset(ptr, 0x80, len);
+                                bytesRead += len;
                             }
                             else
                             {
-                                bytesRead += fread(&(pImage->pData[z][j]), 1, numBytes, m_file);
+                                bytesRead += fread(ptr, 1, len, m_file);
                             }
                         }
                     }

@@ -677,7 +677,7 @@ void dvp_rpc_prepare_image(DVP_RPC_t *rpc, DVP_Core_e core, DVP_Image_t *pImage,
         // @NOTE could the output buffers be accidently written back from the cache during operations?
         pImage->pBuffer[p] = dvp_rpc_mem_xlate_fwrd(rpc, core, pImage->pBuffer[p], planeSize, pImage->memType);
         // recalculate the new pData based on the starts and strides
-        pImage->pData[p] = &pImage->pBuffer[p][(pImage->y_start * pImage->y_stride)+(pImage->x_start * pImage->x_stride)];
+        pImage->pData[p] = DVP_Image_Addressing(pImage, pImage->x_start, pImage->y_start, p);
      }
 }
 
@@ -703,7 +703,7 @@ void dvp_rpc_return_image(DVP_RPC_t *rpc, DVP_Core_e core, DVP_Image_t *pImage, 
             DVP_COMPLAIN_IF_FALSE(dvp_rpc_invalidate(rpc, core, (DVP_PTR)pImage->pBuffer[p], planeSize, pImage->memType));
         }
         // recalculate the pData pointer
-        pImage->pData[p] = &pImage->pBuffer[p][(pImage->y_start * pImage->y_stride) + (pImage->x_start * pImage->x_stride)];
+        pImage->pData[p] = DVP_Image_Addressing(pImage, pImage->x_start, pImage->y_start, p);
     }
 }
 

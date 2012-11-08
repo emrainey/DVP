@@ -2959,41 +2959,25 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
             m_pNodes[31].header.kernel = DVP_KN_COPY;
             dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->input = m_images[8];
             dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output = m_images[46];
-            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output.x_start = m_width/2-15;
-            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output.y_start = m_height/2-15;
-            dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output.pData[0] = (DVP_U08*)
-                ((size_t)m_images[46].pBuffer[0] +
-                DVP_Image_Offset(&m_images[46], m_width/2-15,  m_height/2-15, 0));
+            DVP_Image_SetPatch(&dvp_knode_to(&m_pNodes[31], DVP_Transform_t)->output,
+                m_width/2-15, m_height/2-15, m_width, m_height);
 
             // Crop (copy part of an image to a full buffer)
             m_pNodes[32].header.kernel = DVP_KN_COPY;
             dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input = m_images[8];
-            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.width   = m_width/2-15;
-            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.height  = m_height/2-15;
-            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.x_start = m_width/2-15;
-            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.y_start = m_height/2-15;
-            dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input.pData[0] = (DVP_U08*)
-                ((size_t)m_images[8].pBuffer[0] +
-                DVP_Image_Offset(&m_images[8], m_width/2-15,  m_height/2-15, 0));
+            DVP_Image_SetPatch(&dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->input,
+                m_width/2-15, m_height/2-15, m_width/2-15, m_height/2-15);
             dvp_knode_to(&m_pNodes[32], DVP_Transform_t)->output = m_images[47];
 
             // Crop + Pad (copy part of an image to part of another image with an offset)
             m_pNodes[33].header.kernel = DVP_KN_COPY;
             dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input = m_images[8];
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.width   = m_width/2-15;
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.height  = m_height/2-15;
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.x_start = m_width/2-15;
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.y_start = m_height/2-15;
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input.pData[0] = (DVP_U08*)
-                ((size_t)m_images[8].pBuffer[0] +
-                DVP_Image_Offset(&m_images[8], m_width/2-15,  m_height/2-15, 0));
+            DVP_Image_SetPatch(&dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->input,
+                m_width/2-15, m_height/2-15, m_width/2-15, m_height/2-15);
 
             dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output = m_images[48];
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output.x_start = m_width/4-15;
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output.y_start = m_height/4-15;
-            dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output.pData[0] = (DVP_U08*)
-                ((size_t)m_images[48].pBuffer[0] +
-                DVP_Image_Offset(&m_images[48], m_width/4-15,  m_height/4-15, 0));
+            DVP_Image_SetPatch(&dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output,
+                m_width/4-15, m_height/4-15, m_width, m_height);
 
             m_pNodes[34].header.kernel = DVP_KN_YUV444p_TO_RGBp;
             dvp_knode_to(&m_pNodes[34], DVP_Transform_t)->input  = m_images[1];
@@ -5915,11 +5899,9 @@ status_e TestVisionEngine::Test_Ldc()
                 !DVP_Image_Alloc(m_hDVP, &m_images[7], opType))
                 return STATUS_NOT_ENOUGH_MEMORY;
 
-            if(inputImagePadding) {         // Moving the image to middle of buffer
-                m_images[0].pData[0] += m_images[0].y_stride*m_images[0].height/2;
-                m_images[0].y_start = m_images[0].height/2;
-                m_images[1].pData[0] += m_images[1].y_stride*m_images[1].height/2;
-                m_images[1].y_start = m_images[1].height/2;
+            if(inputImagePadding) { // Moving the image to middle of buffer
+                DVP_Image_SetPatch(&m_images[0], 0, m_height/2, m_width, m_height);
+                DVP_Image_SetPatch(&m_images[1], 0, m_height/2, m_width, m_height);
             }
         }
         else

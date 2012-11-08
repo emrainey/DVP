@@ -545,10 +545,13 @@ void DVP_PrintImage(DVP_U32 zone, DVP_Image_t *img)
         strncpy(fcc, (char *)&img->color, sizeof(fcc));
         fcc[4] = '\0';
         DVP_PRINT(zone,
-            "DVP_Image_t:%p TYPE:%d DATA[%u]{%p, %p, %p} BASE[%u]{%p, %p, %p} W,H=%u,%u dX,dY=%d,%d x0,y0=%u,%u FOURCC=%4s (0x%08x) SIZE:%u RESV:%p FLUSH=%s INV=%s\n",
+            "DVP_Image_t:%p TYPE:%d DATA[%u]{%p, %p, %p} BASE[%u]{%p, %p, %p} W,H=%u,%u dX,dY=%d,%d x0,y0=%u,%u sW,sH=%u,%u FOURCC=%4s (0x%08x) SIZE:%u RESV:%p FLUSH=%s INV=%s\n",
             img, img->memType, img->planes, img->pData[0], img->pData[1], img->pData[2],
             img->planes, img->pBuffer[0], img->pBuffer[1], img->pBuffer[2],
-            img->width, img->height, img->x_stride, img->y_stride, img->x_start, img->y_start,
+            img->bufWidth, img->bufHeight,
+            img->x_stride, img->y_stride,
+            img->x_start, img->y_start,
+            img->width, img->height,
             fcc, img->color, img->numBytes,img->reserved,
             (img->skipCacheOpFlush?"FALSE":"TRUE"),
             (img->skipCacheOpInval?"FALSE":"TRUE"));

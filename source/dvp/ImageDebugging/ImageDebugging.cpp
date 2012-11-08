@@ -78,13 +78,14 @@ void ImageDebug_Write(ImageDebug_t *pImgd, DVP_U32 numImg)
 #if defined(DVP_USE_FS)
     if (pImgd)
     {
-        DVP_U32 i,j,y,p,len,n = 0;
+        DVP_U32 i,y,p,len,n = 0;
 
         // write out all the data
         for (i = 0; i < numImg; i++)
         {
             DVP_Image_t *pImage = pImgd[i].pImg;
             DVP_Buffer_t *pBuffer = pImgd[i].pBuf;
+            DVP_U08 *ptr = NULL;
 
             n = 0; // initialize for each debug image;
 
@@ -95,72 +96,15 @@ void ImageDebug_Write(ImageDebug_t *pImgd, DVP_U32 numImg)
             }
             else if(pImage)
             {
-                // for equal sized plane images
-                if (pImage->planes == 1 ||
-                    pImage->color == FOURCC_RGBP ||
-                    pImage->color == FOURCC_YV24 ||
-                    pImage->color == FOURCC_YU24)
+                // write out each plane patch.
+                for (p = 0; p < pImage->planes; p++)
                 {
-                    for (p = 0; p < pImage->planes; p++)        // loop for each plane
+                    DVP_U32 ydiv = DVP_Image_HeightDiv(pImage, p);
+                    len = DVP_Image_PatchLineSize(pImage, p);
+                    for (y = 0; y < pImage->height/ydiv; y++)
                     {
-                        for (y = 0; y < pImage->height; y++)    // loop for each line
-                        {
-                            len = DVP_Image_LineSize(pImage, 0);
-                            j = (y * pImage->y_stride);
-                            n += (uint32_t)fwrite(&pImage->pData[p][j], 1, len, pImgd[i].debug);
-                        }
-                        fflush(pImgd[i].debug);
-                    }
-                }
-                else
-                {
-                    DVP_U32 x_divisor = 1;
-                    DVP_U32 y_divisor = 1;
-                    if (pImage->color == FOURCC_YVU9 ||
-                        pImage->color == FOURCC_YUV9)
-                    {
-                        x_divisor = 4;
-                        y_divisor = 1;
-                    }
-                    else if (pImage->color == FOURCC_YV16 ||
-                             pImage->color == FOURCC_YU16)
-                    {
-                        x_divisor = 2;
-                        y_divisor = 1;
-                    }
-                    else if (pImage->color == FOURCC_YV12 ||
-                             pImage->color == FOURCC_IYUV)
-                    {
-                        x_divisor = 2;
-                        y_divisor = 2;
-                    }
-                    else if (pImage->color == FOURCC_NV12 ||
-                             pImage->color == FOURCC_NV21)
-                    {
-                        y_divisor = 2;
-                    }
-                    for (y = 0; y < pImage->height; y++)
-                    {
-                        len = (pImage->x_stride * pImage->width);
-                        j = (y * pImage->y_stride);
-                        n += (DVP_U32)fwrite(&pImage->pData[0][j], 1, len, pImgd[i].debug);
-                    }
-                    fflush(pImgd[i].debug);
-                    for (p = 1; p < pImage->planes; p++)
-                    {
-                        for (y = 0; y < pImage->height/y_divisor; y++)
-                        {
-                            len = (pImage->x_stride * pImage->width/x_divisor);
-#ifdef DVP_USE_TILER
-                            if (pImage->y_stride == TILER_STRIDE_8BIT)
-                                j = (y * pImage->y_stride); // @NOTE In this case subsampled images are overallocated and use the same stride
-                            else
-                                j = (y * pImage->y_stride/x_divisor);
-#else
-                            j = (y * pImage->y_stride/x_divisor);
-#endif
-                            n+= (DVP_U32)fwrite(&pImage->pData[p][j], 1, len, pImgd[i].debug);
-                        }
+                        ptr = DVP_Image_PatchAddressing(pImage, 0, y*ydiv, p);
+                        n += (uint32_t)fwrite(ptr, 1, len, pImgd[i].debug);
                     }
                     fflush(pImgd[i].debug);
                 }

@@ -806,73 +806,17 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                     }
                     if (pImgdbg->fp)
                     {
-                        DVP_U32 j,y,p,len,n = 0;
-                        // for equal sized plane images
-                        if (pImage->planes == 1 ||
-                            pImage->color == FOURCC_RGBP ||
-                            pImage->color == FOURCC_YU24 ||
-                            pImage->color == FOURCC_YV24)
+                        DVP_U32 y,p,len,ydiv,n = 0;
+                        DVP_U08 *ptr = NULL;
+
+                        for (p = 0; p < pImage->planes; p++)
                         {
-                            for (p = 0; p < pImage->planes; p++)        // loop for each plane
+                            ydiv = DVP_Image_HeightDiv(pImage, p);
+                            len = DVP_Image_PatchLineSize(pImage, p);
+                            for (y = 0; y < pImage->height/ydiv; y++)
                             {
-                                for (y = pImage->y_start; y < pImage->height; y++)    // loop for each line
-                                {
-                                    len = DVP_Image_LineSize(pImage, p);
-                                    j = DVP_Image_Offset(pImage, 0, y, p);
-                                    n += (uint32_t)fwrite(&pImage->pData[p][j], 1, len, pImgdbg->fp);
-                                }
-                                fflush(pImgdbg->fp);
-                            }
-                        }
-                        else // for non-isometric planes
-                        {
-                            DVP_U32 x_divisor = 1;
-                            DVP_U32 y_divisor = 1;
-                            if (pImage->color == FOURCC_YVU9 ||
-                                 pImage->color == FOURCC_YUV9)
-                            {
-                                x_divisor = 4;
-                                y_divisor = 1;
-                            }
-                            else if (pImage->color == FOURCC_YV16 ||
-                                     pImage->color == FOURCC_YU16)
-                            {
-                                x_divisor = 2;
-                                y_divisor = 1;
-                            }
-                            else if (pImage->color == FOURCC_YV12 ||
-                                     pImage->color == FOURCC_IYUV)
-                            {
-                                x_divisor = 2;
-                                y_divisor = 2;
-                            }
-                            else if (pImage->color == FOURCC_NV12 ||
-                                     pImage->color == FOURCC_NV21)
-                            {
-                                y_divisor = 2;
-                            }
-                            for (y = 0; y < pImage->height; y++)
-                            {
-                                len = DVP_Image_LineSize(pImage, 0);
-                                j = DVP_Image_Offset(pImage, 0, y, 0);
-                                n += (DVP_U32)fwrite(&pImage->pData[0][j], 1, len, pImgdbg->fp);
-                            }
-                            fflush(pImgdbg->fp);
-                            for (p = 1; p < pImage->planes; p++)
-                            {
-                                for (y = 0; y < pImage->height/y_divisor; y++)
-                                {
-                                    len = (pImage->x_stride * pImage->width/x_divisor);
-#if defined(DVP_USE_TILER)
-                                    if (pImage->y_stride == TILER_STRIDE_8BIT)
-                                        j = (y * pImage->y_stride); // @NOTE In this case subsampled images are overallocated and use the same stride
-                                    else
-                                        j = (y * pImage->y_stride/x_divisor);
-#else
-                                    j = (y * pImage->y_stride/x_divisor);
-#endif
-                                    n+= (DVP_U32)fwrite(&pImage->pData[p][j], 1, len, pImgdbg->fp);
-                                }
+                                ptr = DVP_Image_PatchAddressing(pImage, 0, y*ydiv, p);
+                                n += (uint32_t)fwrite(ptr, 1, len, pImgdbg->fp);
                             }
                             fflush(pImgdbg->fp);
                         }

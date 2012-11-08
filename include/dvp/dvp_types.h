@@ -282,7 +282,7 @@ typedef struct _dvp_image_t {
     DVP_S32  x_stride;               /*!<  byte distance from one pixel to the next pixel in the x direction, not necessarily the same as pixel size */
     DVP_S32  y_stride;               /*!<  byte distance from one pixel to the next pixel in the y direction, not necessarily the same as pixel size times width. Note: all planes should use the same stride, thus should be allocated identically. Subsampled planes will be overallocated. */
     DVP_U32  color;                  /*!<  used a FourCC code (http://www.fourcc.org) \see fourcc_t */
-    DVP_U32  numBytes;               /*!<  The allocated byte size of this image */
+    DVP_U32  numBytes;               /*!<  The allocated byte range of this image. */
     DVP_U32  memType;                /*!<  The memory mapping type, \see DVP_MemType_e */
     DVP_PTR  reserved;               /*!<  Used for internal tracking */
     DVP_S32  skipCacheOpInval;       /*!<  Used to indicate to the DVP lower layers to skip cache operations for this image because it will not be used on the local core */

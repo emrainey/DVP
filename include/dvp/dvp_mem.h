@@ -159,6 +159,46 @@ size_t DVP_Image_Serialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len);
  */
 size_t DVP_Image_Unserialize(DVP_Image_t *pImage, uint8_t *buffer, size_t len);
 
+/*! \brief Returns the height divisor for that plane index of the image.
+ * \param [in] pImage The image structure.
+ * \param [in] plane The index of the plane desired.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_HeightDiv(DVP_Image_t *pImage, DVP_U32 plane);
+
+/*! \brief Returns the width divisor for that plane index of the image.
+ * \param [in] pImage The image structure.
+ * \param [in] plane The index of the plane desired.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_WidthDiv(DVP_Image_t *pImage, DVP_U32 plane);
+
+/*! \brief Calculates the size the patch plane's lines in bytes.
+ * The patch is the sub-image defined by {x_start,y_start} by {width,height}.
+ * \param [in] pImage the image meta-pointer.
+ * \param [in] plane The plane index.
+ * \return Returns the lineSize in bytes.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_PatchLineSize(DVP_Image_t *pImage, DVP_U32 plane);
+
+/*!
+ * \brief Calculates the size of the patch plane indexed as given.
+ * The patch is the sub-image defined by {x_start,y_start} by {width,height}.
+ * \param [in] pImage The image pointer to calculate the plane size of.
+ * \param [in] plane The plane index to use to get the size from.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_PatchPlaneSize(DVP_Image_t *pImage, DVP_U32 plane);
+
+/*!
+ * \brief Calculates the byte size of all the patch data in the image.
+ * The patch is the sub-image defined by {x_start,y_start} by {width,height}.
+ * \param [in] pImage The pointer to the image structure.
+ * \ingroup group_images
+ */
+DVP_U32 DVP_Image_PatchSize(DVP_Image_t *pImage);
+
 /*! \brief Calculates the size the plane's lines in bytes.
  * \param [in] pImage the image meta-pointer.
  * \param [in] plane The plane index.
@@ -211,10 +251,31 @@ DVP_U32 DVP_Image_Range(DVP_Image_t *pImage);
  * \param [in] y The y coordinate.
  * \param [in] p The plane index.
  * \returns Returns a pointer to the requested pixel.
+ * \note This pointer is offset from the image patch, not the allocated base.
+ */
+DVP_U08 *DVP_Image_PatchAddressing(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p);
+
+/*! \brief Computes the pointer to an X,Y location on a plane of the image.
+ * \param [in] pImage The pointer to the image structure.
+ * \param [in] x The x coordinate.
+ * \param [in] y The y coordinate.
+ * \param [in] p The plane index.
+ * \returns Returns a pointer to the requested pixel.
+ * \note This pointer is offset from the allocated base of the image, not the patch.
  */
 DVP_U08 *DVP_Image_Addressing(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p);
 
-/*! \brief Computes the per olane offset to an X,Y location of the image.
+/*! \brief Computes the per plane offset to an X,Y location of the image patch.
+ * \param [in] pImage The pointer to the image structure.
+ * \param [in] x The x coordinate.
+ * \param [in] y The y coordinate.
+ * \param [in] p The plane index.
+ * \returns Returns an offset to the requested pixel on a plane.
+ * \note Patch offsets are bounded by width and height, not bufWidth and bufHeight.
+ */
+DVP_U32 DVP_Image_PatchOffset(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p);
+
+/*! \brief Computes the per plane offset to an X,Y location of the image.
  * \param [in] pImage The pointer to the image structure.
  * \param [in] x The x coordinate.
  * \param [in] y The y coordinate.
@@ -222,6 +283,18 @@ DVP_U08 *DVP_Image_Addressing(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32
  * \returns Returns an offset to the requested pixel on a plane.
  */
 DVP_U32 DVP_Image_Offset(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p);
+
+/*! \brief Alters the image structure to set the image patch sub-image.
+ * \param [in] pImage The pointer to the image structure.
+ * \param [in] x_start The start x coordinate.
+ * \param [in] y_start The start y coordinate.
+ * \param [in] width The new sub-image width.
+ * \param [in] height The new sub-image height.
+ * \note Once this patch has been set, you must use the patch appropriate APIs.
+ * \ingroup group_images
+ * return Returns DVP_FALSE if the parameters are outside the allocated size of the image.
+ */
+DVP_BOOL DVP_Image_SetPatch(DVP_Image_t *pImage, DVP_U32 x_start, DVP_U32 y_start, DVP_U32 width, DVP_U32 height);
 
 /*!
  * \brief Validates the values of the various members of the Image structure.
@@ -262,6 +335,15 @@ DVP_BOOL DVP_Image_Validate(DVP_Image_t *pImage,
  * \ingroup group_images
  */
 DVP_BOOL DVP_Image_Equal(DVP_Image_t *pDst, DVP_Image_t *pSrc);
+
+/*! \brief Determines if two image patches are bit equal regardless of the memory layout
+ * of each image.
+ * \param [in] pDst The image patch to determine if equal.
+ * \param [in] pSrc The image patch to compare against.
+ * \return DVP_BOOL
+ * \ingroup group_images
+ */
+DVP_BOOL DVP_Image_PatchEqual(DVP_Image_t *pDst, DVP_Image_t *pSrc);
 
 /*!
  * \brief Allocates and maps a flat buffer to all remote cores.

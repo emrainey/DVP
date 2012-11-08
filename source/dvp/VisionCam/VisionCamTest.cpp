@@ -1222,9 +1222,9 @@ bool save2Dimage( DVP_Image_t *pImage)
         if( outFile )
         {
             // beginning of meaningful image data
-            pos = DVP_Image_Addressing(pImage, pImage->x_start, pImage->y_start, 0);
+            pos = DVP_Image_Addressing(pImage, 0, 0, 0);
 
-            size_t widthInBytes = DVP_Image_LineSize(pImage, 0);
+            size_t widthInBytes = DVP_Image_PatchLineSize(pImage, 0);
 
             for( uint32_t h = 0; h < pImage->bufHeight; h++ , pos += pImage->y_stride )
             {
