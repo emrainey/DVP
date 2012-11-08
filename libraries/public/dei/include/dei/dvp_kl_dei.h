@@ -7,7 +7,10 @@
  * \brief This file decribes the exact set of kernels supported by the
  * deinterlacer algorithm library as exported through DVP.
  * \note When using these enums, only the deinterlacer kernels will be used!
- */
+ * \defgroup group_algo_dei Algos: DEI
+ * \brief This only works on platforms with DSP firmware with the
+ * enabled DVP KGM.
+*/
 
 #ifndef _DVP_KL_DEI_H_
 #define _DVP_KL_DEI_H_
@@ -18,6 +21,7 @@
 
 /*! The explicit list of kernels supported by the DEI algorithm library.
  * \see DVP_Transform_t
+ * \ingroup group_algo_dei
  */
 enum {
     DVP_KN_DEI_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_DEI),
@@ -47,6 +51,7 @@ enum {
 
 /*!
  * This structure is use with deinterlacer Kernels.
+ * \ingroup group_algo_dei
  */
 typedef struct _dvp_deinterlacer_t {
     DVP_Image_t phy_fld_in_current;     /*!<  Current Input/Output image when phy_virt_flag is 0*/

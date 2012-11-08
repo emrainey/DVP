@@ -6,9 +6,9 @@ the OMAP44xx, leveraging specialized hardware which can greatly accelerate
 specific machine vision kernels while minimizing latency by aggregating IPC
 transactions.
 
-    \section remoteexecution Remote Execution Considerations
+\section remoteexecution Remote Execution Considerations
 
-    \subsection ipc Interprocess Communication (IPC) Overhead
+\subsection ipc Interprocess Communication (IPC) Overhead
 
 One of the biggest challenges of using heterogeneous multi-cores is the
 latency involved in IPC. Even with high-speed IPC on the order to microseconds, HLOS's still have
@@ -16,7 +16,7 @@ higher level latency issues such as context switches between processes and
 kernels, and inter-thread switching. Remote work aggregation is the only
 method of mitigating this unpredicatable overhead.
 
-	\subsection example_bad High IPC Overhead Example
+\subsection example_bad High IPC Overhead Example
 
 \msc
 	a [label="Client Process"], b [label="HLOS Kernel"], c [label="Remote Core"];
@@ -37,7 +37,7 @@ method of mitigating this unpredicatable overhead.
 	a<<b [label="<exec result>"];
 \endmsc
 
-	\subsection example_good Low IPC Overhead Example
+\subsection example_good Low IPC Overhead Example
 
 \msc
 	a [label="Client Process"], b [label="HLOS Kernel"], c [label="Remote Core"];
@@ -67,7 +67,7 @@ client to create a graph with sections that optimally aggregate work versus
 functionality.
 
 
-    \section local_optimization Local Optimization
+\section local_optimization Local Optimization
 
 Each Manager can locally optimize Graph performance, beyond what the Boss may
 understand. For example, the CPU Manager may have some specialized assembly

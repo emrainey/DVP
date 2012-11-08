@@ -8,6 +8,8 @@
  * algorithm library as exported through DVP.
  * \note When using these enums, only the DSPLIB kernels will be used!
  * \defgroup group_algo_dsplib Algos: DSP Library
+ * \brief This only works on platforms with DSP firmware with the
+ * enabled DVP KGM.
  */
 
 #ifndef _DVP_KL_DSPLIB_H_

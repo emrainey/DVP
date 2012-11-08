@@ -8,7 +8,7 @@ most allocations are allocated via malloc, calloc or memalign. The RPC layer
 of DVP understands the Cache issues associated with remote core execution and
 works to keep buffers consistent after Section executions.
 
-    \section sec_supported_memory Supported Memory Types
+\section sec_supported_memory Supported Memory Types
 
 DVP supports multiple memory types for Images and Buffers.
 Plain Virtual Memory

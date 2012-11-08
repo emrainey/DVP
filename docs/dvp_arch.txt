@@ -1,16 +1,16 @@
 /*!
 \page page_arch_overview Architecture Overview
 
-    \section high_level_diagram High Level Diagram
+\section high_level_diagram High Level Diagram
 
-    \dotfile high_level.dot
+\dotfile high_level.dot
 
-    \section sec_distribution Distribution
+\section sec_distribution Distribution
 
 DVP uses an RPMSG-based driver called OMAPRPC to distribute work across the OMAP4
 system.
 
-    \section manager_prioritization Manager Prioritization
+\section manager_prioritization Manager Prioritization
 
 DVP internally prioritizes some hardware blocks over others due to implicit
 performance advantages due to hardware designs. If multiple Managers support
@@ -28,7 +28,7 @@ prefer to execute the kernel on the highest priority Manager first working its
  way down the priority list only when the Core that the Manager works on is
 exhausted of resources.
 
-    \section load_balancing Load Balancing
+\section load_balancing Load Balancing
 
 DVP understands that real-time contraints can be expected in production
 devices and therefore has an Estimated Load table, whose input helps control where the
@@ -39,7 +39,7 @@ accelerator and is more accurately thought of as serially accessed in bursts
 of 100% utilization since no two tasks can be present concurrently (or at
 least aren't in this design).
 
-    \section multi_dvp Multiple DVP Instances
+\section multi_dvp Multiple DVP Instances
 
 DVP can execute multiple Graphs in parallel within the same process or across
 multiple processes. The Estimated Load Table is in a semaphore protected
@@ -47,24 +47,24 @@ piece of shared memory so that multiple processes can utilize the DVP system
 at once. Each process gets its own instance of the Managers, but there is
 only one Estimated Load Table.
 
-	\section nodes Nodes
+\section nodes Nodes
 
 A node (\ref DVP_KernelNode_t) is the combination of the Kernel enumeration, the parameters to be
 given to the kernel and some needed overhead.
 
-	\section sections Sections
+\section sections Sections
 
 A section (\ref DVP_KernelGraphSection_t) is a series of nodes collected into a logical set by the client.
 At the end of a section a callback is issued to the client.
 
-    \section graphs Graphs
+\section graphs Graphs
 
 A graph (\ref DVP_KernelGraph_t), in this context, represents one or more sets of sections which are
 executed in series or parallel. The sections are arranged in a specific execution order and if
 this order is the same as another section's, parallelism is possible. In this
 case, the order is set by the client.
 
-    \section callbacks Section Completion Callbacks
+\section callbacks Section Completion Callbacks
 
 After each section completes execution, a callback is issued to the client to
 notify them of completion. This callback has several features.

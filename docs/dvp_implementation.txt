@@ -1,7 +1,7 @@
 /*!
 \page page_implementation Implementation Details
 
-   \section languages Languages
+\section languages Languages
 
 DVP is implemented in C with some C99 extensions. GCC and Microsoft's CL
 compiler can both compile the majority of DVP. DVP does contain some NEON ARM
@@ -11,7 +11,7 @@ DVP contains other components which are implemented in C++ (VisionCam/
 VisionEngine). These are convenience classes used to simplify usage of DVP
 within a HLOS environment.
 
-    \section supported_hlos Supported HLOS
+\section supported_hlos Supported HLOS
 
 - Froyo, Gingerbread, IceCreamSandwich Android - using Android makefiles.
 - QNX - using Concerto
@@ -20,7 +20,7 @@ are used. Using Concerto build.
 - Windows NT - "Host" Build where the reference "C" versions of the kernels are
 used. Using Concerto build.
 
-    \section android_specific Android Specific Issues
+\section android_specific Android Specific Issues
 
 -# Android Froyo/Gingerbread/ICS do not support a generic shmget (shared memory
 allocation) and thus a "work-around" was used which allows multiple DVP
