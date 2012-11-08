@@ -1075,7 +1075,7 @@ DVP_U32 DVP_Image_Offset(DVP_Image_t *pImage, DVP_U32 x, DVP_U32 y, DVP_U32 p)
                 case FOURCC_NV12:
                 case FOURCC_NV21:
                     // U/V sub channel pair.
-                    i = (pImage->y_stride * y/2) + (pImage->x_stride*2 + x/2);
+                    i = (pImage->y_stride * y/2) + (pImage->x_stride*2 * x/2);
                     break;
                 case FOURCC_YUV9:
                 case FOURCC_YVU9:
