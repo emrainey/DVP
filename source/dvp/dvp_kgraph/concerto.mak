@@ -27,6 +27,8 @@ ifeq ($(TARGET_OS),LINUX)
         STATIC_LIBS+=gtkwindow
         SYS_SHARED_LIBS+=$(GTK_LIBS)
         CSOURCES+=dvp_display_gtk.c
+    else
+        CSOURCES+=dvp_display_file.c
     endif
     SHARED_LIBS += $(IPC_LIBS)
     ifeq ($(TARGET_CPU),ARM)
