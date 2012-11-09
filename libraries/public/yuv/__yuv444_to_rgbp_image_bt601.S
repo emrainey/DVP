@@ -18,11 +18,11 @@
 .arch armv7-a
 .fpu neon
 
-.global __iyuv_to_rgbp_image_bt601
+.global __yuv444_to_rgbp_image_bt601
 
 .include "yuv.inc"
 
-__iyuv_to_rgbp_image_bt601:
+__yuv444_to_rgbp_image_bt601:
 width       .req r0
 height      .req r1
 pY          .req r2
@@ -51,12 +51,12 @@ tmp         .req r12
         sub     dstStep, dstStride, width
         mov     tmp, #L2_LINE_SIZE
         FILL_YCBCR_TO_RGB_BT601 q15,q14,q13,q12,q11,d21,d20
-__iyuv_to_rgbp_image_bt601_line:
+__yuv444_to_rgbp_image_bt601_line:
         mov     pixelsLeft, width
         pld     [pY]
         pld     [pU]
         pld     [pV]
-__iyuv_to_rgbp_image_bt601_pixels:
+__yuv444_to_rgbp_image_bt601_pixels:
         pld     [pY, tmp]
         vld1.8  {d2}, [pY]! /* d2 = [y0,y1,y2,y3,y4,y5,y6,y7] */
         vld1.8  {d1}, [pU]! /* d1 = [u0,u1,u2,u3,u4,u5,u6,u7] */
@@ -80,7 +80,7 @@ __iyuv_to_rgbp_image_bt601_pixels:
         vst1.8  {d1}, [pG]!
         vst1.8  {d2}, [pB]!
         subs    pixelsLeft, pixelsLeft, #8
-        bgt     __iyuv_to_rgbp_image_bt601_pixels
+        bgt     __yuv444_to_rgbp_image_bt601_pixels
         add     pY, pY, srcStep
         add     pU, pU, srcStep
         add     pV, pV, srcStep
@@ -88,7 +88,7 @@ __iyuv_to_rgbp_image_bt601_pixels:
         add     pG, pG, dstStep
         add     pB, pB, dstStep
         subs    linesLeft, linesLeft, #1
-        bgt     __iyuv_to_rgbp_image_bt601_line
+        bgt     __yuv444_to_rgbp_image_bt601_line
         EPILOG  r0, r12
 
 .unreq width

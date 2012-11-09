@@ -267,17 +267,18 @@ static DVP_CoreFunction_t local_kernels[] = {
 #endif
 
 #if defined(DVP_USE_YUV)
+    {"NEON YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0, NULL, NULL},
     {"NEON LUMA to xYxY",    DVP_KN_Y800_TO_XYXY, 0, NULL, NULL},
     {"NEON YUV420 to RGBp",  DVP_KN_YUV420p_TO_RGBp, 0, NULL, NULL},
     {"NEON UYVY to BGR",     DVP_KN_UYVY_TO_BGR, 0, NULL, NULL},
 #endif
 
 #if defined(DVP_USE_IMAGE)
-    {"\"C\" YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0, NULL, NULL},
     {"\"C\" YUV444p to UYVY ", DVP_KN_YUV444p_TO_UYVY, 0, NULL, NULL},
     {"\"C\" NV12 to UYVY",     DVP_KN_NV12_TO_UYVY, 0, NULL, NULL},
     {"\"C\" RGB3 to NV12",    DVP_KN_BGR3_TO_NV12, 0, NULL, NULL},
 #endif
+
 
 #if defined(DVP_USE_IMGFILTER)
     {"NEON Sobel3x3",   DVP_KN_SOBEL_8, 0, NULL, NULL},
@@ -469,7 +470,7 @@ static DVP_CoreFunction_t local_kernels[] = {
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON \"YUV\" YUV444 to RGBp",  DVP_KN_YUV_IYUV_TO_RGBp, 0, NULL, NULL},
+    {"NEON \"YUV\" YUV444 to RGBp",  DVP_KN_YUV_YUV444_TO_RGBp, 0, NULL, NULL},
     {"NEON \"YUV\" LUMA to xYxY",    DVP_KN_YUV_Y800_TO_XYXY, 0, NULL, NULL},
     {"NEON \"YUV\" NV12 to YUV444p", DVP_KN_YUV_NV12_TO_YU24_HALF_SCALE, 0, NULL, NULL},
     {"NEON \"YUV\" UYVY HALF SCALE", DVP_KN_YUV_UYVY_HALF_SCALE, 0, NULL, NULL},
@@ -2168,14 +2169,14 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                     }
                     break;
                 }
-                case DVP_KN_YUV420p_TO_RGBp:
-                case DVP_KN_YUV_IYUV_TO_RGBp:
+                case DVP_KN_YUV444p_TO_RGBp:
+                case DVP_KN_YUV_YUV444_TO_RGBp:
                 {
                     DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
-                    if (pT->input.color == FOURCC_IYUV &&
+                    if (pT->input.color == FOURCC_YU24 &&
                         pT->output.color == FOURCC_RGBP)
                     {
-                        __iyuv_to_rgbp_image_bt601(pT->input.width,
+                        __yuv444_to_rgbp_image_bt601(pT->input.width,
                                                    pT->input.height,
                                                    pT->input.pData[0],
                                                    pT->input.pData[1],
@@ -2186,10 +2187,10 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                                                    pT->output.pData[2],
                                                    pT->output.y_stride);
                     }
-                    else if (pT->input.color == FOURCC_YV12 &&
+                    else if (pT->input.color == FOURCC_YV24 &&
                              pT->output.color == FOURCC_RGBP)
                     {
-                        __iyuv_to_rgbp_image_bt601(pT->input.width,
+                        __yuv444_to_rgbp_image_bt601(pT->input.width,
                                                    pT->input.height,
                                                    pT->input.pData[0],
                                                    pT->input.pData[2],
@@ -2601,7 +2602,6 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                 case DVP_KN_NV12_TO_YUV444p:
 #endif
 #if defined(DVP_USE_IMAGE)
-                case DVP_KN_YUV444p_TO_RGBp:
                 case DVP_KN_YUV444p_TO_UYVY:
                 case DVP_KN_NV12_TO_UYVY:
                 case DVP_KN_BGR3_TO_NV12:
@@ -4299,6 +4299,9 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                 break;
             }
             case DVP_KN_YUV444p_TO_RGBp:
+#if defined(DVP_USE_YUV)
+            case DVP_KN_YUV_YUV444_TO_RGBp:
+#endif
             {
                 fourcc_t valid_colors[] = {FOURCC_YU24, FOURCC_YV24, FOURCC_RGBP};
                 if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)

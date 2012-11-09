@@ -209,7 +209,7 @@ void __iyuv_to_bgr_image_bt601(uint32_t width,
                                uint8_t *pDst,
                                int32_t dstStride);
 
-/*! \brief Converts IYUV byte ordered data to RGBp over an image.
+/*! \brief Converts YUV444 planar data to RGBp over an image using BT601.
  * \param [in] width The width in pixels.
  * \param [in] height The height in pixels.
  * \param [in] pY The pointer to the Luma plane.
@@ -222,16 +222,16 @@ void __iyuv_to_bgr_image_bt601(uint32_t width,
  * \param [in] dstStride The stride in bytes of the destination image.
  * \ingroup group_yuv
  */
-void __iyuv_to_rgbp_image_bt601(uint32_t width,
-                                uint32_t height,
-                                uint8_t *pY,
-                                uint8_t *pU,
-                                uint8_t *pV,
-                                int32_t srcStride,
-                                uint8_t *pR,
-                                uint8_t *pG,
-                                uint8_t *pB,
-                                int32_t dstStride);
+void __yuv444_to_rgbp_image_bt601(uint32_t width,
+                                  uint32_t height,
+                                  uint8_t *pY,
+                                  uint8_t *pU,
+                                  uint8_t *pV,
+                                  int32_t srcStride,
+                                  uint8_t *pR,
+                                  uint8_t *pG,
+                                  uint8_t *pB,
+                                  int32_t dstStride);
 
 /*! \brief Converts ARGB byte ordered data to UYVY over an image.
  * \param [in] width The width in pixels.
