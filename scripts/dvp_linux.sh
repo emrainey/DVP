@@ -169,7 +169,7 @@ do
             #   dvp_kgm_* files to know what kgm's are available for loading.  Bins can safely remain in the OUT_DIR
             #   if called directly (or calling the dvp.sh run <bin> <args>).
             for i in ${TARGET_LIBS}; do
-                ${SUDO} rm /usr/lib/lib${i}.so
+                ${SUDO} rm /usr/lib/lib${i}.so*
             done
         fi
     fi
@@ -206,7 +206,7 @@ do
             #   if called directly (or calling the dvp.sh run <bin> <args>).
             for i in ${TARGET_LIBS}; do
                 echo Installing lib${i}.so
-                ${SUDO} cp ${OUT_DIR}/lib${i}.so /usr/lib/.
+                ${SUDO} cp -d ${OUT_DIR}/lib${i}.so* /usr/lib/.
             done
         fi
     fi
@@ -456,6 +456,7 @@ EOF
                     exit 0
                 fi
             else
+                export LD_LIBRARY_PATH=${OUT_DIR}
                 ${OUT_DIR}/${PROCESS} $*
                 exit
             fi
