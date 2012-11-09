@@ -2977,7 +2977,7 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
 
             dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output = m_images[48];
             DVP_Image_SetPatch(&dvp_knode_to(&m_pNodes[33], DVP_Transform_t)->output,
-                m_width/4-15, m_height/4-15, m_width, m_height);
+                m_width/4-15, m_height/4-15, m_width/2-15, m_height/2-15);
 
             m_pNodes[34].header.kernel = DVP_KN_YUV444p_TO_RGBp;
             dvp_knode_to(&m_pNodes[34], DVP_Transform_t)->input  = m_images[1];
