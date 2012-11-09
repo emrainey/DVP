@@ -463,7 +463,8 @@ do
         export PRIVATE_LIB_HEADER_LIST="${MYDROID}/${VISION_ROOT}/libraries/protected/imglib/include/imglib/dvp_kl_imglib.h
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/vlib/include/vlib/dvp_kl_vlib.h
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/rvm/include/rvm/dvp_kl_rvm.h
-                                        ${MYDROID}/${VISION_ROOT}/libraries/protected/tismo/include/tismo/dvp_kl_tismo.h"
+                                        ${MYDROID}/${VISION_ROOT}/libraries/protected/tismo/include/tismo/dvp_kl_tismo.h
+                                        ${MYDROID}/${VISION_ROOT}/libraries/protected/tismov02/include/tismov02/dvp_kl_tismov02.h"
         export LIBHEADERS=
         export doxygen_status=`dpkg-query -W -f='${Status}\n' doxygen`
         export graphviz_status=`dpkg-query -W -f='${Status}\n' graphviz`
@@ -491,7 +492,7 @@ do
                 if [ -f ${i} ]; then
                     LIBHEADERS+="${i} ";
                     echo "Library Header File Found: ${i}";
-                    PREDEF+=" `echo ${i} | sed 's/.*dvp_kl_\([a-z]*\).h/DVP_USE_\U\1/'` ";
+                    PREDEF+=" `echo ${i} | sed 's/.*dvp_kl_\([a-z0-9]*\).h/DVP_USE_\U\1/'` ";
                 fi
             done
             scripts/kernel_doc.pl docs/dvp_kernel_autogen.txt ${TARGET_ROOT}/include/dvp/dvp_types.h ${LIBHEADERS} ${PUBLIC_LIB_HEADER_LIST}

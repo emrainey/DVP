@@ -21,6 +21,11 @@ DVP_FEATURES += -DDVP_USE_TISMO
 DVP_INCLUDES += $(VISION_ROOT)/libraries/protected/tismo/include
 endif
 
+ifneq (,$(findstring tismov02,$(VISION_LIBRARIES)))
+DVP_FEATURES += -DDVP_USE_TISMOV02
+DVP_INCLUDES += $(VISION_ROOT)/libraries/protected/tismov02/include
+endif
+
 ifneq (,$(findstring orb,$(VISION_LIBRARIES)))
 DVP_FEATURES += -DDVP_USE_ORB
 DVP_INCLUDES += $(VISION_ROOT)/libraries/protected/orb/include

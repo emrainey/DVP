@@ -32,6 +32,10 @@
 #include <tismo/dvp_kl_tismo.h>
 #endif
 
+#if defined(DVP_USE_TISMOV02)
+#include <tismov02/dvp_kl_tismov02.h>
+#endif
+
 #if defined(DVP_USE_RVM)
 #include <rvm/dvp_kl_rvm.h>
 #endif
@@ -350,6 +354,9 @@ static DVP_CoreFunction_t remote_kernels[] = {
 #ifdef DVP_USE_TISMO
     {"c64t  TISMO",                     DVP_KN_TISMO_DISPARITY,             0, NULL, NULL},
 #endif
+#ifdef DVP_USE_TISMOV02
+    {"c64t  TISMOV02",                  DVP_KN_TISMOV02_DISPARITY,          0, NULL, NULL},
+#endif
 #ifdef DVP_USE_RVM
     {"c64t RVM",                        DVP_KN_RVM,                         0, NULL, NULL},
 #endif
@@ -399,6 +406,9 @@ MODULE_EXPORT DVP_U32 DVP_GetSupportedKernels(DVP_CoreFunction_t **pFuncs)
 #endif
 #ifdef DVP_USE_TISMO
     DVP_PRINT(DVP_ZONE_KGM, KGM_TAG" DVP_USE_TISMO enabled!\n");
+#endif
+#ifdef DVP_USE_TISMOV02
+    DVP_PRINT(DVP_ZONE_KGM, KGM_TAG" DVP_USE_TISMOV02 enabled!\n");
 #endif
     DVP_PRINT(DVP_ZONE_KGM, KGM_TAG" supports %u kernels\n", numRemoteKernels);
     return numRemoteKernels;
@@ -955,6 +965,35 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
                     DVP_PrintImage(DVP_ZONE_KGM, &pT->right);
                     DVP_PrintImage(DVP_ZONE_KGM, &pT->output);
                     DVP_PrintImage(DVP_ZONE_KGM, &pT->invalid);
+                    break;
+                }
+#endif
+#ifdef DVP_USE_TISMOV02
+                case DVP_KN_TISMOV02_DISPARITY:
+                {
+                    DVP_TismoV02_t *pT = dvp_knode_to(&pNodes[n], DVP_TismoV02_t);
+
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_left, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_right, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_leftIntegralImage, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_rightIntegralImage, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_raw, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_invalid, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_confidence, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_matchScore, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+                    dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_lumaU8, DVP_FALSE, (DVP_PTR)pTmp, &translations);
+
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->in_left);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->in_right);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->in_leftIntegralImage);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->in_rightIntegralImage);
+
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->out_raw);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->out_invalid);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->out_confidence);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->out_matchScore);
+                    DVP_PrintImage(DVP_ZONE_KGM, &pT->out_lumaU8);
                     break;
                 }
 #endif
@@ -1920,6 +1959,24 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->right, DVP_FALSE);
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->output, DVP_TRUE);
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->invalid, DVP_TRUE);
+                    break;
+                }
+#endif
+#ifdef DVP_USE_TISMOV02
+                case DVP_KN_TISMOV02_DISPARITY:
+                {
+                    DVP_TismoV02_t *pT = dvp_knode_to(&pNodes[n], DVP_TismoV02_t);
+
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_left, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_right, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_leftIntegralImage, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->in_rightIntegralImage, DVP_FALSE);
+
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_raw, DVP_TRUE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_invalid, DVP_TRUE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_confidence, DVP_TRUE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_matchScore, DVP_TRUE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pT->out_lumaU8, DVP_TRUE);
                     break;
                 }
 #endif

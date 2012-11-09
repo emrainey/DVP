@@ -29,6 +29,11 @@ DVP_FEATURES += DVP_USE_TISMO
 DVP_INC += $(VISION_ROOT)/libraries/protected/tismo/include
 endif
 
+ifneq (,$(findstring tismov02,$(VISION_LIBRARIES)))
+DVP_FEATURES += DVP_USE_TISMOV02
+DVP_INC += $(VISION_ROOT)/libraries/protected/tismov02/include
+endif
+
 ifneq (,$(findstring imglib,$(VISION_LIBRARIES)))
 DVP_FEATURES += DVP_USE_IMGLIB
 DVP_INC += $(VISION_ROOT)/libraries/protected/imglib/include

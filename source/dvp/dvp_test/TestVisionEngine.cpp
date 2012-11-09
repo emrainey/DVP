@@ -30,6 +30,10 @@
 #include <tismo/dvp_kl_tismo.h>
 #endif
 
+#if defined(DVP_USE_TISMOV02)
+#include <tismov02/dvp_kl_tismov02.h>
+#endif
+
 #if defined(DVP_USE_VRUN)
 #include <vrun/dvp_kl_vrun.h>
 #endif
@@ -163,6 +167,9 @@ status_e TestVisionEngine::GraphSetup()
                 break;
             case TI_GRAPH_TYPE_TISMO:
                 status = Test_Tismo();
+                break;
+            case TI_GRAPH_TYPE_TISMOV02:
+                status = Test_Tismov02();
                 break;
             case TI_GRAPH_TYPE_IMGLIB:
                 status = Test_Imglib();
@@ -4977,7 +4984,7 @@ status_e TestVisionEngine::Test_Tismo()
                 m_images[m_dispIdx].height = m_height;
             }
 
-            DVP_Image_Init(&m_images[m_dispMax], argWidth, argHeight, FOURCC_NV12);   //Disparity Map
+            DVP_Image_Init(&m_images[m_dispMax], argWidth, argHeight, FOURCC_Y16);   //Disparity Map
             DVP_Image_Init(&m_images[m_dispMax+1], argWidth, argHeight, FOURCC_Y800);   //Valid Codes
             DVP_Image_Init(&m_images[m_dispMax+2], argWidth, argHeight, FOURCC_NV12);   //Right
 
@@ -5125,6 +5132,295 @@ status_e TestVisionEngine::Test_Tismo()
 #endif
     return status;
 }
+
+status_e TestVisionEngine::Test_Tismov02()
+{
+    status_e status = STATUS_SUCCESS;
+#if defined(DVP_USE_TISMOV02)
+    m_imgdbg_enabled = true_e;
+    if (m_hDVP)
+    {
+        if (m_pCam == NULL)
+        {
+            m_pCam = VisionCamFactory(m_camtype);
+            if (m_pCam == NULL)
+                return STATUS_NOT_ENOUGH_MEMORY;
+        }
+#define TOPBOTTOM 1
+#define DISPLAY_DISPARITY 0
+#define FULL_SCREEN_DISPARITY 1
+#if TOPBOTTOM
+        VisionCamStereoInfo info = {VCAM_STEREO_LAYOUT_TOPBOTTOM, 1};
+#else
+        VisionCamStereoInfo info = {VCAM_STEREO_LAYOUT_LEFTRIGHT, 1};
+#endif
+        //VisionCamWhiteBalType white = VCAM_WHITE_BAL_CONTROL_AUTO;
+        VisionCamResType res;
+        uint32_t color = FOURCC_NV12; //FOURCC_Y800;//FOURCC_NV12;
+        m_sensorIndex = VCAM_SENSOR_STEREO;
+        m_capmode = VCAM_STEREO_MODE;
+        //int brightness = 50;
+        int32_t allocWidth;
+        int32_t allocHeight;
+        int32_t argWidth = m_width;
+        int32_t argHeight = m_height;
+
+        // Command line specifies width/height of each view.
+        if (info.layout == VCAM_STEREO_LAYOUT_LEFTRIGHT && info.subsampling == 1) {
+            m_width *= 2;
+        } else if (info.layout == VCAM_STEREO_LAYOUT_TOPBOTTOM && info.subsampling == 1) {
+            m_height *= 2;
+        }
+
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->init(this));
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_WIDTH, &m_width, sizeof(uint32_t)));
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_HEIGHT, &m_height, sizeof(uint32_t)));
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_COLOR_SPACE_FOURCC, &color, sizeof(fourcc_t)));
+        // Can't set ROTATION here, see below
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_FPS_FIXED, &m_fps, sizeof(uint32_t)));
+        if (m_camtype == VISIONCAM_FILE)
+        {
+            VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_NAME, m_name, (int32_t)strlen(m_name)));
+            VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_PATH, m_path, (int32_t)strlen(m_path)));
+        }
+        //VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_NAME, m_name, (int32_t)strlen(m_name)));
+        //VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_PATH, m_path, (int32_t)strlen(m_path)));
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_SENSOR_SELECT, &m_sensorIndex, sizeof( m_sensorIndex) ));
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_CAP_MODE, &m_capmode, sizeof(m_capmode)));
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_STEREO_INFO, &info, sizeof(info)));
+
+        memset(&res, 0, sizeof(res));
+        // VCAM_PARAM_2DBUFFER_DIM should only be called after resolutions, color space, cap mode, and
+        //   optionally stereo information is set.
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->getParameter(VCAM_PARAM_2DBUFFER_DIM, &res, sizeof(res)));
+
+#if TOPBOTTOM && DISPLAY_DISPARITY
+        allocWidth = m_width*2;
+#else
+        allocWidth = res.mWidth;
+#endif
+        allocHeight = res.mHeight;
+
+        m_camIdx = m_dispIdx = 0;
+        m_camMin = m_dispMin = 0;
+        m_camMax = m_dispMax = 4;
+
+        if (m_display_enabled)
+#if TOPBOTTOM && DISPLAY_DISPARITY
+#if FULL_SCREEN_DISPARITY
+        m_display = DVP_Display_Create(m_width, m_height/2, allocWidth, allocHeight, DVP_DISPLAY_WIDTH, DVP_DISPLAY_HEIGHT, 640, 480, 0, m_width, color, 0, m_dispMax+1);
+#else
+        m_display = DVP_Display_Create(m_width*2, m_height, allocWidth, allocHeight, DVP_DISPLAY_WIDTH, DVP_DISPLAY_HEIGHT, allocWidth, allocHeight, 0, 0, color, 0, m_dispMax+1);
+#endif
+#else
+        m_display = DVP_Display_Create(m_width, m_height, allocWidth, allocHeight, DVP_DISPLAY_WIDTH, DVP_DISPLAY_HEIGHT, allocWidth, allocHeight, 0, 0, color, 0, m_dispMax+1);
+#endif
+
+        if (AllocateImageStructs(m_dispMax+9))
+        {
+            for (m_dispIdx = m_dispMin; m_dispIdx < m_dispMax; m_dispIdx++)
+            {
+                DVP_Image_Init(&m_images[m_dispIdx], allocWidth, allocHeight, color);
+                m_images[m_dispIdx].width = m_width;
+                m_images[m_dispIdx].height = m_height;
+            }
+
+            DVP_Image_Init(&m_images[m_dispMax], argWidth, argHeight, FOURCC_Y800);   //out_lumaU8
+            DVP_Image_Init(&m_images[m_dispMax+1], argWidth, argHeight, FOURCC_Y800);   //out_invalid
+            DVP_Image_Init(&m_images[m_dispMax+2], argWidth, argHeight, FOURCC_Y16);   //out_raw
+            DVP_Image_Init(&m_images[m_dispMax+3], argWidth, argHeight, FOURCC_RGBA);   //in_leftIntegralImage
+            DVP_Image_Init(&m_images[m_dispMax+4], argWidth, argHeight, FOURCC_RGBA);   //in_rightIntegralImage
+            DVP_Image_Init(&m_images[m_dispMax+5], argWidth, argHeight, FOURCC_UYVY);   //out_confidence
+            DVP_Image_Init(&m_images[m_dispMax+6], argWidth, argHeight, FOURCC_UYVY);   //out_matchScore
+            DVP_Image_Init(&m_images[m_dispMax+7], argWidth, argHeight, FOURCC_Y800);   //out_lumaU8
+            DVP_Image_Init(&m_images[m_dispMax+8], argWidth, argHeight, FOURCC_Y800);   //out_invalid
+
+            if (m_display_enabled)
+            {
+                for (m_dispIdx = m_dispMin; m_dispIdx < m_dispMax; m_dispIdx++) {
+                    if (DVP_Display_Alloc(m_display, &m_images[m_dispIdx]) == DVP_FALSE)
+                        return STATUS_NOT_ENOUGH_MEMORY;
+
+                    for (DVP_U32 y = 0; y < m_images[m_dispIdx].bufHeight; y++) {
+                        int i = (y * m_images[m_dispIdx].y_stride);
+                        memset(&m_images[m_dispIdx].pData[0][i], 0, m_images[m_dispIdx].bufWidth*m_images[m_dispIdx].x_stride);
+                    }
+                    for (DVP_U32 y = 0; y < m_images[m_dispIdx].bufHeight/2; y++) {
+                        int i = (y * m_images[m_dispIdx].y_stride);
+                        memset(&m_images[m_dispIdx].pData[1][i], 0x80, m_images[m_dispIdx].bufWidth*m_images[m_dispIdx].x_stride);
+                    }
+                }
+            }
+            else {
+                for (m_dispIdx = m_dispMin; m_dispIdx < m_dispMax; m_dispIdx++)
+                {
+#if defined(DVP_USE_GRALLOC)
+                    m_images[m_dispIdx].memType = DVP_MTYPE_GRALLOC_2DTILED;
+#elif defined(DVP_USE_TILER) || defined(DVP_USE_ION) || defined(DVP_USE_BO)
+                    m_images[m_dispIdx].memType = DVP_MTYPE_MPUNONCACHED_2DTILED;
+#endif
+                }
+            }
+
+            for (m_dispIdx = m_dispMin; m_dispIdx < m_dispMax; m_dispIdx++) {
+                if (DVP_Image_Alloc(m_hDVP, &m_images[m_dispIdx],(DVP_MemType_e)m_images[m_dispIdx].memType) == DVP_FALSE)
+                    return STATUS_NOT_ENOUGH_MEMORY;
+            }
+#if defined(DVP_USE_TILER) || defined(DVP_USE_ION) || defined(DVP_USE_BO)
+            if (!DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+0], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+1], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+2], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+3], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+4], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+5], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+6], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+7], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+8], DVP_MTYPE_DEFAULT))
+                return STATUS_NOT_ENOUGH_MEMORY;
+#else
+            if (!DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+0], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+1], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+2], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+3], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+4], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+5], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+6], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+7], DVP_MTYPE_DEFAULT) ||
+                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+8], DVP_MTYPE_DEFAULT))
+                return STATUS_NOT_ENOUGH_MEMORY;
+#endif
+        }
+        else
+            return STATUS_NOT_ENOUGH_MEMORY;
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->useBuffers(&m_images[m_camIdx], m_camMax));
+        // @todo BUG: Can't set ROTATION until after useBuffers
+        /** @todo Additionally, OMX-CAMERA STEREO mode can't handle the rotation values! */
+        if (m_capmode != VCAM_STEREO_MODE)
+            VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_ROTATION, &m_camera_rotation, sizeof(uint32_t)));
+
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->enablePreviewCbk(m_camcallback));
+        DVP_PerformanceStart(&m_capPerf); // we'll time the camera init to first capture
+        VCAM_COMPLAIN_IF_FAILED(status, m_pCam->sendCommand(VCAM_CMD_PREVIEW_START));
+        //VCAM_COMPLAIN_IF_FAILED(status, m_pCam->setParameter(VCAM_PARAM_DO_MANUALFOCUS, &m_focusDepth, sizeof(m_focusDepth)));
+        if (AllocateNodes(3) && AllocateGraphs(1) && AllocateSections(&m_graphs[0], 1))
+        {
+            // initialize the data in the nodes...
+#ifdef DVP_USE_TISMOV02
+            m_pNodes[2].header.kernel = DVP_KN_TISMOV02_DISPARITY;//DVP_KN_TISMOV02_DISPARITY;
+#else
+            m_pNodes[2].header.kernel = DVP_KN_NOOP;
+#endif
+            // construct the left and right images from the camera input
+            DVP_Image_t left = m_images[m_dispMin];
+            DVP_Image_t right = m_images[m_dispMin];
+            DVP_Image_t disp = m_images[m_dispMin];
+
+            left.width = argWidth;
+            left.height = argHeight;
+            right.width = argWidth;
+            right.height = argHeight;
+            disp.width = argWidth;
+            disp.height = argHeight;
+
+           // y stride should be the same
+            if (info.layout == VCAM_STEREO_LAYOUT_LEFTRIGHT && info.subsampling == 1) {
+                right.pData[0] = right.pBuffer[0] +  left.width*left.x_stride;
+                disp = m_images[m_dispMax];
+            } else if (info.layout == VCAM_STEREO_LAYOUT_TOPBOTTOM && info.subsampling == 1) {
+                right.pData[0] = left.pBuffer[0] + left.height*left.y_stride;
+#if DISPLAY_DISPARITY
+                disp.pData[0]  = left.pBuffer[0] + left.width*left.x_stride;
+                disp.pData[1]  = left.pBuffer[1] + left.width*left.x_stride;
+#endif
+            }
+
+            //Copy right frame to separate buffer: WORKAROUND
+            DVP_Image_Copy(&m_images[m_dispMax+7], &left);
+            DVP_Image_Copy(&m_images[m_dispMax+8], &right);
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_left = m_images[m_dispMax+7];
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_right = m_images[m_dispMax+8];
+
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_leftIntegralImage = m_images[m_dispMax + 3];
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_rightIntegralImage = m_images[m_dispMax + 4];
+#if DISPLAY_DISPARITY
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_falseColor_NV12 = disp;
+#else
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8 = m_images[m_dispMax];
+#endif
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_invalid = m_images[m_dispMax+1];
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_raw = m_images[m_dispMax + 2];
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_confidence = m_images[m_dispMax + 5];
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_matchScore = m_images[m_dispMax + 6];
+
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->disparityMin = 4;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->disparityMax = 95;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->windowSize = 11;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->consistencyThreshold = 4;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->n_fractionalBits = 3;//reset on the dsp side anyways
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->noiseFilterMethod = DVP_KN_TISMO_PERSEG_NF;//DVP_KN_TISMO_PERPIX_NF;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->uniquenessThreshold = 160;//5000;// ->if NF is PER SEG and PF is on, then this needs to be larger
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->uniquenessMinValid = 1;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->noiseThresholdDisparitySimilarity = 1;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->prefilterMethod = DVP_KN_TISMO_PF_NONE;//DVP_KN_TISMO_PF_LOW_TEXTURE;//
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->planePrecision = DVP_KN_TISMO_PPP_OFF;//DVP_KN_TISMO_PPP_MEDIUM;//
+
+            m_pNodes[0].header.kernel = DVP_KN_INTEGRAL_IMAGE_8;
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = m_images[m_dispMax+7];
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = m_images[m_dispMax + 3];
+            m_pNodes[0].header.affinity = DVP_CORE_DSP;
+            if(dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input.width> 2049 ||dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input.height> 819 )
+               m_pNodes[0].header.affinity = DVP_CORE_CPU;
+
+            m_pNodes[1].header.kernel = DVP_KN_INTEGRAL_IMAGE_8;
+            dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->input = m_images[m_dispMax+8];
+            dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->output = m_images[m_dispMax + 4];
+            m_pNodes[1].header.affinity = DVP_CORE_DSP;
+            if(dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->input.width> 2049 ||dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->input.height> 819 )
+               m_pNodes[1].header.affinity = DVP_CORE_CPU;
+
+            // put all the nodes in the section.
+            m_correlation[0].portIdx = VCAM_PORT_PREVIEW;
+            m_graphs[0].sections[0].pNodes = &m_pNodes[0];
+            m_graphs[0].sections[0].numNodes = m_numNodes;
+            m_graphs[0].order[0] = 0;
+        }
+
+        if (status == STATUS_SUCCESS)
+        {
+            if (m_imgdbg_enabled && AllocateImageDebug(6))
+            {
+                m_dbgImage = m_images[m_dispMin];
+#if TOPBOTTOM
+#if DISPLAY_DISPARITY
+                m_dbgImage.width = argWidth * 2;
+                m_dbgImage.y_stride *= 2;
+#endif
+                m_dbgImage.height = m_height;
+#else
+                m_dbgImage.width = m_width;
+#endif
+                ImageDebug_Init(&m_imgdbg[0], &m_dbgImage, m_imgdbg_path, "tismov02");
+                ImageDebug_Init(&m_imgdbg[1], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8, m_imgdbg_path, "01_disparityU8");
+                ImageDebug_Init(&m_imgdbg[2], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_invalid, m_imgdbg_path, "02_invalid");
+                ImageDebug_Init(&m_imgdbg[3], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_left, m_imgdbg_path, "02_left");
+                ImageDebug_Init(&m_imgdbg[4], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_right, m_imgdbg_path, "02_right");
+                ImageDebug_Init(&m_imgdbg[5], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_raw, m_imgdbg_path, "01_disparityraw");
+                ImageDebug_Open(m_imgdbg, m_numImgDbg);
+            }
+            // clear the performance
+            DVP_Perf_Clear(&m_graphs[0].totalperf);
+            DVP_PerformanceClear(m_hDVP, m_pNodes, m_numNodes);
+            DVP_PRINT(DVP_ZONE_ENGINE, "About to process %u frames!\n",m_numFrames);
+        }
+    }
+    else
+        status = STATUS_NO_RESOURCES;
+#else
+        status = STATUS_NOT_IMPLEMENTED;
+#endif
+    return status;
+}
+
 
 status_e TestVisionEngine::Test_Imglib()
 {
@@ -6821,6 +7117,58 @@ status_e TestVisionEngine::GraphUpdate(VisionCamFrame *cameraFrame)
             }
         }
 #endif // defined(DVP_USE_TISMO)
+#if defined(DVP_USE_TISMOV02)
+        else if (m_graphtype == TI_GRAPH_TYPE_TISMOV02)
+        {
+            // construct the left and right images from the camera input
+            DVP_Image_t left = *pImage;
+            DVP_Image_t right = *pImage;
+            DVP_Image_t disp = *pImage;
+
+            left.width = dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8.width;
+            left.height = dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8.height;
+            right.width = dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8.width;
+            right.height = dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8.height;
+            disp.width = dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8.width;
+            disp.height = dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8.height;
+
+            // y stride should be the same
+#if TOPBOTTOM
+            right.pData[0] = left.pBuffer[0] + left.height*left.y_stride;
+#if DISPLAY_DISPARITY
+            disp.pData[0]  = left.pBuffer[0] + left.width*left.x_stride;
+            disp.pData[1]  = left.pBuffer[1] + left.width*left.x_stride;
+            dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_falseColor_NV12 = disp;
+#endif
+#else
+            right.pData[0] = left.pBuffer[0] + left.width*left.x_stride;
+#endif
+            //dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_left = left;
+            //WORKAROUND
+            DVP_Image_Copy(&m_images[m_dispMax+7], &left);
+            DVP_Image_Copy(&m_images[m_dispMax+8], &right);
+            //dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_right = right;
+
+            //dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = left;
+            //dvp_knode_to(&m_pNodes[1], DVP_Transform_t)->input = right;
+
+            if (m_imgdbg_enabled){
+                memcpy(&m_dbgImage, pImage, sizeof(DVP_Image_t));//Copy image structure
+
+                m_imgdbg[0].pImg = &m_dbgImage;
+#if TOPBOTTOM
+#if DISPLAY_DISPARITY
+                m_imgdbg[0].pImg->width *= 2;
+#endif
+                m_imgdbg[0].pImg->height = m_height;
+#else
+                m_imgdbg[0].pImg->width = m_width;
+#endif
+                m_imgdbg[3].pImg = &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_left;
+                m_imgdbg[4].pImg = &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_right;
+            }
+        }
+#endif // defined(DVP_USE_TISMOV02)
 #if defined(DVP_USE_ORB)
         else if(m_graphtype == TI_GRAPH_TYPE_ORBHARRIS)
         {

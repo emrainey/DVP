@@ -48,6 +48,7 @@ typedef enum _vision_engine_tests_e
     TI_GRAPH_TYPE_DSPLIB_TESLA, //24 Dsplib on Tesla
     TI_GRAPH_TYPE_VLIB_CPU, //25 Dsplib on Tesla
     TI_GRAPH_TYPE_IMGLIB_CPU, //26 Dsplib on Tesla
+    TI_GRAPH_TYPE_TISMOV02, //27 NV12 Stereo Capture, TISMOv02 To Produce a disparity map.    
     VENDOR_GRAPH_TYPE_BASE = 0x1000,    // Put vendor specific graph tests after here
 
 } TI_GraphType_e;
@@ -86,6 +87,7 @@ public:
     status_e Test_Rotate();
     status_e Test_Disparity();
     status_e Test_Tismo();
+    status_e Test_Tismov02();
     status_e Test_Imglib();
     status_e Test_Ldc();
     status_e Test_AR();

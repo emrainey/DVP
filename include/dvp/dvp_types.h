@@ -518,6 +518,7 @@ typedef enum _dvp_klib_e {
     DVP_KL_POINTCLOUD,          /*!< A point-cloud library */
     DVP_KL_DSPLIB,              /*!< A set of DSP optimized algorithms */
     DVP_KL_DEI,                 /*!< Deinterlacer algorithm library */
+    DVP_KL_TISMOV02,            /*!< Texas Instruments Stereo Module Version 2 */    
     // new libraries get added here
     DVP_KL_EXTERNAL_LIBRARIES = 0x80,    /*!< 3rd parties can add algos libraries from here */
     DVP_KL_LIBRARY_MAX = 0xFF,  /*!< The maximum library set */
