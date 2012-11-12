@@ -267,7 +267,7 @@ static DVP_CoreFunction_t local_kernels[] = {
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0, NULL, NULL},
+//    {"NEON YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0, NULL, NULL},
     {"NEON LUMA to xYxY",    DVP_KN_Y800_TO_XYXY, 0, NULL, NULL},
     {"NEON YUV420 to RGBp",  DVP_KN_YUV420p_TO_RGBp, 0, NULL, NULL},
     {"NEON UYVY to BGR",     DVP_KN_UYVY_TO_BGR, 0, NULL, NULL},
@@ -470,7 +470,7 @@ static DVP_CoreFunction_t local_kernels[] = {
 #endif
 
 #if defined(DVP_USE_YUV)
-    {"NEON \"YUV\" YUV444 to RGBp",  DVP_KN_YUV_YUV444_TO_RGBp, 0, NULL, NULL},
+//    {"NEON \"YUV\" YUV444 to RGBp",  DVP_KN_YUV_YUV444_TO_RGBp, 0, NULL, NULL},
     {"NEON \"YUV\" LUMA to xYxY",    DVP_KN_YUV_Y800_TO_XYXY, 0, NULL, NULL},
     {"NEON \"YUV\" NV12 to YUV444p", DVP_KN_YUV_NV12_TO_YU24_HALF_SCALE, 0, NULL, NULL},
     {"NEON \"YUV\" UYVY HALF SCALE", DVP_KN_YUV_UYVY_HALF_SCALE, 0, NULL, NULL},
