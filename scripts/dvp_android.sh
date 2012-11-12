@@ -466,6 +466,7 @@ do
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/tismo/include/tismo/dvp_kl_tismo.h
                                         ${MYDROID}/${VISION_ROOT}/libraries/protected/tismov02/include/tismov02/dvp_kl_tismov02.h"
         export LIBHEADERS=
+        export LIBDOCS=
         export doxygen_status=`dpkg-query -W -f='${Status}\n' doxygen`
         export graphviz_status=`dpkg-query -W -f='${Status}\n' graphviz`
         export mscgen_status=`dpkg-query -W -f='${Status}\n' mscgen`
@@ -493,11 +494,26 @@ do
                     LIBHEADERS+="${i} ";
                     echo "Library Header File Found: ${i}";
                     PREDEF+=" `echo ${i} | sed 's/.*dvp_kl_\([a-z0-9]*\).h/DVP_USE_\U\1/'` ";
+                    export LIBDOC="`echo ${i} | sed 's/\.h$/\.txt/'` ";
+                    if [ -f ${LIBDOC} ]; then
+                        LIBDOCS+=${LIBDOC};
+                    fi
+                fi
+            done
+
+            # Only include the document files from libraries that exist in DVP repo
+            for i in ${PUBLIC_LIB_HEADER_LIST}; do
+                if [ -f ${i} ]; then
+                    echo "Library Header File Found: ${i}";
+                    export LIBDOC="`echo ${i} | sed 's/\.h$/\.txt/'` ";
+                    if [ -f ${LIBDOC} ]; then
+                        LIBDOCS+=${LIBDOC};
+                    fi
                 fi
             done
             scripts/kernel_doc.pl docs/dvp_kernel_autogen.txt ${TARGET_ROOT}/include/dvp/dvp_types.h ${LIBHEADERS} ${PUBLIC_LIB_HEADER_LIST}
             (cat docs/full/Doxyfile ; echo "PROJECT_NUMBER = \"DVP project git tag: \" $COMMIT" ; echo $PREDEF; \
-                                      echo "INPUT+= ${LIBHEADERS}") | doxygen -
+                                      echo "INPUT+= ${LIBHEADERS} ${LIBDOCS}") | doxygen -
             mv docs/dvp_sdk.bak docs/dvp_sdk.txt
             popd
             echo "Look in ${TARGET_ROOT}/docs/ for the generated documentation"
