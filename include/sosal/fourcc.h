@@ -28,7 +28,7 @@
  */
 enum _fourcc {
 
-    FOURCC_NONE = 0,				/*!< An invalid code */
+    FOURCC_NONE = 0,                /*!< An invalid code */
 //#if !defined(WIN32) && !defined(CYGWIN)
     // RIFF and AVI Container codes
     FOURCC_RIFF = 0x46464952,       /*!< AVI File Header Type */
@@ -61,9 +61,10 @@ enum _fourcc {
     FOURCC_YU16 = 0x36315559,       /*!< 4:2:2 Planar YUV (unoffical) */
     FOURCC_YV24 = 0x34325659,       /*!< 4:4:4 Planar YVU (unoffical) */
     FOURCC_YU24 = 0x34325559,       /*!< 4:4:4 Planar YUV (unoffical) */
-    FOURCC_Y800 = 0x30303859,       /*!< 8 bit Luma only */
-    FOURCC_Y16  = 0x20363159,       /*!< 16 bit Luma only */
-    FOURCC_Y32  = 0x20323359,       /*!< 32 bit Luma only */
+    FOURCC_Y800 = 0x30303859,       /*!< 8 bit Luma only  'Y800' */
+    FOURCC_Y16  = 0x20363159,       /*!< 16 bit Luma only 'Y16 ' */
+    FOURCC_Y32  = 0x20323359,       /*!< 32 bit Luma only 'Y32 ' (unoffical) */
+    FOURCC_Y64  = 0x20343659,       /*!< 64 bit Luma only 'Y64 ' (unoffical) */
 
     // semi-planar
     FOURCC_NV12 = 0x3231564E,       /*!< Y Plane + UV Plane packed with 2x2 subsampling */

@@ -908,6 +908,9 @@ void DVP_Image_Init(DVP_Image_t *pImage, DVP_U32 width, DVP_U32 height, fourcc_t
     if (fourcc == FOURCC_Y32)
         pImage->x_stride = 4;
 
+    if (fourcc == FOURCC_Y64)
+        pImage->x_stride = 8;
+
     if (fourcc == FOURCC_RGB565 ||
         fourcc == FOURCC_BGR565)
         pImage->x_stride = 2;
