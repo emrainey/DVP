@@ -267,7 +267,7 @@ static DVP_CoreFunction_t local_kernels[] = {
 #endif
 
 #if defined(DVP_USE_YUV)
-//    {"NEON YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0, NULL, NULL},
+    {"NEON YUV444 to RGBP",  DVP_KN_YUV444p_TO_RGBp, 0, NULL, NULL},
     {"NEON LUMA to xYxY",    DVP_KN_Y800_TO_XYXY, 0, NULL, NULL},
     {"NEON YUV420 to RGBp",  DVP_KN_YUV420p_TO_RGBp, 0, NULL, NULL},
     {"NEON UYVY to BGR",     DVP_KN_UYVY_TO_BGR, 0, NULL, NULL},
@@ -460,7 +460,7 @@ static DVP_CoreFunction_t local_kernels[] = {
 #if defined(DVP_USE_YUV)
     {"NEON \"YUV\" xYxY to LUMA",    DVP_KN_YUV_XYXY_TO_Y800, 0, NULL, NULL},
     {"NEON \"YUV\" UYVY to YUV420p", DVP_KN_YUV_UYVY_TO_IYUV, 0, NULL, NULL},
-    {"NEON \"YUV\" UYVY to YUV444p", DVP_KN_YUV_UYVY_TO_YU24, 0, NULL, NULL},
+    {"NEON \"YUV\" UYVY to YUV444p", DVP_KN_YUV_UYVY_TO_YUV444p, 0, NULL, NULL},
     {"NEON \"YUV\" UYVY to RGBp",    DVP_KN_YUV_UYVY_TO_RGBp, 0, NULL, NULL},
 #elif defined(DVP_USE_VLIB)
     {"\"C\" VLIB xYxY to LUMA",  DVP_KN_VLIB_XYXY_TO_Y800, 0, NULL, NULL},
@@ -2465,7 +2465,7 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
 
                 case DVP_KN_UYVY_TO_YUV444p:
 #if defined(DVP_USE_YUV)
-                case DVP_KN_YUV_UYVY_TO_YU24:
+                case DVP_KN_YUV_UYVY_TO_YUV444p:
 #elif defined(DVP_USE_VLIB)
                 case DVP_KN_VLIB_UYVY_TO_YUV444p:
 #endif
@@ -2490,14 +2490,18 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
 #if defined(DVP_USE_YUV)
                         __uyvy_to_yuv444p_image(pT->input.width, pT->input.height,
                                                 pT->input.pData[0], pT->input.y_stride,
-                                                pT->output.pData[0], pT->output.pData[1],pT->output.pData[2],
+                                                pT->output.pData[0],
+                                                pU,
+                                                pV,
                                                 pT->output.y_stride);
 #elif defined(DVP_USE_VLIB)
                         VLIB_convertUYVYint_to_YUV444pl(pT->input.pData[0],
                                                         pT->input.width,
                                                         pT->input.y_stride/pT->input.x_stride,
                                                         pT->input.height,
-                                                        pT->output.pData[0],pU,pV);
+                                                        pT->output.pData[0],
+                                                        pV,
+                                                        pU);
 #endif
                     }
                     break;
@@ -4387,7 +4391,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             case DVP_KN_YUV_UYVY_TO_IYUV:
             case DVP_KN_YUV_UYVY_TO_RGBp:
             // case DVP_KN_YUV_UYVY_TO_RGBp_Y800_YU24:
-            case DVP_KN_YUV_UYVY_TO_YU24:
+            case DVP_KN_YUV_UYVY_TO_YUV444p:
             case DVP_KN_YUV_XYXY_TO_Y800:
             // case DVP_KN_YUV_Y800_ROTATE_CCW_90:
             // case DVP_KN_YUV_Y800_ROTATE_CW_90:

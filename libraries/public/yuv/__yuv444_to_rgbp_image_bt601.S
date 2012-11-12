@@ -50,35 +50,100 @@ tmp         .req r12
         sub     srcStep, srcStride, width
         sub     dstStep, dstStride, width
         mov     tmp, #L2_LINE_SIZE
-        FILL_YCBCR_TO_RGB_BT601 q15,q14,q13,q12,q11,d21,d20
+        FILL_YCBCR_TO_RGB_BT601_Q13 q15,q14,q13,q12,q11,q10
+
+        /* load the offset and clamp values */
+        vmov.u8    d18, #16
+        vmov.u8    d19, #128
+        vmov.u8    d17, #235
+        vmov.u8    d16, #240
+
 __yuv444_to_rgbp_image_bt601_line:
         mov     pixelsLeft, width
-        pld     [pY]
-        pld     [pU]
-        pld     [pV]
 __yuv444_to_rgbp_image_bt601_pixels:
+        /* preload the next set */
         pld     [pY, tmp]
-        vld1.8  {d2}, [pY]! /* d2 = [y0,y1,y2,y3,y4,y5,y6,y7] */
-        vld1.8  {d1}, [pU]! /* d1 = [u0,u1,u2,u3,u4,u5,u6,u7] */
-        vld1.8  {d0}, [pV]! /* d0 = [v0,v1,v2,v3,v4,v5,v6,v7] */
         pld     [pU, tmp]
-        vsubl.u8    q2, d2, d20     /* q2 = Y - 16 */
-        vsubl.u8    q1, d1, d21     /* q1 = Cb - 128 */
-        vsubl.u8    q0, d0, d21     /* q0 = Cr - 128 */
-        vmul.s16    q4, q2, q15     /* R = 74*Ye */
-        vmla.s16    q4, q0, q12     /* R += 102*Cr */
-        vmul.s16    q5, q2, q15     /* G = 74*Ye */
-        vmls.s16    q5, q0, q13     /* G -= 52*Cr */
-        vmls.s16    q5, q1, q14     /* G -= 25*Cb */
-        vmul.s16    q6, q2, q15     /* B = 74*Ye */
-        vmla.s16    q6, q1, q11     /* B += 129*Cb */
         pld     [pV, tmp]
-        vqshrun.s16 d0, q6, #6      /* B >> 6 */
-        vqshrun.s16 d1, q5, #6      /* G >> 6 */
-        vqshrun.s16 d2, q4, #6      /* R >> 6 */
+
+       /* load the pixels */
+        vld1.8  {d2}, [pY]!         /* d2 = [y0,y1,y2,y3,y4,y5,y6,y7] */
+        vld1.8  {d1}, [pU]!         /* d1 = [u0,u1,u2,u3,u4,u5,u6,u7] */
+        vld1.8  {d0}, [pV]!         /* d0 = [v0,v1,v2,v3,v4,v5,v6,v7] */
+
+        /* clamp ranges: 16 <= Y <= 235 */
+        vmax.u8     d2, d2, d18
+        vmin.u8     d2, d2, d17
+
+        /* clamp ranges: 16 <= Cb,Cr <= 240 */
+        vmax.u8     d1, d1, d18
+        vmax.u8     d0, d0, d18
+        vmin.u8     d1, d1, d16
+        vmin.u8     d0, d0, d16
+
+        /* range change and length to 16 bits */
+        vsubl.u8    q2, d2, d18     /* q2 = Y - 16 */
+        vsubl.u8    q1, d1, d19     /* q1 = Cb - 128 */
+        vsubl.u8    q0, d0, d19     /* q0 = Cr - 128 */
+
+        /* we have to futher expand the s16 to s32 during the coeff multiply */
+        vmull.s16   q3, d4, d30     /* yn = yk*ye */
+        vmull.s16   q4, d5, d31
+
+        vqshrn.u32 d4, q3, #13      /* yn >>= 13 */
+        vqshrn.u32 d5, q4, #13      /* q2 = yn */
+
+        vmull.s16   q3, d0, d24     /* rn = rk*Cr */
+        vmull.s16   q4, d1, d25
+
+        vqshrn.s32 d6, q3, #13      /* rn >>= 13 */
+        vqshrn.s32 d7, q4, #13      /* q3 = rn */
+
+        vmull.s16   q4, d2, d22     /* bn = bk*Cb */
+        vmull.s16   q5, d3, d23
+
+        vqshrn.s32 d8, q4, #13      /* bn >>= 13 */
+        vqshrn.s32 d9, q5, #13      /* q4 = bn */
+
+        vmull.s16   q5, d0, d26     /* gn1 = gk1*Cr */
+        vmull.s16   q6, d1, d27
+
+        vqshrn.s32 d10, q5, #13     /* gn1 >>= 13 */
+        vqshrn.s32 d11, q6, #13     /* q5 = qn1 */
+
+        vmull.s16   q6, d2, d28     /* gn2 = gk2*Cb */
+        vmull.s16   q7, d3, d29
+
+        vqshrn.s32 d12, q6, #13     /* gn2 >>= 13 */
+        vqshrn.s32 d13, q7, #13     /* q6 = gn2 */
+
+        vadd.s16    q3, q2, q3      /* R = yn + rn */
+        vadd.s16    q4, q2, q4      /* B = yn + bn */
+        vsub.s16    q5, q2, q5      /* G = yn - gn1 */
+        vsub.s16    q5, q5, q6      /* G -= gn2 */
+
+        vmov.i16    q6, #0
+        vmov.i16    q7, #255
+
+        /* clamp: 255 <= R,G,B */
+        vmin.s16    q3, q3, q7
+        vmin.s16    q4, q4, q7
+        vmin.s16    q5, q5, q7
+
+        /* clamp: 0 >= R,G,B */
+        vmax.s16    q3, q3, q6
+        vmax.s16    q4, q4, q6
+        vmax.s16    q5, q5, q6
+
+        /* narrow from u16 to u8 */
+        vqshrun.s16 d2, q3, #0
+        vqshrun.s16 d1, q5, #0
+        vqshrun.s16 d0, q4, #0
+
         vst1.8  {d2}, [pR]!
         vst1.8  {d1}, [pG]!
-        vst1.8  {d2}, [pB]!
+        vst1.8  {d0}, [pB]!
+
         subs    pixelsLeft, pixelsLeft, #8
         bgt     __yuv444_to_rgbp_image_bt601_pixels
         add     pY, pY, srcStep

@@ -2607,7 +2607,7 @@ status_e TestVisionEngine::Test_CommonGraphSetup()
         {
             /** **/
             DVP_Image_Init(&m_images[0], m_width, m_height, FOURCC_UYVY);
-            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_YV24);
+            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_YU24);
 
             // images 2-7 moved to end of list
 

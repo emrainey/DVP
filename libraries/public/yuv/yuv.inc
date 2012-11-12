@@ -46,7 +46,7 @@
 
 /* These are the 64x Constants for Y,Cb,Cr to R,G,B in BT601 Space. */
 .macro FILL_YCBCR_TO_RGB_BT601 yk, gk2, gk1, rk, bk, coff, yoff
-    vmov.i16    \yk,    #74     /* 1.614 * 64 */
+    vmov.i16    \yk,    #74     /* 1.164 * 64 */
     vmov.i16    \gk2,   #25     /* 0.391 * 64 */
     vmov.i16    \gk1,   #52     /* 0.813 * 64 */
     vmov.i16    \rk,    #102    /* 1.596 * 64 */
@@ -65,6 +65,25 @@
     vmov.i16    \g2,    #28     /* (G & B Coef) */
     vmov.i16    \b1,    #24     /* (B Coef) */
     vmov.i16    \b2,    #5
+.endm
+
+/* These are the 64x Constants for Y,Cb,Cr to R,G,B in BT601 Space. */
+.macro FILL_YCBCR_TO_RGB_BT601_Q13 yk, gk2, gk1, rk, bk, tmp
+    vmov.i16    \yk,    #0x003F /* 1.164 * 8192 =  9535 = 0x253F */
+    vmov.i16    \tmp,   #0x2500
+    vorr.u16    \yk, \tmp, \yk
+    vmov.i16    \gk2,   #0x0083 /* 0.391 * 8192 =  3203 = 0x0C83 */
+    vmov.i16    \tmp,   #0x0C00
+    vorr.u16    \gk2, \tmp, \gk2
+    vmov.i16    \gk1,   #0x0004 /* 0.813 * 8192 =  6660 = 0x1A04 */
+    vmov.i16    \tmp,   #0x1A00
+    vorr.u16    \gk1, \tmp, \gk1
+    vmov.i16    \rk,    #0x0012 /* 1.596 * 8192 = 13074 = 0x3312 */
+    vmov.i16    \tmp,   #0x3300
+    vorr.u16    \rk, \tmp, \rk
+    vmov.i16    \bk,    #0x0093 /* 2.018 * 8192 = 16531 = 0x4093 */
+    vmov.i16    \tmp,   #0x4000
+    vorr.u16    \bk, \tmp, \bk
 .endm
 
 /* This takes a dN register and duplicates the bottom bytes */
