@@ -955,6 +955,7 @@ private:
     typedef status_e (OMXVisionCam::*startAutofocusFuncPtr)(VisionCamFocusMode focusMode);
     VisionCamExecutionService <OMXVisionCam, OMXVisionCam::startAutofocusFuncPtr>*mPendingConfigs;
 
+
     void FirstFrameFunc(void * data);
 
     void FrameReceivedFunc(void * data);

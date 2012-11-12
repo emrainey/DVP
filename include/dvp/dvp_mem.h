@@ -397,10 +397,10 @@ DVP_BOOL DVP_Buffer_Free_Import(DVP_Handle handle, DVP_Buffer_t *pBuffer, DVP_VA
  * \note Does not allocate any memory!
  * \param [in] pBuffer The pointer to the structure to be initialized.
  * \param [in] elemSize The size of an individual element.
- * \param [in] numBytes The total number of bytes to be requested.
+ * \param [in] numElems The total number of bytes to be requested.
  * \ingroup group_buffers
  */
-void DVP_Buffer_Init(DVP_Buffer_t *pBuffer, DVP_U32 elemSize, DVP_U32 numBytes);
+void DVP_Buffer_Init(DVP_Buffer_t *pBuffer, DVP_U32 elemSize, DVP_U32 numElems);
 
 /*!
  * \brief Deinitializes the image structure.

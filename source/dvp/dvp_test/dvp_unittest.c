@@ -24,6 +24,9 @@
 #if defined(DVP_USE_VRUN)
 #include <vrun/dvp_kl_vrun.h>
 #endif
+#include "dvp_unittest_data.h"
+
+#define HERE {printf("=======> UNITTEST - %d <=======\n", __LINE__);fflush(stdout);}
 
 uint32_t iterations;
 option_t opts[] = {
@@ -34,8 +37,16 @@ option_t opts[] = {
 // GLOBAL VARIABLES
 //**********************************************************************
 
-DVP_CoreInfo_t cores[DVP_CORE_MAX];
-DVP_U32 numCoresEnabled;
+static DVP_CoreInfo_t cores[DVP_CORE_MAX];
+static DVP_U32 numCoresEnabled;
+
+const DVP_U32 width         = 320;
+const DVP_U32 height        = 240;
+
+const char * SERIALIZE    = "SERIALIZE";
+const char * UNSERIALIZE  = "UNSERIALIZE";
+const char * ALLOC        = "ALLOC";
+const char * FREE         = "FREE";
 
 //**********************************************************************
 // SUPPORT FUNCTIONS
@@ -664,6 +675,722 @@ status_e dvp_split_cc_test(void)
     return status;
 }
 #endif
+/*!
+ * \brief Tests core capacity APIs
+ * \return Returns status_e
+ * \retval STATUS_SUCCESS on success.
+ * \retval STATUS_FAILURE on failure.
+ * \ingroup group_ tests
+ */
+status_e dvp_capacity_test(void)
+{
+    /// @todo check if it's actually needed returning failure in case any the the cores culdn't be set, while some could
+    /// @todo depends on the pourposes of the test
+    status_e status = STATUS_FAILURE;
+    DVP_S32 core;
+
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    if( dvp )
+    {
+        DVP_U32 cap  = DVP_CAPACITY_DATA_RANGE * 3 / 4;
+        for( core= DVP_CORE_MIN  + 1; core < DVP_CORE_MAX ; core++  )
+        {
+            DVP_SetCoreCapacity(dvp, core, cap);
+            DVP_PRINT(DVP_ZONE_ALWAYS, "Core Capacity set to %d on core ID %d \n", cap, core);
+
+            if ( cap == DVP_GetCoreCapacity(dvp, core) )
+            {
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Set/Get core capacity successful for core id %d\n", core);
+                status = STATUS_SUCCESS;
+            }
+            else
+            {
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Set/Get core capacity failed for core id %d\n", core);
+            }
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+    else
+    {
+        DVP_PRINT(DVP_ZONE_ALWAYS, "Failed to initialize DVP Kernel Graph!!!\n");
+        status = STATUS_FAILURE;
+    }
+
+    return status;
+}
+
+status_e dvp_query_kernel_test(void)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_KernelNode_e kernel = DVP_KF_DEBUG_BASE + 1;
+    DVP_BOOL present[DVP_CORE_MAX], check[DVP_CORE_MAX];
+
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    if( dvp )
+    {
+        DVP_S32 feature_ends_at[] = {
+            DVP_KN_BGR3_TO_IYUV,
+            DVP_KN_PREWITT_8,
+            DVP_KN_ERODE_SQUARE,
+            DVP_KN_CANNY_HYST_THRESHHOLD,
+            DVP_KN_XSTRIDE_SHIFT,
+            DVP_KN_IIR_VERT,
+            DVP_KN_NONMAXSUPPRESS_7x7_S16,
+            DVP_KN_CONV_7x7,
+            DVP_KN_THR_LE2THR_16,
+            DVP_KN_SOBEL_7x7_16,
+            DVP_KN_GAMMA
+        };
+        DVP_KernelFeature_e feature;
+        DVP_KernelFeature_e feature_start   = DVP_KF_COLOR_CONVERT;
+        DVP_KernelFeature_e feature_end     = DVP_KF_INTEGRAL + 1;
+        for( feature = feature_start; feature < feature_end; feature++ )
+        {
+            for(kernel = (DVP_KN_FEATURE_BASE(feature) + 1); kernel <= (feature_ends_at[feature - feature_start]); kernel++)
+            {
+                memset(present, (DVP_FALSE - 1), sizeof(present)   );
+                memset(check,   (DVP_FALSE - 1), sizeof(check)     );
+                DVP_QueryKernel(dvp, kernel, present);
+                int i;
+                for( i = 0; i < dimof(present) ; i++ )
+                {
+                    if( DVP_TRUE == present[i] ) {
+                        status = STATUS_SUCCESS;
+                        break;
+                    }
+                    else if( DVP_FALSE == present[i] ) {
+                        continue;
+                    }
+                    else {
+                        // possible momory corruption !!!
+                        DVP_PRINT(DVP_ZONE_ALWAYS, "A boolean API returned non boolean value!\n");
+                        DVP_PRINT(DVP_ZONE_ALWAYS, "Possible momory corruption !!!");
+                        status = STATUS_FAILURE;
+                        break;
+                    }
+                }
+            }
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+    else
+    {
+        DVP_PRINT( DVP_ZONE_ALWAYS, "Failed to initialize DVP Kernel Graph!!!\n");
+        status = STATUS_FAILURE;
+    }
+
+    return status;
+}
+
+status_e dvp_image_share_test(void)
+{
+    status_e stat = STATUS_FAILURE;
+    DVP_S08 mem[width*height];
+    DVP_Image_t *pImage = malloc(sizeof(DVP_Image_t));
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+
+    if( dvp )
+    {
+        if( pImage )
+        {
+            memset(mem, 0x57, sizeof(mem));
+
+            DVP_Image_Init(pImage, width, height, FOURCC_Y800);
+            pImage->memType = DVP_MTYPE_DEFAULT;
+
+            if( DVP_TRUE == DVP_Image_Alloc(dvp, pImage, (DVP_MemType_e)(pImage->memType)) )
+            {
+                DVP_Image_Fill(pImage, mem, sizeof(mem));
+
+                DVP_S32 fds[1] = { 0 };
+                if( DVP_TRUE == DVP_Image_Share( dvp, pImage, fds ) )
+                {
+                    stat = STATUS_SUCCESS;
+                }
+                DVP_Image_Free(dvp, pImage);
+            }
+            DVP_Image_Deinit(pImage);
+            free(pImage);
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+
+    return stat;
+}
+
+status_e dvp_image_import_test(void)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_S08 mem[width*height];
+
+    DVP_Image_t *pImage = malloc(sizeof(DVP_Image_t));
+
+    DVP_Handle dvp_importer = DVP_MemImporter_Create();
+    DVP_Handle dvp_allocator = DVP_KernelGraph_Init();
+
+    if( dvp_importer && dvp_allocator )
+    {
+        if( pImage )
+        {
+            memset(mem, 0x57, sizeof(mem));
+
+            DVP_Image_Init(pImage, width, height, FOURCC_Y800);
+            pImage->memType = DVP_MTYPE_DEFAULT;
+
+            if( DVP_TRUE == DVP_Image_Alloc(dvp_allocator, pImage, (DVP_MemType_e)(pImage->memType)) )
+            {
+                DVP_Image_Fill(pImage, mem, sizeof(mem));
+
+                DVP_S32 fds[1] = { 0 };
+                if( DVP_TRUE == DVP_Image_Share( dvp_allocator, pImage, fds ) )
+                {
+                    DVP_VALUE hdls[1] = { 0 };
+                    if( DVP_TRUE == DVP_Image_Import(dvp_importer, pImage, fds, hdls) )
+                    {
+                        /// dostatachno li e ili da se napravi neshto s taq kartinka ???
+                        /// dali ako iskam da se obraboti, ne trqbva nov dvp_handle, napraven ot graph init????
+                        DVP_PrintImage(DVP_ZONE_ALWAYS, pImage);
+                        status = STATUS_SUCCESS;
+                        /// dali ne e po-dobre da sa v otdelni funkcii (import i import_free) ???
+                        if( DVP_TRUE == DVP_Image_Free_Import(dvp_importer, pImage, hdls) )
+                        {
+                            ;
+                        }
+                        else
+                        {
+                            DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Image_Free_Import() failed !!!\n");
+                        }
+                    }
+                    else
+                    {
+                        DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Image_Import() failed !!!\n");
+                    }
+                }
+                else
+                {
+                    DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Image_Share() failed !!!\n");
+                }
+
+                DVP_Image_Free(dvp_allocator, pImage);
+            }
+            else
+            {
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Failed to allocate DVP_Image!!!\n");
+            }
+
+            DVP_Image_Deinit(pImage);
+
+            free(pImage);
+        }
+        DVP_MemImporter_Free(dvp_importer);
+        DVP_KernelGraph_Deinit(dvp_allocator);
+    }
+
+    return status;
+}
+
+status_e dvp_calloc_test(void)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    DVP_Image_t *imgPtr = NULL;
+
+    if( dvp )
+    {
+        imgPtr = (DVP_Image_t*)dvp_calloc(dvp, 1, sizeof(DVP_Image_t));
+        if( imgPtr )
+        {
+            dvp_free( dvp, imgPtr, 1, sizeof(DVP_Image_t));
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+
+    return status;
+}
+
+status_e dvp_img_copy_test(void)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_S32 success  = 0, fail = 0;
+
+    DVP_PRINT(DVP_ZONE_ALWAYS, "Starting DVP_Image_Copy() test.\n");
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+
+    DVP_Image_t *srcImage = malloc(sizeof(DVP_Image_t));
+    DVP_Image_t *dstImage = malloc(sizeof(DVP_Image_t));
+
+    if(!dvp || !srcImage || !dstImage)
+    {
+        return STATUS_NOT_ENOUGH_MEMORY;
+    }
+
+    if( dvp && srcImage && dstImage )
+    {
+        DVP_U32 copyCnt;
+        for( copyCnt = 0; copyCnt < dimof(img_copy_conversions); copyCnt++ )
+        {
+            DVP_Image_Init(srcImage, width, height, img_copy_conversions[copyCnt].from);
+            if( DVP_FALSE == DVP_Image_Alloc(dvp, srcImage, DVP_MTYPE_DEFAULT) )
+            {
+                DVP_Image_Deinit(srcImage);
+                continue;
+            }
+
+            DVP_S08 *ptr = malloc(srcImage->numBytes);
+            memset(ptr, 0x57, sizeof(ptr));
+
+            if( NULL == ptr ) {
+                DVP_Image_Free(dvp, srcImage);
+                DVP_Image_Deinit(srcImage);
+                continue;
+            }
+
+            DVP_Image_Fill(srcImage, ptr, srcImage->numBytes);
+
+            DVP_Image_Init(dstImage, width, height, img_copy_conversions[copyCnt].to);
+
+            if ( DVP_Image_Alloc(dvp, dstImage, DVP_MTYPE_DEFAULT) )
+            {
+                DVP_S32 i, fromInd = -1, toInd = -1;
+                for( i = 0; i < dimof(color_name_table); i++ )
+                {
+                    if( color_name_table[i].colorID == img_copy_conversions[copyCnt].from )
+                        fromInd = i;
+
+                    if( color_name_table[i].colorID == img_copy_conversions[copyCnt].to )
+                        toInd = i;
+
+                    if( fromInd >= 0  && toInd >= 0 )
+                    {
+                        DVP_PRINT(DVP_ZONE_ALWAYS,  "Formats for image copy: %s to %s.\n",
+                                      color_name_table[fromInd].colorName, color_name_table[toInd].colorName );
+                        break;
+                    }
+                }
+
+                if ( DVP_TRUE == DVP_Image_Copy(dstImage, srcImage) )
+                {
+                    DVP_PRINT(DVP_ZONE_ALWAYS,  "(image copied...)\n");
+                    if ( DVP_Image_Equal(dstImage, srcImage))
+                    {
+                        status = STATUS_SUCCESS;
+                        DVP_PRINT(DVP_ZONE_ALWAYS,  "DVP_Image_Copy() : Success\n");
+                        success++;
+                    }
+                    else
+                    {
+                        status = STATUS_FAILURE;
+                        fail++;
+                        DVP_PRINT(DVP_ZONE_ALWAYS,  "DVP_Image_Copy() : Failure\n");
+                    }
+                }
+                else
+                {
+                    status = STATUS_FAILURE;
+                    fail++;
+                    DVP_PRINT(DVP_ZONE_ALWAYS,  "DVP_Image_Copy() : Failure\n");
+                }
+
+                DVP_Image_Free(dvp, dstImage);
+            }
+            DVP_Image_Deinit(dstImage);
+
+            DVP_Image_Free(dvp, srcImage);
+            DVP_Image_Deinit(srcImage);
+
+            free(ptr);
+        }
+    }
+
+    DVP_S32 avg = (success * 100) / (success + fail);
+    DVP_PRINT(DVP_ZONE_ALWAYS,  "DVP_Image_Print() has ended with average success of %d %% \n", avg);
+
+    if( dvp )
+        DVP_KernelGraph_Deinit(dvp);
+
+    if( srcImage )
+        free(srcImage);
+
+    if( dstImage )
+        free(dstImage);
+
+    return status;
+}
+
+status_e dvp_image_serialization(const char *testVariant)
+{
+#define num_imgs_max (21)
+#define max_mem_per_img (1024*512)
+#define CMP_VAL 0xEB
+
+    status_e    ret                 = STATUS_SUCCESS;
+    DVP_BOOL    use_single_image    = DVP_TRUE;
+    DVP_U08     *buffer             = NULL;
+    DVP_Image_t *pImg_Ser[num_imgs_max];
+    DVP_Handle  dvp = DVP_KernelGraph_Init();
+
+    if( dvp )
+    {
+        DVP_S32 count, alloc_size = 0;
+
+        memset(pImg_Ser, 0, sizeof(pImg_Ser));
+        for( count = 0; count < num_imgs_max; count++ )
+        {
+//            pImg_Ser[count] = NULL;
+            pImg_Ser[count] = malloc(sizeof(DVP_Image_t));
+
+            if( NULL == pImg_Ser[count] )
+            {
+                ret = STATUS_NOT_ENOUGH_MEMORY;
+                break;
+            }
+
+            DVP_Image_Init(pImg_Ser[count], width, height, FOURCC_NV12);
+
+            if( DVP_TRUE == DVP_Image_Alloc(dvp, pImg_Ser[count], DVP_MTYPE_DEFAULT) )
+            {
+                if( DVP_TRUE == use_single_image ) {
+                    alloc_size = max_mem_per_img * num_imgs_max;
+                    break; // quit this loop once we get here...
+                }
+                else {
+                    alloc_size += max_mem_per_img;
+                }
+            }
+            else
+            {
+                ret = STATUS_NOT_ENOUGH_MEMORY;
+                break;
+            }
+        }
+
+        if( alloc_size && STATUS_SUCCESS == ret )
+        {
+            buffer = malloc(alloc_size);
+            memset(buffer, CMP_VAL, alloc_size);
+
+            if( NULL == buffer )
+                ret = STATUS_NOT_ENOUGH_MEMORY;
+        }
+
+        DVP_S32 offset = 0, *ind, zeroVal = 0;
+
+        if( use_single_image ) {
+            ind = &zeroVal;
+        }
+        else {
+            ind = &count;
+        }
+
+        if( STATUS_SUCCESS == ret )
+        {
+            for( count = 0; count < num_imgs_max; count++ )
+            {
+                if( pImg_Ser[*ind] && buffer )
+                {
+                    offset += DVP_Image_Serialize( pImg_Ser[*ind], &buffer[offset], (alloc_size - offset));
+                }
+            }
+
+            if( !strcmp(testVariant, SERIALIZE) && buffer )
+            {
+                DVP_U08 *mem = malloc(alloc_size - offset);
+                memset(mem, CMP_VAL, sizeof(mem));
+                if ( memcmp(&buffer[offset], mem, sizeof(mem) ) )
+                     ret = STATUS_FAILURE;
+            }
+            else if ( !strcmp(testVariant, UNSERIALIZE) /*&& buffer*/ )
+            {
+                DVP_Image_t *pImg_Unser = malloc(sizeof(DVP_Image_t));
+
+                if( pImg_Unser )
+                {
+                    DVP_Image_Init(pImg_Unser, width, height, FOURCC_NV12);
+                    if( DVP_Image_Alloc(dvp, pImg_Unser, DVP_MTYPE_DEFAULT) )
+                    {
+                        size_t offset = 0;
+                        for( count = 0; count < num_imgs_max; count++ )
+                        {
+                            offset = DVP_Image_Unserialize(pImg_Unser, &buffer[offset], (alloc_size - offset));
+                            if( DVP_FALSE == DVP_Image_Equal(pImg_Ser[*ind],pImg_Unser) )
+                            {
+                                ret = STATUS_FAILURE;
+                            }
+                        }
+                        DVP_Image_Free(dvp, pImg_Unser);
+                    }
+                    DVP_Image_Deinit(pImg_Unser);
+                    free(pImg_Unser);
+                }
+                else
+                    ret = STATUS_NOT_ENOUGH_MEMORY;
+            }
+        }
+
+        for( count = 0; count < num_imgs_max; count++ )
+        {
+            if( pImg_Ser[*ind] )
+            {
+                if( DVP_Image_Free(dvp, pImg_Ser[*ind]) )
+                {
+                    DVP_Image_Deinit(pImg_Ser[*ind]);
+                    free( pImg_Ser[*ind] );
+                    pImg_Ser[*ind] = NULL;
+                }
+            }
+        }
+
+        if( buffer )
+        {
+            free(buffer);
+            buffer = NULL;
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+
+    return ret;
+}
+
+status_e dvp_serialize_test(void)
+{
+    return dvp_image_serialization(SERIALIZE );
+}
+
+
+status_e dvp_unserialize_test(void)
+{
+    return dvp_image_serialization(UNSERIALIZE);
+}
+
+status_e dvp_image_size_test(void)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    DVP_Image_t *img = NULL;
+    DVP_U32 size = 0;
+    if( dvp )
+    {
+        img = malloc(sizeof(DVP_Image_t));
+        if( img )
+        {
+            DVP_Image_Init(img, width, height, FOURCC_YV12);
+            if( DVP_Image_Alloc(dvp, img, DVP_MTYPE_DEFAULT) )
+            {
+                size = DVP_Image_Size(img);
+                if( size == img->numBytes )
+                    status = STATUS_SUCCESS;
+                else
+                    DVP_PRINT( DVP_ZONE_ALWAYS, "Expected Image Size is %d, but found is %d.\n",
+                               img->numBytes, size);
+
+                DVP_Image_Free(dvp, img);
+                DVP_Image_Deinit(img);
+                free(img);
+            }
+        }
+
+        DVP_KernelGraph_Deinit(dvp);
+    }
+    return status;
+}
+
+
+
+status_e dvp_buffer_init_test(void)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_Buffer_t *pBuffer = malloc(sizeof(DVP_Buffer_t));
+    if( pBuffer )
+    {
+        DVP_U32 elSize = 16, elNum = 10;
+        DVP_Buffer_Init( pBuffer, elSize, elNum );
+        if( pBuffer->elemSize == elSize && pBuffer->numBytes == (elSize * elNum))
+        {
+            status = STATUS_SUCCESS;
+        }
+        DVP_Buffer_Deinit( pBuffer );
+        free(pBuffer);
+        pBuffer = NULL;
+    }
+
+    return status;
+}
+
+status_e dvp_buffer_allocation_test(const char *memOperation)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+
+    if( dvp )
+    {
+        DVP_U32 elSize = 16, elNum = 10;
+        DVP_Buffer_t *pBuffer = malloc(sizeof(DVP_Buffer_t));
+        if( pBuffer )
+        {
+            DVP_Buffer_Init( pBuffer, elSize, elNum );
+            if ( DVP_Buffer_Alloc(dvp, pBuffer, DVP_MTYPE_DEFAULT) )
+            {
+                if( !strcmp(ALLOC, memOperation ))
+                    status = STATUS_SUCCESS;
+
+                if( DVP_Buffer_Free(dvp, pBuffer) )
+                {
+                    if( !strcmp(FREE, memOperation ))
+                        status = STATUS_SUCCESS;
+                }
+                else
+                {
+                    DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Buffer_Free() failed ! \n");
+                }
+            }
+            else
+            {
+                DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Buffer_Alloc() failed ! \n");
+            }
+            DVP_Buffer_Deinit( pBuffer );
+            free(pBuffer);
+            pBuffer = NULL;
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+
+    return status;
+}
+
+status_e dvp_buffer_alloc_test(void)
+{
+    return dvp_buffer_allocation_test(ALLOC);
+}
+
+status_e dvp_buffer_free_test(void)
+{
+    return dvp_buffer_allocation_test(FREE);
+}
+
+status_e dvp_memory_import_test(void)
+{
+    DVP_Handle mem_importer = DVP_MemImporter_Create();
+    if( mem_importer )
+    {
+        DVP_MemImporter_Free(mem_importer);
+        return STATUS_SUCCESS;
+    }
+    else
+    {
+        return STATUS_FAILURE;
+    }
+}
+
+
+status_e dvp_buffer_share_test(void)
+{
+    status_e stat = STATUS_FAILURE;
+    DVP_S08 mem[width*height];
+    DVP_Buffer_t *pBuffer = malloc(sizeof(DVP_Buffer_t));
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+
+    if( dvp )
+    {
+        if( pBuffer )
+        {
+            memset(mem, 0x57, sizeof(mem));
+
+            DVP_Buffer_Init(pBuffer, sizeof(DVP_Image_t), 32);
+            pBuffer->memType = DVP_MTYPE_DEFAULT;
+
+            if( DVP_TRUE == DVP_Buffer_Alloc(dvp, pBuffer, (DVP_MemType_e)(pBuffer->memType)) )
+            {
+//                DVP_Image_Fill(pBuffer, mem, sizeof(mem));
+
+                DVP_S32 fd[1] = { 0 };
+                if( DVP_TRUE == DVP_Buffer_Share( dvp, pBuffer, fd ) )
+                {
+                    stat = STATUS_SUCCESS;
+                }
+                DVP_Buffer_Free(dvp, pBuffer);
+            }
+            DVP_Buffer_Deinit(pBuffer);
+            free(pBuffer);
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+
+    return stat;
+}
+
+status_e dvp_buffer_import_test(void)
+{
+    status_e status = STATUS_FAILURE;
+#if 0
+    DVP_S08 mem[width*height];
+#endif
+
+    DVP_Buffer_t *pBuffer = malloc(sizeof(DVP_Buffer_t));
+
+    DVP_Handle dvp_importer = DVP_MemImporter_Create();
+    DVP_Handle dvp_allocator = DVP_KernelGraph_Init();
+
+    if( dvp_importer && dvp_allocator )
+    {
+        if( pBuffer )
+        {
+
+            DVP_Buffer_Init(pBuffer, sizeof(DVP_Image_t), 32 );
+            pBuffer->memType = DVP_MTYPE_DEFAULT;
+
+            if( DVP_TRUE == DVP_Buffer_Alloc(dvp_allocator, pBuffer, (DVP_MemType_e)(pBuffer->memType)) )
+            {
+#if 0
+    memset(mem, 0x57, sizeof(mem));
+    DVP_Buffer_Fill(pBuffer, mem, sizeof(mem));
+#endif
+                DVP_S32 fds[1] = { 0 };
+                if( DVP_TRUE == DVP_Buffer_Share( dvp_allocator, pBuffer, fds ) )
+                {
+                    DVP_VALUE hdls[1] = { 0 };
+                    if( DVP_TRUE == DVP_Buffer_Import(dvp_importer, pBuffer, fds[0], hdls) )
+                    {
+                        /// dostatachno li e ili da se napravi neshto s taq kartinka ???
+                        /// dali ako iskam da se obraboti, ne trqbva nov dvp_handle, napraven ot graph init????
+                        DVP_PrintBuffer(DVP_ZONE_ALWAYS, pBuffer);
+                        status = STATUS_SUCCESS;
+                        /// dali ne e po-dobre da sa v otdelni funkcii (import i import_free) ???
+                        if( DVP_TRUE == DVP_Buffer_Free_Import(dvp_importer, pBuffer, hdls[0]) )
+                        {
+                            ;
+                        }
+                        else
+                        {
+                            DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Buffer_Free_Import() failed !!!\n");
+                        }
+                    }
+                    else
+                    {
+                        DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Buffer_Import() failed !!!\n");
+                    }
+                }
+                else
+                {
+                    DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Buffer_Share() failed !!!\n");
+                }
+
+                DVP_Buffer_Free(dvp_allocator, pBuffer);
+            }
+            else
+            {
+                DVP_PRINT(DVP_ZONE_ALWAYS, "Failed to allocate DVP_Buffer!!!\n");
+            }
+
+            DVP_Buffer_Deinit(pBuffer);
+
+            free(pBuffer);
+        }
+        DVP_MemImporter_Free(dvp_importer);
+        DVP_KernelGraph_Deinit(dvp_allocator);
+    }
+
+    return status;
+}
 
 status_e dvp_imageshift_test(void)
 {
@@ -744,16 +1471,31 @@ typedef struct _dvp_unittest_t {
 
 dvp_unittest_t unittests[] = {
     {STATUS_FAILURE, "Framework: Context", dvp_context_test},
-    {STATUS_FAILURE, "Framework: QuerySystem", dvp_info_test},
-    {STATUS_FAILURE, "Framework: CPU Nop Test", dvp_cpu_nop_test},
+    {STATUS_FAILURE, "Framework: Query System", dvp_info_test},//
+    {STATUS_FAILURE, "Framework: CPU Nop Test", dvp_cpu_nop_test},//
     {STATUS_FAILURE, "Framework: SERIAL Nop Test", dvp_serial_nop_test},
     {STATUS_FAILURE, "Framework: PARALLEL Nop Test", dvp_parallel_nop_test},
     {STATUS_FAILURE, "Framework: SERIAL Copy Test", dvp_copy_test},
     {STATUS_FAILURE, "Framework: CUSTOM Copy Test", dvp_custom_copy_test},
 #if defined(DVP_USE_YUV)
-    {STATUS_FAILURE, "Framework: PARALLEL CC Test", dvp_split_cc_test},
+    {STATUS_FAILURE, "Framework: PARALLEL CC Test", dvp_split_cc_test},//
 #endif
     {STATUS_FAILURE, "Framework: ImageShift", dvp_imageshift_test},
+    {STATUS_FAILURE, "Framework: Core Capacity Test", dvp_capacity_test },
+    {STATUS_FAILURE, "Framemork: Query Kernel Test", dvp_query_kernel_test},
+    {STATUS_FAILURE, "Framework: Memory Import Test", dvp_memory_import_test},
+    {STATUS_FAILURE, "Framework: Image Share Test", dvp_image_share_test},
+    {STATUS_FAILURE, "Framework: Image Importer Test", dvp_image_import_test},
+    {STATUS_FAILURE, "Framework: Image Copy Test", dvp_img_copy_test},
+    {STATUS_FAILURE, "Framework: Image Serialize Test", dvp_serialize_test},
+    {STATUS_FAILURE, "Framework: Image Unerialize Test", dvp_unserialize_test},
+    {STATUS_FAILURE, "Framework: Get image Size Test", dvp_image_size_test},
+    {STATUS_FAILURE, "Framework: Buffer Init Test", dvp_buffer_init_test},
+    {STATUS_FAILURE, "Framework: Buffer Alloc Test", dvp_buffer_alloc_test},
+    {STATUS_FAILURE, "Framework: Buffer Free Test", dvp_buffer_free_test},
+    {STATUS_FAILURE, "Framework: Buffer Share Test", dvp_buffer_share_test},
+    {STATUS_FAILURE, "Framework: Buffer Importer Test", dvp_buffer_import_test}
+
 };
 
 int main(int argc, char *argv[])
@@ -782,7 +1524,9 @@ int main(int argc, char *argv[])
         }
         DVP_PRINT(DVP_ZONE_ALWAYS, "[%s] %s\n", (unittests[i].status == STATUS_SUCCESS?"PASSED":"FAILED"), unittests[i].name);
     }
+
     DVP_PRINT(DVP_ZONE_ALWAYS, "Passed %d out of %u\n", passed, dimof(unittests));
+
     return err;
 }
 

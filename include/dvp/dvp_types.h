@@ -554,7 +554,7 @@ typedef enum _dvp_klib_e {
  * \brief Sets the base value of a feature set.
  * \ingroup group_kernels
  */
-#define DVP_KN_FEATURE_BASE(set)        (DVP_KN_FEATURE_START + (set * DVP_KN_RANGE))
+#define DVP_KN_FEATURE_BASE(set)        (DVP_KN_FEATURE_START + ((set) * DVP_KN_RANGE))
 
 /*! \brief An enumeration of all possible DVP kernels (or functions).
  * \note New features should be added either in existing ranges if applicable but
