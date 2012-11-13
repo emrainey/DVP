@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright (C) 2009-2011 Texas Instruments, Inc.
+# Copyright (C) 2009-2012 Texas Instruments, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,26 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# v01	J.Villarreal	- Initial Release
-# v02	J.Villarreal	- Changes to support dvp removal of union
-# v03	J.Villarreal	- Changes to remove dependency on xls file, extract
+# v01   J.Villarreal    - Initial Release
+# v02   J.Villarreal    - Changes to support dvp removal of union
+# v03   J.Villarreal    - Changes to remove dependency on xls file, extract
 #                         all necessary info from the code.
-# v04	J.Villarreal	- Changes to leave the type blank if it doesn't
+# v04   J.Villarreal    - Changes to leave the type blank if it doesn't
 #                         exist in the comments.
-# v05	J.Villarreal	- Adding GPU core
+# v05   J.Villarreal    - Adding GPU core
+# v06   J.Villarreal    - Updating header file parse start for named enums
 
 use Cwd;
 
 $argc = @ARGV;
 if ($argc < 1) {
-  die "\nusage:   perl kernel_doc.pl <kernel doc output file> <dvp_types.h> <additional header files> \nversion: v05\n\n";
+  die "\nusage:   perl kernel_doc.pl <kernel doc output file> <dvp_types.h> <additional header files> \nversion: v06\n\n";
 }
 
 my %hash_enums = ();
 my %hash_types = ();
 my @headers;
 
-my $outFile	= shift;
+my $outFile = shift;
 my $summary = shift;
 my $errorlog = "error.log";
 
@@ -66,7 +67,7 @@ $dir = cwd; # Assume this is running from the DVP root directory.
 push(@endOrder, scalar @parseOrder);
 push(@libName, "DVP Common Kernels");
 foreach $k (@headers) {
-    &parseHeader($k, "^enum {", "^};");
+    &parseHeader($k, "^enum ", "^};");
     push(@endOrder, scalar @parseOrder);
     push(@libName, "$libNameTmp Library");
 }
@@ -145,16 +146,16 @@ foreach $j (@endOrder) {
 
 # Print comments for each enumeration, cross-referencing the required data types and available cores.
 foreach $k (keys %hash_enums) {
-	$type = ($hash_enums{$k}[0] eq 'x') ? "N/A" : $hash_enums{$k}[0];
-	$cpu  = ($hash_enums{$k}[1] eq 'x') ? "" :
-	        ($hash_enums{$k}[1] eq 'NEON') ? "$core"."CPU (NEON)" : "$core"."CPU";
-	$dsp  = ($hash_enums{$k}[2] eq 'x') ? "" : "$core"."$hash_enums{$k}[2]";
-	$imx  = ($hash_enums{$k}[3] eq 'x') ? "" : "$core"."$hash_enums{$k}[3]";
-	$gpu  = ($hash_enums{$k}[4] eq 'x') ? "" : "$core"."$hash_enums{$k}[4]";
-	$cmma1 = ($cpu && $dsp) ? ", " : "";
-	$cmma2 = (($cpu || $dsp) && $imx) ? ", " : "";
-	$cmma3 = (($cpu || $dsp || $imx) && $gpu) ? ", " : "";
-	print DOC "
+    $type = ($hash_enums{$k}[0] eq 'x') ? "N/A" : $hash_enums{$k}[0];
+    $cpu  = ($hash_enums{$k}[1] eq 'x') ? "" :
+            ($hash_enums{$k}[1] eq 'NEON') ? "$core"."CPU (NEON)" : "$core"."CPU";
+    $dsp  = ($hash_enums{$k}[2] eq 'x') ? "" : "$core"."$hash_enums{$k}[2]";
+    $imx  = ($hash_enums{$k}[3] eq 'x') ? "" : "$core"."$hash_enums{$k}[3]";
+    $gpu  = ($hash_enums{$k}[4] eq 'x') ? "" : "$core"."$hash_enums{$k}[4]";
+    $cmma1 = ($cpu && $dsp) ? ", " : "";
+    $cmma2 = (($cpu || $dsp) && $imx) ? ", " : "";
+    $cmma3 = (($cpu || $dsp || $imx) && $gpu) ? ", " : "";
+    print DOC "
     \\var DVP_KernelNode_e::$k
     Implemented on following cores: $cpu"."$cmma1"."$dsp"."$cmma2"."$imx"."$cmma3"."$gpu
 ";
@@ -162,45 +163,45 @@ foreach $k (keys %hash_enums) {
 
 # Print comments for each data types, cross-referncing the kernel enumerations that require each data type.
 foreach $k (keys %hash_types) {
-	local $, = "\\n \n    - \\ref ";
-	print DOC "
+    local $, = "\\n \n    - \\ref ";
+    print DOC "
     \\class $k
     Used by the following kernels:\\n
     - \\ref ";
     print DOC @{$hash_types{$k}};
-	print DOC "\n";
+    print DOC "\n";
 }
 
 print DOC "*/";
 
 sub parseHeader {
-	my $header = shift;
+    my $header = shift;
     my $start = shift;
     my $end = shift;
-	my $values;
+    my $values;
     my $configStruct;
 
-	open(HEAD, $header) || die("can't open file");
+    open(HEAD, $header) || die("can't open file");
 
-	$active = 0;
-	while ($line=<HEAD>) {
-		if($line =~ /$start/) {
-			$active = 1;
-		}
-		elsif ($line =~ /$end/) {
-			$active = 0;
-		}
+    $active = 0;
+    while ($line=<HEAD>) {
+        if($line =~ /$start/) {
+            $active = 1;
+        }
+        elsif ($line =~ /$end/) {
+            $active = 0;
+        }
 
-		if($active)
-		{
-			if($line =~ /\s+Configuration Structure: (DVP_\w+)/) {
+        if($active)
+        {
+            if($line =~ /\s+Configuration Structure: (DVP_\w+)/) {
                 $configStruct = $1;
-			}
-			elsif($line =~ /\s+(DVP_KN_\w+),?/ &&
+            }
+            elsif($line =~ /\s+(DVP_KN_\w+),?/ &&
                   $line !~ /\s+DVP_KN_\w+_BASE/ &&
                   $line !~ /\s+DVP_KN_INVALID/ &&
                   $line !~ /\s+DVP_KN_MAXIMUM/) {
-                $values = [];	#creates a new anonymous array
+                $values = [];   #creates a new anonymous array
                 push (@$values, $configStruct);
                 push (@$values, "x"); #placeholder for CPU
                 push (@$values, "x"); #placeholder for DSP
@@ -214,14 +215,14 @@ sub parseHeader {
             elsif($line =~ /DVP_KN_(\w+)_BASE =/) {
                 $libNameTmp = $1;
             }
-		}
-	}
-	close(HEAD);
+        }
+    }
+    close(HEAD);
 }
 
 sub parseKgm {
-	my $kgm = shift;
-	my $slot;
+    my $kgm = shift;
+    my $slot;
     my $core;
     my %case_enums = ();
 
@@ -242,25 +243,25 @@ sub parseKgm {
         $core = "GPU";
     }
 
-	open(KGM, $kgm) || die("can't open file");
+    open(KGM, $kgm) || die("can't open file");
 
-	$active = 0;
-	while ($line=<KGM>) {
-		if($line =~ /static DVP_CoreFunction_t/) {
-			$active = 1;
-		}
-		elsif ($line =~ /};/) {
-			$active = 0;
-		}
+    $active = 0;
+    while ($line=<KGM>) {
+        if($line =~ /static DVP_CoreFunction_t/) {
+            $active = 1;
+        }
+        elsif ($line =~ /};/) {
+            $active = 0;
+        }
 
-		if($active)
-		{
-			if($line =~ /(DVP_KN_\w+)/ &&
+        if($active)
+        {
+            if($line =~ /(DVP_KN_\w+)/ &&
                $line !~ /\/\// &&
                exists $hash_enums{ $1 }) {
                 $hash_enums{$1}[$slot] = $core;
             }
-		}
+        }
 
         # This portion is used for static code analysis
         if($line =~ /case (DVP_KN_\w+)/ &&
@@ -268,8 +269,8 @@ sub parseKgm {
            exists $hash_enums{ $1 }) {
             $case_enums{$1} = $core;
         }
-	}
-	close(KGM);
+    }
+    close(KGM);
 
     # This portion is used for static code analysis
     print ERLOG "\n+++++++++++++++++++++++++++++++++++++++++++\n";
@@ -296,26 +297,26 @@ sub parseKgm {
 
 # Depreciated
 sub parseSummary {
-	my $input = shift;
-	my $line;
-	my @words;
-	my $values;
-	my $i;
+    my $input = shift;
+    my $line;
+    my @words;
+    my $values;
+    my $i;
 
-	open(IN, $input) || die("can't open file");
+    open(IN, $input) || die("can't open file");
 
-	while ($line=<IN>) {
-		$line =~ s/\"//g;
-		chomp($line);
-		@words = split(/,/, $line);
-		$values = [];	#creates a new anonymous array
-		for( $i=1; $i<@words; $i++ )
-		{
-			push (@$values, $words[$i]);
-		}
-		$hash_enums{$words[0]} = $values;   # add
-		push @{ $hash_types{$words[1]} }, $words[0];
+    while ($line=<IN>) {
+        $line =~ s/\"//g;
+        chomp($line);
+        @words = split(/,/, $line);
+        $values = [];   #creates a new anonymous array
+        for( $i=1; $i<@words; $i++ )
+        {
+            push (@$values, $words[$i]);
+        }
+        $hash_enums{$words[0]} = $values;   # add
+        push @{ $hash_types{$words[1]} }, $words[0];
         push (@parseOrder, $words[0]);
-	}
-	close(IN);
+    }
+    close(IN);
 }
