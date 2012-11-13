@@ -37,39 +37,39 @@ enum {
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Sobel Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_IMGFILTER_SOBEL,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Scharr Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_IMGFILTER_SCHARR,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Scharr Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_IMGFILTER_KROON,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Prewitt Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_IMGFILTER_PREWITT,
 
     /*!
      * Image Filter of 1x3 with predetermined coefficients.
-     * \param [input] Image Color type supported: FOURCC_ARGB
-     * \param [output] Image Color type supported: FOURCC_ARGB
+     * \param [in] input Image Color type supported: FOURCC_ARGB
+     * \param [out] output Image Color type supported: FOURCC_ARGB
      */
     DVP_KN_IMGFILTER_3CHAN_TAP_FILTER_1x3,
 };
