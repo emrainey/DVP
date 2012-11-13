@@ -6169,9 +6169,9 @@ status_e TestVisionEngine::Test_Ldc()
         if (AllocateImageStructs(8))
         {
             DVP_Image_Init(&m_images[0], m_width, m_height, FOURCC_UYVY);
-            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_Y800);
+            DVP_Image_Init(&m_images[1], m_width, m_height, FOURCC_NV12);
+            DVP_Image_Init(&tmpImages[0], m_width, m_height, FOURCC_Y800);
             DVP_Image_Init(&m_images[2], m_width, m_height, FOURCC_UYVY); // To see full output of data, need larger output size
-            DVP_Image_Init(&tmpImages[0], m_width, m_height, FOURCC_NV12);
             DVP_Image_Init(&m_images[3], m_width, m_height, FOURCC_NV12);
             DVP_Image_Init(&m_images[4], m_width, m_height, FOURCC_UYVY);
             DVP_Image_Init(&m_images[5], m_width, m_height, FOURCC_NV12);
@@ -6228,10 +6228,16 @@ status_e TestVisionEngine::Test_Ldc()
             int x0out = m_images[1].width/2;
             int y0out = m_images[1].height/2;
 
+            tmpImages[0].pBuffer[0] = m_images[1].pBuffer[0];    // Using Luma from luma extract function
+            tmpImages[0].pData[0] = m_images[1].pData[0];
+            tmpImages[0].y_stride = m_images[1].y_stride;
+            tmpImages[0].y_start  = m_images[1].y_start;
+            tmpImages[0].memType  = m_images[1].memType;
+
             /* Luma Extraction */
             m_pNodes[0].header.kernel = DVP_KN_XYXY_TO_Y800;
             dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->input = m_images[0];
-            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = m_images[1];
+            dvp_knode_to(&m_pNodes[0], DVP_Transform_t)->output = tmpImages[0];
 
             /* YUV422 Image Rotation */
             m_pNodes[1].header.kernel = DVP_KN_LDC_AFFINE_TRANSFORM;
@@ -6254,17 +6260,9 @@ status_e TestVisionEngine::Test_Ldc()
             for(int i=0; i<6; i++)
                 DVP_PRINT(DVP_ZONE_ALWAYS, "Affine[%d]: %d\n", i, dvp_knode_to(&m_pNodes[1], DVP_Ldc_t)->affine[i]);
 
-            tmpImages[0].pBuffer[0] = m_images[1].pBuffer[0];    // Using Luma from luma extract function
-            tmpImages[0].pData[0] = m_images[1].pData[0];
-            tmpImages[0].pBuffer[1] = m_images[3].pBuffer[1];
-            tmpImages[0].pData[1] = m_images[3].pData[1];
-            tmpImages[0].y_stride = m_images[2].y_stride;
-            tmpImages[0].y_start  = m_images[2].y_start;
-            tmpImages[0].memType  = m_images[3].memType;
-
             /* NV12 Image Rotation */
             m_pNodes[2].header.kernel = DVP_KN_LDC_AFFINE_TRANSFORM;
-            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->input  = tmpImages[0];
+            dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->input  = m_images[1];
             dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->output = m_images[3];
             dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->pixpad = 6;
             dvp_knode_to(&m_pNodes[2], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
@@ -6297,7 +6295,7 @@ status_e TestVisionEngine::Test_Ldc()
 
             /* NV12 Distortion Correction */
             m_pNodes[4].header.kernel = DVP_KN_LDC_DISTORTION_CORRECTION;
-            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->input  = tmpImages[0];
+            dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->input  = m_images[1];
             dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->output = m_images[5];
             dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->pixpad = 3;
             dvp_knode_to(&m_pNodes[4], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
@@ -6338,7 +6336,7 @@ status_e TestVisionEngine::Test_Ldc()
 
             /* NV12 Distortion Correction + Affine rotation */
             m_pNodes[6].header.kernel = DVP_KN_LDC_DISTORTION_AND_AFFINE;
-            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->input  = tmpImages[0];
+            dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->input  = m_images[1];
             dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->output = m_images[7];
             dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->pixpad = 3;
             dvp_knode_to(&m_pNodes[6], DVP_Ldc_t)->interpolationLuma = interpolateLuma;
