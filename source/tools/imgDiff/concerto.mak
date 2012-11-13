@@ -18,4 +18,11 @@ TARGET=imgDiff
 TARGETTYPE=exe
 CSOURCES=imgDiff.c
 include $(FINALE)
+
+include $(PRELUDE)
+TARGET=imgcomp
+TARGETTYPE=exe
+CSOURCES=imgcomp.c
+STATIC_LIBS:=sosal
+include $(FINALE)
 endif

@@ -99,4 +99,37 @@ void PYUV_GetFilename(char *filename,
     sprintf(filename, "%s%s_%ux%u_%uHz_%s.%s", path, name, width, modHeight, fps, PYUV_GetColorSpaceName(fourcc), PYUV_GetFileExtension(fourcc));
 }
 
+static char strindex(char *str, unsigned int index)
+{
+    return str[index];
+}
+
+void PYUV_DecodeFilename(char *filename,
+                         uint32_t *width,
+                         uint32_t *height,
+                         uint32_t *fps,
+                         fourcc_t *color)
+{
+    char ext[10];
+    char fourcc[5];
+    char shortname[MAX_PATH];
+    char *p = filename;
+    int count;
+
+    *width = 0;
+    *height = 0;
+    *fps = 0;
+    *color = FOURCC_NONE;
+
+    // move through the path
+    while (*p!='\0') {
+        if (*p == strindex(PATH_DELIM,0)) {
+            filename = p+1;
+        }
+        p++;
+    }
+    sscanf(filename, "%02u_%[a-zA-Z0-9]_%ux%u_%uHz_%[a-zA-Z0-9].%[a-z]", &count, shortname, width, height, fps, fourcc, ext);
+    *color = PYUV_GetColorSpace(fourcc, ext);
+}
+
 

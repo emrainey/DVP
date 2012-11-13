@@ -17,7 +17,7 @@
 #ifndef _PYUV_H_
 #define _PYUV_H_
 
-/*! \file  
+/*! \file
  * \brief The SOSAL PYUV interfacing module for naming files.
  * \author Erik Rainey <erik.rainey@ti.com>
  * \see http://dsplab.diei.unipg.it/pyuv_raw_video_sequence_player_original_one
@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-/*! \brief Gets the extension which the supplied FOURCC code would use. 
+/*! \brief Gets the extension which the supplied FOURCC code would use.
  * \param [in] fourcc The \ref _fourcc code.
  * \return Returns a pointer to an extension.
  * \ingroup group_pyuv
@@ -44,22 +44,22 @@ char *PYUV_GetFileExtension(fourcc_t fourcc);
 char *PYUV_GetColorSpaceName(fourcc_t fourcc);
 
 /*! \brief Gets the FOURCC code which co-relates to the name and ext provided.
- * \param [in] name The name of the color space. 
+ * \param [in] name The name of the color space.
  * \param [in] ext The extension of the file.
  * \return Returns the FOURCC code.
  * \ingroup group_pyuv
  */
 fourcc_t PYUV_GetColorSpace(char *name, char *ext);
 
-/*! \brief Constructs a filename based on the parameters supplied to the 
+/*! \brief Constructs a filename based on the parameters supplied to the
  * function which allows the pYUV player to load the RAW file appropriately.
  * \param [out] filename The final filename.
  * \param [in] path The path to place the file in.
- * \param [in] name The short name of the file. 
+ * \param [in] name The short name of the file.
  * \param [in] width The width in pixels.
  * \param [in] height The height in pixels.
  * \param [in] fps The frame rate of the RAW sequence.
- * \param [in] fourcc The FOURCC format of the data. 
+ * \param [in] fourcc The FOURCC format of the data.
  * \ingroup group_pyuv
  */
 void PYUV_GetFilename(char *filename,
@@ -69,6 +69,20 @@ void PYUV_GetFilename(char *filename,
                       unsigned int height,
                       unsigned int fps,
                       fourcc_t fourcc);
+
+/*! \brief Decodes a pYUV compatible filename into attributes.
+ * \param [in] filename
+ * \param [out] width The pointer to the width.
+ * \param [out] height The pointer to the height.
+ * \param [out] fps The pointer to the fps.
+ * \param [out] color The pointer to the fourcc_t.
+ * \ingroup group_pyuv
+ */
+void PYUV_DecodeFilename(char *filename,
+                         uint32_t *width,
+                         uint32_t *height,
+                         uint32_t *fps,
+                         fourcc_t *color);
 #ifdef __cplusplus
 }
 #endif
