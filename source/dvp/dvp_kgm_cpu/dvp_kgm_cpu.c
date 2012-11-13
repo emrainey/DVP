@@ -515,7 +515,7 @@ static DVP_BOOL DVP_Transform_Check(DVP_KernelNode_t *pNode, fourcc_t *from, DVP
     if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, from, fromLen) == DVP_FALSE ||
         DVP_Image_Validate(&pT->output, 1, 1, 1, 1, to, toLen) == DVP_FALSE ||
         pT->input.width > pT->output.width ||
-        pT->input.height > pT->output.width)
+        pT->input.height > pT->output.height)
         return DVP_FALSE;
     return DVP_TRUE;
 }
@@ -4200,7 +4200,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
                 if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, &pT->output.color, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pT->output, 1, 1, 1, 1, &pT->input.color, 1) == DVP_FALSE ||
                     pT->input.width > pT->output.width ||
-                    pT->input.height > pT->output.width)
+                    pT->input.height > pT->output.height)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
@@ -4314,7 +4314,7 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             }
             case DVP_KN_YUV444p_TO_UYVY:
             {
-                fourcc_t valid_colors[] = {FOURCC_IYUV, FOURCC_YV12, FOURCC_UYVY};
+                fourcc_t valid_colors[] = {FOURCC_YU24, FOURCC_YV24, FOURCC_UYVY};
                 if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 2, &valid_colors[2], 1) == DVP_FALSE)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
@@ -4328,8 +4328,12 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pSubNodes,
             }
             case DVP_KN_NV12_TO_YUV444p:
             {
+                DVP_Transform_t *pT = dvp_knode_to(&pSubNodes[n], DVP_Transform_t);
                 fourcc_t valid_colors[] = {FOURCC_NV12, FOURCC_YU24, FOURCC_YV24};
-                if (DVP_Transform_Check(&pSubNodes[n], valid_colors, 1, &valid_colors[1], 2) == DVP_FALSE)
+                if (DVP_Image_Validate(&pT->input, 1, 1, 1, 1, valid_colors, 1) == DVP_FALSE ||
+                    DVP_Image_Validate(&pT->output, 1, 1, 1, 1, &valid_colors[1], 2) == DVP_FALSE ||
+                    pT->input.width > pT->output.width*2 ||
+                    pT->input.height > pT->output.height*2)
                     pSubNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }

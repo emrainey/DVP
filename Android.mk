@@ -242,6 +242,9 @@ endif # rpmsg
 # Android always has FS usage turned on
 DVP_FLAGS += -DDVP_USE_FS
 
+# Enable image functions in the sosal
+DVP_FEATURES += -DDVP_USE_IMAGE
+
 # in the future this may be conditionally defined.
 DVP_USES_CAMERA_SERVICE := false
 

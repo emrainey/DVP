@@ -1416,8 +1416,8 @@ MODULE_EXPORT DVP_U32 DVP_KernelGraphManagerVerify(DVP_KernelNode_t *pNodes,
                 fourcc_t colorOut[] = {FOURCC_YV24, FOURCC_YU24};
                 if (DVP_Image_Validate(&pIO->input, 16, 16, 32, 2, colorIn, 1) == DVP_FALSE ||
                     DVP_Image_Validate(&pIO->output, 16, 16, 32, 2, colorOut, 2) == DVP_FALSE ||
-                    pIO->input.width  > pIO->output.width ||
-                    pIO->input.height > pIO->output.height)
+                    pIO->input.width  > pIO->output.width*2 ||
+                    pIO->input.height > pIO->output.height*2)
                     pNodes[n].header.error = DVP_ERROR_INVALID_PARAMETER;
                 break;
             }
