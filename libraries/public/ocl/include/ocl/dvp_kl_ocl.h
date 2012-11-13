@@ -39,32 +39,32 @@ enum {
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Sobel Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_OCL_SOBEL,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Scharr Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_OCL_SCHARR,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Scharr Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_OCL_KROON,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Prewitt Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input  Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_OCL_PREWITT,
 

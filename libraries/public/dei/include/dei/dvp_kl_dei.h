@@ -29,8 +29,8 @@ enum {
     /*!
      * Deinterlacer \n
      * Configuration Structure: DVP_Deinterlacer_t
-     * \param [phy_fld_in_current] Image color type supported: FOURCC_UYVY
-     * \param [phy_fld_in_prev]    Image color type supported: FOURCC_UYVY
+     * \param [in,out] phy_fld_in_current Image color type supported: FOURCC_UYVY
+     * \param [in] phy_fld_in_prev    Image color type supported: FOURCC_UYVY
      */
     DVP_KN_DEI_DEINTERLACER,
 
