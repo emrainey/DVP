@@ -60,6 +60,11 @@ do
         adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/handqvga_320x240_30Hz_UYVY.yuv /sdcard/raw/.
         adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/handvga_640x480_30Hz_UYVY.yuv /sdcard/raw/.
         adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/hand4Xvga_1280x960_30Hz_UYVY.yuv /sdcard/raw/.
+
+        adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/handqqvga_160x360_30Hz_P400.bw /sdcard/raw/.
+        adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/handqvga_320x720_30Hz_P400.bw /sdcard/raw/.
+        adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/handvga_640x1440_30Hz_P400.bw /sdcard/raw/.
+
 #        adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/rvm_lut_320x240_to_320x240_BL64.bin /sdcard/raw/.
         adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/rvm_calib_160x120_to_160x120.txt /sdcard/raw/.
         adb -s ${TARGET_DEVICE} push $DVP_ROOT/raw/input/rvm_calib_320x240_to_320x240.txt /sdcard/raw/.
@@ -99,17 +104,21 @@ do
         fi
         . $DVP_ROOT/scripts/dvp.sh convert
 
-        echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at QQVGA  >> regression_results.txt
-        $DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/qqvga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 10 0  >> regression_results.txt
-        if [ $DVP_TEST_FULL ]; then
-            echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at QVGA  >> regression_results.txt
-            $DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/qvga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 2 0 >> regression_results.txt
-            echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at VGA  >> regression_results.txt
-            $DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/vga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 2 0 >> regression_results.txt
-            #echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at 4xVGA  >> regression_results.txt
-            #$DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/4xvga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 2 0 >> regression_results.txt
+        if [ -f $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt ]; then
+            echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at QQVGA  >> regression_results.txt
+            $DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/qqvga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 10 0  >> regression_results.txt
+            if [ $DVP_TEST_FULL ]; then
+                echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at QVGA  >> regression_results.txt
+                $DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/qvga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 2 0 >> regression_results.txt
+                echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at VGA  >> regression_results.txt
+                $DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/vga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 2 0 >> regression_results.txt
+                #echo RESULTS of ${DVP_TEST_GRAPH_STR} on $1 at 4xVGA  >> regression_results.txt
+                #$DVP_ROOT/bin/imgDiff $DVP_ROOT/raw/ref/$DVP_TEST_GRAPH_STR/4xvga/ $DVP_ROOT/raw/output/ $DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt 2 0 >> regression_results.txt
+            fi
+            echo >> regression_results.txt
+        else
+            echo "$DVP_ROOT/raw/ref/${DVP_TEST_GRAPH_STR}_reference_config.txt does not exist, make sure you are using proper version of raw folder."
         fi
-        echo >> regression_results.txt
     fi
     if [ "$1" == "report" ]; then
         cat regression_results.txt

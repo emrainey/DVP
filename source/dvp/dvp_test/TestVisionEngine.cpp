@@ -4962,7 +4962,10 @@ status_e TestVisionEngine::Test_Tismo()
 
         m_camIdx = m_dispIdx = 0;
         m_camMin = m_dispMin = 0;
-        m_camMax = m_dispMax = 4;
+        if (m_camtype == VISIONCAM_FILE)
+            m_camMax = m_dispMax = 1;  // Use one buffer to avoid frame dropping in file based mode
+        else
+            m_camMax = m_dispMax = 4;
 
         if (m_display_enabled)
 #if TOPBOTTOM && DISPLAY_DISPARITY
@@ -5113,9 +5116,9 @@ status_e TestVisionEngine::Test_Tismo()
                 m_dbgImage.width = m_width;
 #endif
                 ImageDebug_Init(&m_imgdbg[0], &m_dbgImage, m_imgdbg_path, "tismo");
-                ImageDebug_Init(&m_imgdbg[1], &dvp_knode_to(&m_pNodes[0], DVP_Tismo_t)->output, m_imgdbg_path, "01_disparity");
-                ImageDebug_Init(&m_imgdbg[2], &dvp_knode_to(&m_pNodes[0], DVP_Tismo_t)->invalid, m_imgdbg_path, "02_invalid");
-                ImageDebug_Init(&m_imgdbg[3], &dvp_knode_to(&m_pNodes[0], DVP_Tismo_t)->left, m_imgdbg_path, "02_left");
+                ImageDebug_Init(&m_imgdbg[1], &dvp_knode_to(&m_pNodes[0], DVP_Tismo_t)->output, m_imgdbg_path, "03_disparity");
+                ImageDebug_Init(&m_imgdbg[2], &dvp_knode_to(&m_pNodes[0], DVP_Tismo_t)->invalid, m_imgdbg_path, "04_invalid");
+                ImageDebug_Init(&m_imgdbg[3], &dvp_knode_to(&m_pNodes[0], DVP_Tismo_t)->left, m_imgdbg_path, "01_left");
                 ImageDebug_Init(&m_imgdbg[4], &dvp_knode_to(&m_pNodes[0], DVP_Tismo_t)->right, m_imgdbg_path, "02_right");
                 ImageDebug_Open(m_imgdbg, m_numImgDbg);
             }
@@ -5203,7 +5206,10 @@ status_e TestVisionEngine::Test_Tismov02()
 
         m_camIdx = m_dispIdx = 0;
         m_camMin = m_dispMin = 0;
-        m_camMax = m_dispMax = 4;
+        if (m_camtype == VISIONCAM_FILE)
+            m_camMax = m_dispMax = 1;  // Use one buffer to avoid frame dropping in file based mode
+        else
+            m_camMax = m_dispMax = 4;
 
         if (m_display_enabled)
 #if TOPBOTTOM && DISPLAY_DISPARITY
@@ -5267,17 +5273,6 @@ status_e TestVisionEngine::Test_Tismov02()
                     return STATUS_NOT_ENOUGH_MEMORY;
             }
 #if defined(DVP_USE_TILER) || defined(DVP_USE_ION) || defined(DVP_USE_BO)
-            if (!DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+0], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+1], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+2], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+3], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+4], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+5], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+6], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+7], DVP_MTYPE_DEFAULT) ||
-                !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+8], DVP_MTYPE_DEFAULT))
-                return STATUS_NOT_ENOUGH_MEMORY;
-#else
             if (!DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+0], DVP_MTYPE_DEFAULT) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+1], DVP_MTYPE_DEFAULT) ||
                 !DVP_Image_Alloc(m_hDVP, &m_images[m_dispMax+2], DVP_MTYPE_DEFAULT) ||
@@ -5400,11 +5395,11 @@ status_e TestVisionEngine::Test_Tismov02()
                 m_dbgImage.width = m_width;
 #endif
                 ImageDebug_Init(&m_imgdbg[0], &m_dbgImage, m_imgdbg_path, "tismov02");
-                ImageDebug_Init(&m_imgdbg[1], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8, m_imgdbg_path, "01_disparityU8");
-                ImageDebug_Init(&m_imgdbg[2], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_invalid, m_imgdbg_path, "02_invalid");
-                ImageDebug_Init(&m_imgdbg[3], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_left, m_imgdbg_path, "02_left");
+                ImageDebug_Init(&m_imgdbg[1], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_lumaU8, m_imgdbg_path, "04_disparityU8");
+                ImageDebug_Init(&m_imgdbg[2], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_invalid, m_imgdbg_path, "05_invalid");
+                ImageDebug_Init(&m_imgdbg[3], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_left, m_imgdbg_path, "01_left");
                 ImageDebug_Init(&m_imgdbg[4], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->in_right, m_imgdbg_path, "02_right");
-                ImageDebug_Init(&m_imgdbg[5], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_raw, m_imgdbg_path, "01_disparityraw");
+                ImageDebug_Init(&m_imgdbg[5], &dvp_knode_to(&m_pNodes[2], DVP_TismoV02_t)->out_raw, m_imgdbg_path, "03_disparityraw");
                 ImageDebug_Open(m_imgdbg, m_numImgDbg);
             }
             // clear the performance

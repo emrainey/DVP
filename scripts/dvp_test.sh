@@ -63,6 +63,14 @@ if [[ "$@" =~ "rvm" ]]; then
     export DVP_TEST_GRAPH_NUM=1
     export DVP_TEST_GRAPH_STR="rvm"
 fi
+if [[ "$@" =~ "tismo1" ]]; then
+    export DVP_TEST_GRAPH_NUM=15
+    export DVP_TEST_GRAPH_STR="tismo1"
+fi
+if [[ "$@" =~ "tismo2" ]]; then
+    export DVP_TEST_GRAPH_NUM=27
+    export DVP_TEST_GRAPH_STR="tismo2"
+fi
 
 
 # Redirect to the appropriate OS-based script
