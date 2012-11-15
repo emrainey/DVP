@@ -32,8 +32,9 @@
 
 /*! \brief The explicit list of kernels supported by the OCL algorithm library.
  *  \see DVP_Transform_t
+ *  \ingroup group_algo_ocl
  */
-enum {
+enum DVP_KernelNode_Ocl_e {
     DVP_KN_OCL_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_OCL),
 
     /*!

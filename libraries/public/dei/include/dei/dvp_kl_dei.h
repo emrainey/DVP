@@ -19,11 +19,12 @@
 
 #include <dvp/dvp_types.h>
 
-/*! The explicit list of kernels supported by the DEI algorithm library.
+/*!
+ * \brief The explicit list of kernels supported by the DEI algorithm library.
  * \see DVP_Transform_t
  * \ingroup group_algo_dei
  */
-enum {
+enum DVP_KernelNode_Dei_e {
     DVP_KN_DEI_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_DEI),
 
     /*!
@@ -50,7 +51,7 @@ enum {
 };
 
 /*!
- * This structure is use with deinterlacer Kernels.
+ * \brief This structure is use with deinterlacer Kernels.
  * \ingroup group_algo_dei
  */
 typedef struct _dvp_deinterlacer_t {

@@ -28,10 +28,12 @@
 
 #include <dvp/dvp_types.h>
 
-/*! The explicit list of kernels supported by the IMGFILTER algorithm library.
+/*!
+ * \brief The explicit list of kernels supported by the IMGFILTER algorithm library.
  * \see DVP_Transform_t
+ * \ingroup group_imgfilter
  */
-enum {
+enum DVP_KernelNode_Imgfilter_e {
     DVP_KN_IMGFILTER_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_IMGFILTER),
 
     /*!

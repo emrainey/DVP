@@ -28,8 +28,10 @@
 
 #include <dvp/dvp_types.h>
 
-/*! The explicit list of kernels supported by the YUV algorithm library */
-enum {
+/*! \brief The explicit list of kernels supported by the YUV algorithm library 
+ * \ingroup group_yuv
+ */
+enum DVP_KernelNode_Yuv_e {
     DVP_KN_YUV_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_YUV),
 
     /*!
@@ -221,6 +223,7 @@ enum {
 
 /*! \brief Use this struct with the YUV kernels which support one input and three outputs.
  * \see DVP_KN_YUV_UYVY_TO_RGBp_Y800_YU24
+ * \ingroup group_yuv
  */
 typedef struct _dvp_yuv_triple_transform_t {
     DVP_Image_t input;

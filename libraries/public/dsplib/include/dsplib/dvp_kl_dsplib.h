@@ -26,7 +26,7 @@
  * \see DVP_DSPFunc
  * \ingroup group_algo_dsplib
  */
-enum {
+enum DVP_KernelNode_Dsplib_e {
     DVP_KN_DSP_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_DSPLIB),
 
     /*!
@@ -450,7 +450,8 @@ enum {
     DVP_KN_GEN_TWIDDLE_IFFT_16X16_IMRE
 };
 
-/*! \brief This is not a generic function. It can find if x is the power of no.
+/*! 
+ * \brief This is not a generic function. It can find if x is the power of no.
  * \note No has to be multiple of 2 and 4.
  * \param [in] x The value to determine.
  * \param [in] no The

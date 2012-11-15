@@ -23,7 +23,7 @@
  * \see DVP_Transform_t
  * \ingroup group_algo_vrun
  */
-enum {
+enum DVP_KernelNode_Vrun_e {
     DVP_KN_VRUN_BASE = DVP_KN_LIBRARY_BASE(DVP_KL_VRUN),
 
     /*!
@@ -606,7 +606,7 @@ enum {
 };
 
 /*!
- * This structure is used with LDC Kernels.
+ * \brief This structure is used with LDC Kernels.
  * \ingroup group_algo_vrun
  */
 typedef struct _dvp_ldc_t {
@@ -649,7 +649,7 @@ typedef struct _dvp_ldc_t {
 } DVP_Ldc_t;
 
 /*!
- * This structure is used with Harris Corner Kernel in VRUN.
+ * \brief This structure is used with Harris Corner Kernel in VRUN.
  * \ingroup group_algo_vrun
  */
 typedef struct _dvp_harriscorner_t {
@@ -664,7 +664,7 @@ typedef struct _dvp_harriscorner_t {
 } DVP_HarrisCorners_t;
 
 /*!
- * This structure is used with Harris Corner Score Kernels.
+ * \brief This structure is used with Harris Corner Score Kernels.
  * \ingroup group_algo_vrun
  */
 typedef struct _dvp_harris_t {
@@ -674,7 +674,7 @@ typedef struct _dvp_harris_t {
 } DVP_Harris_t;
 
 /*!
- * This structure is used with Block Maxima Kernels.
+ * \brief This structure is used with Block Maxima Kernels.
  * \ingroup group_algo_vrun
  */
 typedef struct _dvp_blockmaxima_t {
@@ -686,7 +686,7 @@ typedef struct _dvp_blockmaxima_t {
 } DVP_BlockMaxima_t;
 
 /*!
- * This structure is used with NMS_step1 Kernels.
+ * \brief This structure is used with NMS_step1 Kernels.
  * \ingroup group_algo_vrun
  */
 typedef struct _dvp_nmsstep1_t {
