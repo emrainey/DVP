@@ -518,7 +518,7 @@ typedef enum _dvp_klib_e {
     DVP_KL_POINTCLOUD,          /*!< A point-cloud library */
     DVP_KL_DSPLIB,              /*!< A set of DSP optimized algorithms */
     DVP_KL_DEI,                 /*!< Deinterlacer algorithm library */
-    DVP_KL_TISMOV02,            /*!< Texas Instruments Stereo Module Version 2 */    
+    DVP_KL_TISMOV02,            /*!< Texas Instruments Stereo Module Version 2 */
     // new libraries get added here
     DVP_KL_EXTERNAL_LIBRARIES = 0x80,    /*!< 3rd parties can add algos libraries from here */
     DVP_KL_LIBRARY_MAX = 0xFF,  /*!< The maximum library set */
@@ -611,172 +611,172 @@ typedef enum _dvp_knode_e {
     /*!
      * Converts FOURCC_UYVY or FOURCC_VYUY to FOURCC_Y800 image\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_UYVY or FOURCC_VYUY
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_UYVY or FOURCC_VYUY
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_XYXY_TO_Y800,
 
     /*!
      * Converts FOURCC_YVYU or FOURCC_YUY2 format to FOURCC_Y800 image.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_YVYU or FOURCC_YUY2
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_YVYU or FOURCC_YUY2
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_YXYX_TO_Y800,
 
     /*!
      * Converts 1 plane 8 bit per pixel luma to FOURCC_UYVY\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_UYVY
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_UYVY
      */
     DVP_KN_Y800_TO_XYXY,
 
     /*!
      * Converts FOURCC_UYVY format to 8 bits per pixels planar RGB using BT.601. (VLIB-API.Sec 58.0)\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_UYVY
-     * \param [output] Image color type supported: FOURCC_RGBP
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output Image color type supported: FOURCC_RGBP
      */
     DVP_KN_UYVY_TO_RGBp,
 
     /*!
      * Converts FOURCC_UYVY format to FOURCC_IYUV or FOURCC_YV12 format. Chroma planes are downsampled vertically. (VLIB-API.Sec 55.0)\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_UYVY
-     * \param [output] Image color type supported: FOURCC_IYUV or FOURCC_YV12
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output Image color type supported: FOURCC_IYUV or FOURCC_YV12
      */
     DVP_KN_UYVY_TO_YUV420p,
 
     /*!
      * Converts FOURCC_UYVY format to FOURCC_YU16 or FOURCC_YV16 format. (VLIB-API.Sec 54.0)\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_UYVY
-     * \param [output] Image color type supported: FOURCC_YV16 or FOURCC_YU16
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output Image color type supported: FOURCC_YV16 or FOURCC_YU16
      */
     DVP_KN_UYVY_TO_YUV422p,
 
     /*!
      * Converts FOURCC_UYVY format to FOURCC_YU24 or FOURCC_YV24 format. Chroma planes are doubled.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_UYVY
-     * \param [output] Image color type supported: FOURCC_YV24 or FOURCC_YU24
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output Image color type supported: FOURCC_YV24 or FOURCC_YU24
      */
     DVP_KN_UYVY_TO_YUV444p,
 
     /*!
      * Converts FOURCC_UYVY format to 1 plane 8 bit pixel packed BGR byte ordered 24 bit per pixel format (FOURCC_BGR) using BT.601\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_UYVY
-     * \param [output] Image color type supported: FOURCC_BGR
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output Image color type supported: FOURCC_BGR
      */
     DVP_KN_UYVY_TO_BGR,
 
     /*!
      * Converts FOURCC_UYVY format to 1 plane 565 bit pixel packed BGR ordered format (FOURCC_RGB565) using BT.601 \n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_UYVY
-     * \param [output] Image color type supported: FOURCC_RGB565
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output Image color type supported: FOURCC_RGB565
      */
     DVP_KN_YUV422p_TO_RGB565,
 
     /*!
      * Converts FOURCC_UYVY format to 3 plane HSV (Hue, Saturation, Value) 8 bit per plane format. (VLIB-API.Sec 56.0) \n
      * Configuration Structure: DVP_Int2Pl_t
-     * \param [input]   Image color type supported: FOURCC_UYVY
-     * \param [output1] Image color type supported: FOURCC_Y16
-     * \param [output2] Image color type supported: FOURCC_Y800
-     * \param [output3] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output1 Image color type supported: FOURCC_Y16
+     * \param [out] output2 Image color type supported: FOURCC_Y800
+     * \param [out] output3 Image color type supported: FOURCC_Y800
      */
     DVP_KN_UYVY_TO_HSLp,
 
     /*!
      * Converts FOURCC_UYVY format to 3 plane LAB D65 8 bit per pixel color space (VLIB-API.Sec 59.0)\n
      * Configuration Structure: DVP_Int2Pl_t
-     * \param [input]   Image color type supported: FOURCC_UYVY
-     * \param [output1] Image color type supported: FOURCC_RGBA
-     * \param [output2] Image color type supported: FOURCC_RGBA
-     * \param [output3] Image color type supported: FOURCC_RGBA
+     * \param [in] input Image color type supported: FOURCC_UYVY
+     * \param [out] output1 Image color type supported: FOURCC_RGBA
+     * \param [out] output2 Image color type supported: FOURCC_RGBA
+     * \param [out] output3 Image color type supported: FOURCC_RGBA
      */
     DVP_KN_UYVY_TO_LABp,
 
     /*!
      * Converts FOURCC_IYUV or FOURCC_YV12 into FOURCC_UYVY. Chroma are doubled vertically\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_IYUV or FOURCC_YV12
-     * \param [output] Image color type supported: FOURCC_UYVY
+     * \param [in] input Image color type supported: FOURCC_IYUV or FOURCC_YV12
+     * \param [out] output Image color type supported: FOURCC_UYVY
      */
     DVP_KN_YUV420p_TO_UYVY,
 
     /*!
      * Converts FOURCC_YU16 or FOURCC_YV16 into FOURCC_UYVY.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_YV16 or FOURCC_YU16
-     * \param [output] Image color type supported: FOURCC_UYVY
+     * \param [in] input Image color type supported: FOURCC_YV16 or FOURCC_YU16
+     * \param [out] output Image color type supported: FOURCC_UYVY
      */
     DVP_KN_YUV422p_TO_UYVY,
 
     /*!
      * Converts FOURCC_YU24 or FOURCC_YV24 into FOURCC_UYVY. Chroma are downsampled.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_YU24 or FOURCC_YV24
-     * \param [output] Image color type supported: FOURCC_UYVY
+     * \param [in] input Image color type supported: FOURCC_YU24 or FOURCC_YV24
+     * \param [out] output Image color type supported: FOURCC_UYVY
      */
     DVP_KN_YUV444p_TO_UYVY,
 
     /*!
      * Converts FOURCC_YU24 or FOURCC_YV24 into 8 bits per pixels planar RGB using BT.601.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_YU24 or FOURCC_YV24
-     * \param [output] Image color type supported: FOURCC_RGBP
+     * \param [in] input Image color type supported: FOURCC_YU24 or FOURCC_YV24
+     * \param [out] output Image color type supported: FOURCC_RGBP
      */
     DVP_KN_YUV444p_TO_RGBp,
 
     /*!
      * Converts FOURCC_NV12 into FOURCC_YU24 or FOURCC_YV24. Luma plane is half-scale downsampled. Output is 1/2w 1/2h from input.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_NV12
-     * \param [output] Image color type supported: FOURCC_YV24 or FOURCC_YU24
+     * \param [in] input Image color type supported: FOURCC_NV12
+     * \param [out] output Image color type supported: FOURCC_YV24 or FOURCC_YU24
      */
     DVP_KN_NV12_TO_YUV444p,
 
     /*!
      * Converts 1 plane RGB 888 FOURCC_BGR to FOURCC_UYVY\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_RGB888 or FOURCC_BGR
-     * \param [output] Image color type supported: FOURCC_UYVY
+     * \param [in] input Image color type supported: FOURCC_RGB888 or FOURCC_BGR
+     * \param [out] output Image color type supported: FOURCC_UYVY
      */
     DVP_KN_BGR3_TO_UYVY,
 
     /*!
      * Converts 1 plane RGB 888 FOURCC_BGR to FOURCC_NV12\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_RGB888 or FOURCC_BGR
-     * \param [output] Image color type supported: FOURCC_NV12
+     * \param [in] input Image color type supported: FOURCC_RGB888 or FOURCC_BGR
+     * \param [out] output Image color type supported: FOURCC_NV12
      */
     DVP_KN_BGR3_TO_NV12,
 
     /*!
      * Converts FOURCC_NV12 to UYVY.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_NV12
-     * \param [output] Image color type supported: FOURCC_UYVY
+     * \param [in] input Image color type supported: FOURCC_NV12
+     * \param [out] output Image color type supported: FOURCC_UYVY
      */
     DVP_KN_NV12_TO_UYVY,
 
     /*!
      * Converts FOURCC_IYUV or FOURCC_YV12 into 8 bits per pixels planar RGB using BT.601.\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_IYUV or FOURCC_YV12
-     * \param [output] Image color type supported: FOURCC_RGBP
+     * \param [in] input Image color type supported: FOURCC_IYUV or FOURCC_YV12
+     * \param [out] output Image color type supported: FOURCC_RGBP
      */
     DVP_KN_YUV420p_TO_RGBp,
 
     /*!
      * Converts 1 plane RGB 888 FOURCC_BGR to FOURCC_IYUV\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_RGB888 or FOURCC_BGR
-     * \param [output] Image color type supported: FOURCC_IYUV
+     * \param [in] input Image color type supported: FOURCC_RGB888 or FOURCC_BGR
+     * \param [out] output Image color type supported: FOURCC_IYUV
      */
     DVP_KN_BGR3_TO_IYUV,
 
@@ -789,32 +789,32 @@ typedef enum _dvp_knode_e {
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Sobel Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SOBEL_8,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Scharr Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SCHARR_8,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Scharr Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_KROON_8,
 
     /*!
      * Image Convolution of FOURCC_Y800 of data using the Prewitt Gx and Gy operators\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_PREWITT_8,
 
@@ -827,54 +827,54 @@ typedef enum _dvp_knode_e {
     /*!
      * Image Dilation using a 3x3 Cross Pattern : [0,1,0],[1,1,1],[0,1,0]\n
      * Configuration Structure: DVP_Morphology_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
-     * \param [mask]   Not applicable
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Not applicable
      */
     DVP_KN_DILATE_CROSS,
 
     /*!
      * Image Dilation using a user specified 3x3 Mask pattern\n
      * Configuration Structure: DVP_Morphology_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
-     * \param [mask]   Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Image color type supported: FOURCC_Y800
      */
     DVP_KN_DILATE_MASK,
 
     /*!
      * Image Dilation using a 3x3 Square pattern : [1,1,1],[1,1,1],[1,1,1]\n
      * Configuration Structure: DVP_Morphology_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
-     * \param [mask]   Not applicable
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Not applicable
      */
     DVP_KN_DILATE_SQUARE,
 
     /*!
      * Image Erosion using a 3x3 Cross Pattern : [0,1,0],[1,1,1],[0,1,0]\n
      * Configuration Structure: DVP_Morphology_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
-     * \param [mask]   Not applicable
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Not applicable
      */
     DVP_KN_ERODE_CROSS,
 
     /*!
      * Image Erosion using a user specified 3x3 Mask pattern\n
      * Configuration Structure: DVP_Morphology_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
-     * \param [mask]   Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Image color type supported: FOURCC_Y800
      */
     DVP_KN_ERODE_MASK,
 
     /*!
      * Image Erosion using a 3x3 Square pattern : [1,1,1],[1,1,1],[1,1,1]\n
      * Configuration Structure: DVP_Morphology_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
-     * \param [mask]   Not applicable
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Not applicable
      */
     DVP_KN_ERODE_SQUARE,
 
@@ -887,38 +887,38 @@ typedef enum _dvp_knode_e {
     /*!
      * Canny Image Smoothing (7x7 Image Convolution)\n
      * Configuration Structure: DVP_ImageConvolution_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
-     * \param [mask]   Image color type supported: FOURCC_Y800, signed
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Image color type supported: FOURCC_Y800, signed
      */
     DVP_KN_CANNY_IMAGE_SMOOTHING,
 
     /*!
      * Canny 2D Gradient from FOURCC_Y800 to FOURCC_Y16 (VLIB-API.Sec 19.0)\n
      * Configuration Structure: DVP_Canny2dGradient_t
-     * \param [input]    Image color type supported: FOURCC_Y800
-     * \param [outGradX] Image color type supported: FOURCC_Y16
-     * \param [outGradY] Image color type supported: FOURCC_Y16
-     * \param [outMag]   Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] outGradX Image color type supported: FOURCC_Y16
+     * \param [out] outGradY Image color type supported: FOURCC_Y16
+     * \param [out] outMag Image color type supported: FOURCC_Y16
      */
     DVP_KN_CANNY_2D_GRADIENT,
 
     /*!
      * Canny Non-Maximum Suppression from FOURCC_Y16 data to FOURCC_Y800 data)\n
      * Configuration Structure: DVP_CannyNonMaxSuppression_t
-     * \param [inGradX] Image color type supported: FOURCC_Y16
-     * \param [inGradY] Image color type supported: FOURCC_Y16
-     * \param [inMag]   Image color type supported: FOURCC_Y16
-     * \param [output]  Image color type supported: FOURCC_Y800
+     * \param [in] inGradX Image color type supported: FOURCC_Y16
+     * \param [in] inGradY Image color type supported: FOURCC_Y16
+     * \param [in] inMag Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_CANNY_NONMAX_SUPPRESSION,
 
     /*!
      * Canny Hysterisis Threshholding from FOURCC_Y800 edge map data to FOURCC_Y800 edge image\n
      * Configuration Structure: DVP_CannyHystThresholding_t
-     * \param [inMag]     Image color type supported: FOURCC_Y16
-     * \param [inEdgeMap] Image color type supported: FOURCC_Y800
-     * \param [output]    Image color type supported: FOURCC_Y800
+     * \param [in] inMag Image color type supported: FOURCC_Y16
+     * \param [in] inEdgeMap Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_CANNY_HYST_THRESHHOLD,
 
@@ -931,24 +931,24 @@ typedef enum _dvp_knode_e {
     /*!
      * Converts an 8 bit planar image to 1 bit (stored in 8 bits) by down shifting all bytes by 7\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_THRESHOLD,
 
     /*!
      * Converts a 8 bit to 16 bit per pixel or 16 bit to 8 bit per pixel planar image\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800 or FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16  or FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800 or FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16  or FOURCC_Y800
      */
     DVP_KN_XSTRIDE_CONVERT,
 
     /*!
      * Converts a 8 bit to 16 bit per pixel or 16 bit to 8 bit per pixel planar image with 8 bit shift\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800 or FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16  or FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800 or FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16  or FOURCC_Y800
      */
     DVP_KN_XSTRIDE_SHIFT,
 
@@ -961,18 +961,18 @@ typedef enum _dvp_knode_e {
     /*!
      * Recursive First Order IIR Filter, Horizontal, FOURCC_Y800 input and output\n
      * Configuration Structure: DVP_IIR_t
-     * \param [input]     Image color type supported: FOURCC_Y800
-     * \param [output]    Image color type supported: FOURCC_Y800
-     * \param [scratch]   Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] scratch Image color type supported: FOURCC_Y800
      */
     DVP_KN_IIR_HORZ,
 
     /*!
      * Recursive First Order IIR Filter, Vertical, FOURCC_Y800 input and output\n
      * Configuration Structure: DVP_IIR_t
-     * \param [input]     Image color type supported: FOURCC_Y800
-     * \param [output]    Image color type supported: FOURCC_Y800
-     * \param [scratch]   Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] scratch Image color type supported: FOURCC_Y800
      */
     DVP_KN_IIR_VERT,
 
@@ -985,24 +985,24 @@ typedef enum _dvp_knode_e {
     /*!
      * Non-maximum suppression using a local neighborhood size of 3x3 on FOURCC_Y16 data\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_NONMAXSUPPRESS_3x3_S16,
 
     /*!
      * Non-maximum suppression using a local neighborhood size of 5x5 on FOURCC_Y16 data\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_NONMAXSUPPRESS_5x5_S16,
 
     /*!
      * Non-maximum suppression using a local neighborhood size of 7x7 on FOURCC_Y16 data\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_NONMAXSUPPRESS_7x7_S16,
 
@@ -1015,27 +1015,27 @@ typedef enum _dvp_knode_e {
     /*!
      * Image Convolution using an arbitrary 3x3 matrix on FOURCC_Y800 data\n
      * Configuration Structure: DVP_ImageConvolution_t
-     * \param [input]     Image color type supported: FOURCC_Y800
-     * \param [output]    Image color type supported: FOURCC_Y800
-     * \param [mask]      Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Image color type supported: FOURCC_Y800
      */
     DVP_KN_CONV_3x3,
 
     /*!
      * Image Convolution using an arbitrary 5x5 matrix on FOURCC_Y800 data\n
      * Configuration Structure: DVP_ImageConvolution_t
-     * \param [input]     Image color type supported: FOURCC_Y800
-     * \param [output]    Image color type supported: FOURCC_Y800
-     * \param [mask]      Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Image color type supported: FOURCC_Y800
      */
     DVP_KN_CONV_5x5,
 
     /*!
      * Image Convolution using an arbitrary 7x7 matrix on FOURCC_Y800 data\n
      * Configuration Structure: DVP_ImageConvolution_t
-     * \param [input]     Image color type supported: FOURCC_Y800
-     * \param [output]    Image color type supported: FOURCC_Y800
-     * \param [mask]      Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
+     * \param [in] mask Image color type supported: FOURCC_Y800
      */
     DVP_KN_CONV_7x7,
 
@@ -1048,64 +1048,64 @@ typedef enum _dvp_knode_e {
     /*!
      * Image Thresholding : {out[i] = (in[i] >  thr) ?  255  : in[i]} for 8-bit  input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_THR_GT2MAX_8,
 
     /*!
      * Image Thresholding : {out[i] = (in[i] >  thr) ? 65535 : in[i]} for 16-bit input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_THR_GT2MAX_16,
 
     /*!
      * Image Thresholding : {out[i] = (in[i] >  thr) ?  thr  : in[i]} for 8-bit  input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_THR_GT2THR_8,
 
     /*!
      * Image Thresholding : {out[i] = (in[i] >  thr) ?  thr  : in[i]} for 16-bit input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_THR_GT2THR_16,
 
     /*!
      * Image Thresholding : {out[i] = (in[i] <= thr) ?   0   : in[i]} for 8-bit  input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_THR_LE2MIN_8,
 
     /*!
      * Image Thresholding : {out[i] = (in[i] <= thr) ?   0   : in[i]} for 16-bit input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_THR_LE2MIN_16,
 
     /*!
      * Image Thresholding : {out[i] = (in[i] <= thr) ?  thr  : in[i]} for 8-bit  input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_THR_LE2THR_8,
 
     /*!
      * Image Thresholding : {out[i] = (in[i] <= thr) ?  thr  : in[i]} for 16-bit input\n
      * Configuration Structure: DVP_Threshold_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_THR_LE2THR_16,
 
@@ -1117,96 +1117,96 @@ typedef enum _dvp_knode_e {
     /*!
      * Image Sobel : 3x3 for 8-bit  signed   input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SOBEL_3x3_8s,
 
     /*!
      * Image Sobel : 3x3 for 8-bit  unsigned input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SOBEL_3x3_8,
 
     /*!
      * Image Sobel : 3x3 for 16-bit signed   input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_SOBEL_3x3_16s,
 
     /*!
      * Image Sobel : 3x3 for 16-bit unsigned input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_SOBEL_3x3_16,
 
     /*!
      * Image Sobel : 5x5 for 8-bit  signed   input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SOBEL_5x5_8s,
 
     /*!
      * Image Sobel : 5x5 for 8-bit  unsigned input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SOBEL_5x5_8,
 
     /*!
      * Image Sobel : 5x5 for 16-bit signed   input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_SOBEL_5x5_16s,
 
     /*!
      * Image Sobel : 5x5 for 16-bit unsigned input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_SOBEL_5x5_16,
 
     /*!
      * Image Sobel : 7x7 for 8-bit  signed   input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SOBEL_7x7_8s,
 
     /*!
      * Image Sobel : 7x7 for 8-bit  unsigned input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
     DVP_KN_SOBEL_7x7_8,
 
     /*!
      * Image Sobel : 7x7 for 16-bit signed   input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_SOBEL_7x7_16s,
 
     /*!
      * Image Sobel : 7x7 for 16-bit unsigned input\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y16
-     * \param [output] Image color type supported: FOURCC_Y16
+     * \param [in] input Image color type supported: FOURCC_Y16
+     * \param [out] output Image color type supported: FOURCC_Y16
      */
     DVP_KN_SOBEL_7x7_16,
 
@@ -1219,16 +1219,16 @@ typedef enum _dvp_knode_e {
     /*!
      * Computes a Integral Image over the FOURCC_Y800 data. FOURCC_Y32 output\n
      * Configuration Structure: DVP_Transform_t
-     * \param [input]  Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y32
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y32
      */
     DVP_KN_INTEGRAL_IMAGE_8,
 
     /*!
      * Applies a given gamma mapping to an image and produces it as a new output.
      * Configuration Structure: DVP_Transform_t
-     * \param [input] Image color type supported: FOURCC_Y800
-     * \param [output] Image color type supported: FOURCC_Y800
+     * \param [in] input Image color type supported: FOURCC_Y800
+     * \param [out] output Image color type supported: FOURCC_Y800
      */
      DVP_KN_GAMMA,
 
