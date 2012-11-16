@@ -47,6 +47,8 @@ const char * SERIALIZE    = "SERIALIZE";
 const char * UNSERIALIZE  = "UNSERIALIZE";
 const char * ALLOC        = "ALLOC";
 const char * FREE         = "FREE";
+const char * IMPORT       = "IMPORT";
+const char * IMPORT_FREE  = "IMPORT_FREE";
 
 //**********************************************************************
 // SUPPORT FUNCTIONS
@@ -106,6 +108,56 @@ status_e dvp_context_test(void)
         DVP_KernelGraph_Deinit(dvp);
     }
     return status;
+}
+
+status_e dvp_kernel_node_allocation_test(const char * memOperation)
+{
+    status_e status = STATUS_FAILURE;
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    DVP_KernelNode_t *node = NULL;
+    DVP_U32 numNodes = 16;
+
+    if( dvp )
+    {
+        node = DVP_KernelNode_Alloc(dvp, numNodes);
+        if( node )
+        {
+            if( !strcmp(memOperation, ALLOC) )
+            {
+                status = STATUS_SUCCESS;
+            }
+
+            DVP_KernelNode_Free(dvp, node, numNodes );
+
+            if( !strcmp(memOperation, FREE) )
+            {
+                DVP_U32 i;
+                void *cmpMem = calloc(1, sizeof(DVP_KernelNode_t));
+                status = STATUS_SUCCESS;
+
+                for(i = 0; i < numNodes; i++)
+                {
+                    if( memcmp(cmpMem, &node[i], sizeof(DVP_KernelNode_t) ) )
+                    {
+                        status = STATUS_FAILURE;
+                    }
+                }
+            }
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+    return status;
+}
+
+
+status_e dvp_kern_node_alloc_test(void)
+{
+    return dvp_kernel_node_allocation_test(ALLOC);
+}
+
+status_e dvp_kern_node_free_test(void)
+{
+    return dvp_kernel_node_allocation_test(FREE);
 }
 
 /*! \brief Tests the \ref DVP_QuerySystem API.
@@ -782,6 +834,67 @@ status_e dvp_query_kernel_test(void)
     return status;
 }
 
+status_e dvp_image_init_test(void)
+{
+    status_e res = STATUS_FAILURE;
+    DVP_Image_t *pImage = malloc(sizeof(DVP_Image_t));
+    if(pImage)
+    {
+        DVP_Image_Init(pImage, width, height, FOURCC_NV12);
+        DVP_U32 expectedSize = (height * width * 3u)/2u;
+        if( pImage->color == FOURCC_NV12
+                && width == pImage->width && height == pImage->height
+                && pImage->bufWidth == width && pImage->bufHeight == height
+                && expectedSize == pImage->numBytes && 2 == pImage->planes )
+        {
+            res = STATUS_SUCCESS;
+        }
+        free(pImage);
+    }
+    return res;
+}
+
+status_e dvp_image_allocation_test(const char *memOperation)
+{
+    status_e res = STATUS_FAILURE;
+    DVP_Image_t *pImage = NULL;
+    DVP_Handle dvp = DVP_KernelGraph_Init();
+    if(dvp )
+    {
+        pImage = malloc(sizeof(DVP_Image_t));
+        if(pImage)
+        {
+            DVP_Image_Init(pImage, width, height, FOURCC_NV12);
+            if ( DVP_TRUE == DVP_Image_Alloc(dvp, pImage, DVP_MTYPE_DEFAULT) )
+            {
+                if( !strcmp(memOperation, ALLOC) )
+                {
+                    res = STATUS_SUCCESS;
+                }
+
+                if( DVP_TRUE == DVP_Image_Free(dvp, pImage) && !strcmp(memOperation, FREE) )
+                {
+                    res = STATUS_SUCCESS;
+                }
+            }
+            free(pImage);
+        }
+        DVP_KernelGraph_Deinit(dvp);
+    }
+
+    return res;
+}
+
+status_e dvp_image_alloc_test(void)
+{
+    return dvp_image_allocation_test(ALLOC);
+}
+
+status_e dvp_image_free_test(void)
+{
+    return dvp_image_allocation_test(FREE);
+}
+
 status_e dvp_image_share_test(void)
 {
     status_e stat = STATUS_FAILURE;
@@ -818,7 +931,7 @@ status_e dvp_image_share_test(void)
     return stat;
 }
 
-status_e dvp_image_import_test(void)
+status_e dvp_image_importer_test(const char* importOperation)
 {
     status_e status = STATUS_FAILURE;
     DVP_S08 mem[width*height];
@@ -847,18 +960,15 @@ status_e dvp_image_import_test(void)
                     DVP_VALUE hdls[1] = { 0 };
                     if( DVP_TRUE == DVP_Image_Import(dvp_importer, pImage, fds, hdls) )
                     {
-                        /// dostatachno li e ili da se napravi neshto s taq kartinka ???
-                        /// dali ako iskam da se obraboti, ne trqbva nov dvp_handle, napraven ot graph init????
                         DVP_PrintImage(DVP_ZONE_ALWAYS, pImage);
-                        status = STATUS_SUCCESS;
-                        /// dali ne e po-dobre da sa v otdelni funkcii (import i import_free) ???
-                        if( DVP_TRUE == DVP_Image_Free_Import(dvp_importer, pImage, hdls) )
+                        if( !strcmp(importOperation, IMPORT) )
                         {
-                            ;
+                            status = STATUS_SUCCESS;
                         }
-                        else
+
+                        if( DVP_TRUE == DVP_Image_Free_Import(dvp_importer, pImage, hdls) && !strcmp(importOperation, IMPORT_FREE))
                         {
-                            DVP_PRINT(DVP_ZONE_ALWAYS, "DVP_Image_Free_Import() failed !!!\n");
+                            status = STATUS_SUCCESS;
                         }
                     }
                     else
@@ -887,6 +997,16 @@ status_e dvp_image_import_test(void)
     }
 
     return status;
+}
+
+status_e dvp_image_import_test(void)
+{
+    return dvp_image_importer_test(IMPORT);
+}
+
+status_e dvp_image_import_free_test(void)
+{
+    return dvp_image_importer_test(IMPORT_FREE);
 }
 
 status_e dvp_calloc_test(void)
@@ -1482,10 +1602,16 @@ dvp_unittest_t unittests[] = {
 #endif
     {STATUS_FAILURE, "Framework: ImageShift", dvp_imageshift_test},
     {STATUS_FAILURE, "Framework: Core Capacity Test", dvp_capacity_test },
+    {STATUS_FAILURE, "Framemork: Kernel Node Alloc Test", dvp_kern_node_alloc_test},
+    {STATUS_FAILURE, "Framemork: Kernel Node Free Test", dvp_kern_node_free_test},
     {STATUS_FAILURE, "Framemork: Query Kernel Test", dvp_query_kernel_test},
     {STATUS_FAILURE, "Framework: Memory Import Test", dvp_memory_import_test},
+    {STATUS_FAILURE, "Framework: Buffer Image Init Test", dvp_image_init_test},
+    {STATUS_FAILURE, "Framework: Buffer Image Alloc Test", dvp_image_alloc_test},
+    {STATUS_FAILURE, "Framework: Buffer Image Free Test", dvp_image_free_test},
     {STATUS_FAILURE, "Framework: Image Share Test", dvp_image_share_test},
     {STATUS_FAILURE, "Framework: Image Importer Test", dvp_image_import_test},
+    {STATUS_FAILURE, "Framework: Image Importer Free Test", dvp_image_import_free_test},
     {STATUS_FAILURE, "Framework: Image Copy Test", dvp_img_copy_test},
     {STATUS_FAILURE, "Framework: Image Serialize Test", dvp_serialize_test},
     {STATUS_FAILURE, "Framework: Image Unerialize Test", dvp_unserialize_test},
@@ -1494,7 +1620,7 @@ dvp_unittest_t unittests[] = {
     {STATUS_FAILURE, "Framework: Buffer Alloc Test", dvp_buffer_alloc_test},
     {STATUS_FAILURE, "Framework: Buffer Free Test", dvp_buffer_free_test},
     {STATUS_FAILURE, "Framework: Buffer Share Test", dvp_buffer_share_test},
-    {STATUS_FAILURE, "Framework: Buffer Importer Test", dvp_buffer_import_test}
+    {STATUS_FAILURE, "Framework: Buffer Importer Test", dvp_buffer_import_test},
 
 };
 
