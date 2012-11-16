@@ -1002,10 +1002,11 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
                 {
                   DVP_Orb_t * pOrb = dvp_knode_to(&pNodes[n], DVP_Orb_t);
                   dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->inputImage, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                  dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->filtImage, DVP_TRUE, (DVP_PTR)pTmp, &translations);
                   dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->harrisImage, DVP_TRUE, (DVP_PTR)pTmp, &translations);
                   dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->integralImage, DVP_TRUE, (DVP_PTR)pTmp, &translations);
                   dvp_rpc_prepare_buffer(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbPattern31, DVP_TRUE, (DVP_PTR)pTmp, &translations);
-                  dvp_rpc_prepare_buffer(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbOutput.orbData, DVP_TRUE, (DVP_PTR)pTmp, &translations);
+                  dvp_rpc_prepare_buffer(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbOutput.orbData, DVP_FALSE, (DVP_PTR)pTmp, &translations);
                   dvp_rpc_prepare_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbOutput.outImage, DVP_TRUE, (DVP_PTR)pTmp, &translations);
                   break;
                 }
@@ -1984,10 +1985,11 @@ static DVP_U32 DVP_KernelGraphManager_DSP(DVP_KernelNode_t *pNodes, DVP_U32 star
                 case DVP_KN_ORB:
                 {
                     DVP_Orb_t * pOrb = dvp_knode_to(&pNodes[n], DVP_Orb_t);
-                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->inputImage, DVP_TRUE);
-                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->harrisImage, DVP_TRUE);
-                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->integralImage, DVP_TRUE);
-                    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbPattern31, DVP_TRUE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->inputImage, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->filtImage,  DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->harrisImage, DVP_FALSE);
+                    dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->integralImage, DVP_FALSE);
+                    dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbPattern31, DVP_FALSE);
                     dvp_rpc_return_buffer(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbOutput.orbData, DVP_TRUE);
                     dvp_rpc_return_image(rpc, DVP_GetSupportedRemoteCore(), &pOrb->orbOutput.outImage, DVP_TRUE);
                     break;

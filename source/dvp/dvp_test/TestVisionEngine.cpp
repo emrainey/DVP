@@ -6684,6 +6684,7 @@ status_e TestVisionEngine::Test_ORBnHarris()
             m_pNodes[m_numNodes-1].header.kernel = DVP_KN_ORB;
             memcpy(m_buffers[1].pData, orbPattern31, sizeof(DVP_S08)*CORB_NUM_PATTERNS*4);
             dvp_knode_to(&m_pNodes[m_numNodes-1], DVP_Orb_t)->inputImage = m_images[1];
+            dvp_knode_to(&m_pNodes[m_numNodes-1], DVP_Orb_t)->filtImage  = m_images[1];
             dvp_knode_to(&m_pNodes[m_numNodes-1], DVP_Orb_t)->harrisImage = m_images[5];
             dvp_knode_to(&m_pNodes[m_numNodes-1], DVP_Orb_t)->integralImage = m_images[3];
             dvp_knode_to(&m_pNodes[m_numNodes-1], DVP_Orb_t)->orbOutput.nfeatures = 2000;//numFeatures
