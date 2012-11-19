@@ -1392,7 +1392,7 @@ typedef void (*dvp_image_shift_f)(DVP_KernelNode_t *node, dvp_image_shift_t *shi
  */
 typedef struct _dvp_core_function_t {
     char                        name[DVP_KERNEL_MAX];   /*!< The name of the kernel, used in debugging */
-    DVP_KernelNode_e            kernel;                 /*!< The enumerated name of the kernel */
+    DVP_S32                     kernel;                 /*!< The enumerated name of the kernel. Use a \ref DVP_KernelNode_e value.  */
     DVP_U32                     load;                   /*!< The load value of this kernel */
     dvp_image_shift_t          *shift;                  /*!< The pointer, if needed, to use to calculate image shifts for this kernel */
     dvp_image_shift_f           shift_func;             /*!< The pointer to a function to compute the image shift. */
