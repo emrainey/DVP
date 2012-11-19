@@ -3088,7 +3088,8 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                         {
                             IMG_conv_3x3_i8_c8s(in,
                                                 out,
-                                                (int)(pImg->input.width -(filterSize -1)),
+                                                (short)pImg->input.width,
+                                                (short)pImg->input.y_stride,
                                                 (const char*)pImg->mask.pData[0],
                                                 (int)pImg->shiftMask);
                             in += pImg->input.y_stride;
@@ -3110,7 +3111,8 @@ static DVP_U32 DVP_KernelGraphManager_CPU(DVP_KernelNode_t *pSubNodes, DVP_U32 s
                             {
                                 IMG_conv_3x3_i8_c8s(&tmpBuf[i*pImg->input.width],
                                                     out,
-                                                    (int)pImg->input.width,
+                                                    (short)pImg->input.width,
+                                                    (short)pImg->input.y_stride,
                                                     (const char*)pImg->mask.pData[0],
                                                     (int)pImg->shiftMask);
                                 out += pImg->output.y_stride;
