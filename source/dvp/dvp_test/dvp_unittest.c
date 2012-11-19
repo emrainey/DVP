@@ -1057,7 +1057,7 @@ status_e dvp_img_copy_test(void)
             }
 
             DVP_S08 *ptr = malloc(srcImage->numBytes);
-            memset(ptr, 0x57, sizeof(ptr));
+            memset(ptr, 0x57, srcImage->numBytes);
 
             if( NULL == ptr ) {
                 DVP_Image_Free(dvp, srcImage);
@@ -1214,9 +1214,10 @@ status_e dvp_image_serialization(const char *testVariant)
 
             if( !strcmp(testVariant, SERIALIZE) && buffer )
             {
-                DVP_U08 *mem = malloc(alloc_size - offset);
-                memset(mem, CMP_VAL, sizeof(mem));
-                if ( memcmp(&buffer[offset], mem, sizeof(mem) ) )
+                DVP_U32 len = alloc_size - offset;
+                DVP_U08 *mem = malloc(len);
+                memset(mem, CMP_VAL, len);
+                if ( memcmp(&buffer[offset], mem, len ) != 0)
                      ret = STATUS_FAILURE;
             }
             else if ( !strcmp(testVariant, UNSERIALIZE) /*&& buffer*/ )
